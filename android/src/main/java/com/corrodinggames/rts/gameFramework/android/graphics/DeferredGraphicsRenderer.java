@@ -51,13 +51,65 @@ public final class DeferredGraphicsRenderer extends AbstractGraphicsRenderer {
     }
 
     @Override // com.corrodinggames.rts.gameFramework.m.GraphicsRenderer
-    public final void a(Canvas canvas) {
+    public void a(Canvas canvas) {
         Object[] objArr = this.j.a();
         int i = this.k;
         try {
+            // Hardware canvas throws on restore-without-save; game code can rarely record such a frame, so skip the excess restores instead of crashing.
+            int baseSaveCount = canvas.getSaveCount();
+            int depth = 0;
+            int minDepth = 0;
+            int firstNegativeIndex = -1;
+            int saveTotal = 0;
+            int restoreTotal = 0;
+            int skippedRestores = 0;
             for (int i2 = 0; i2 < i; i2++) {
                 CanvasDrawCommand canvasDrawCommand = (CanvasDrawCommand) objArr[i2];
+                com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation op = canvasDrawCommand.f761a;
+                if (op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.V
+                        || op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.W
+                        || op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.X
+                        || op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.Y
+                        || op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.Z) {
+                    depth++;
+                    saveTotal++;
+                } else if (op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.R) {
+                    depth--;
+                    restoreTotal++;
+                    if (depth < minDepth) {
+                        minDepth = depth;
+                        if (firstNegativeIndex < 0) {
+                            firstNegativeIndex = i2;
+                        }
+                    }
+                    if (canvas.getSaveCount() <= baseSaveCount) {
+                        skippedRestores++;
+                        continue;
+                    }
+                }
                 canvasDrawCommand.f761a.a(canvas, canvasDrawCommand);
+            }
+            if (skippedRestores > 0) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("CanvasBalanceDiag: frame cmds=").append(i).append(" saves=").append(saveTotal).append(" restores=").append(restoreTotal).append(" skipped=").append(skippedRestores).append(" minDepth=").append(minDepth).append(" firstNegative=").append(firstNegativeIndex).append(" ops around: ");
+                int from = Math.max(0, firstNegativeIndex - 12);
+                int to = Math.min(i, firstNegativeIndex + 4);
+                for (int t = from; t < to; t++) {
+                    CanvasDrawCommand c = (CanvasDrawCommand) objArr[t];
+                    sb.append("[").append(t).append(":");
+                    com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation o = c.f761a;
+                    if (o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.R)
+                        sb.append("restore");
+                    else if (o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.V)
+                        sb.append("save");
+                    else if (o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.W || o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.X || o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.Y || o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.Z)
+                        sb.append("saveLayer");
+                    else if (o == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.S)
+                        sb.append("restoreToCount");
+                    else sb.append("draw");
+                    sb.append("]");
+                }
+                GameEngine.log(sb.toString());
             }
         } finally {
             d();
