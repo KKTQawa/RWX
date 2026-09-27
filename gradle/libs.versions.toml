@@ -22,6 +22,7 @@ navigationeventVersion = "1.1.0"
 koinCoreVersion = "4.2.2"
 activityVersion = "1.13.0"
 slf4jVersion = "2.0.18"
+steamworks4j = "1.10.0"
 logbackVersion = "1.6.2"
 timberVersion = "5.0.1"
 [libraries]
@@ -56,6 +57,7 @@ android-webrtc = { module = "io.github.webrtc-sdk:android", version.ref = "andro
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCoreVersion" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCoreVersion" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jVersion" }
+steamworks4j = { group = "com.code-disaster.steamworks4j", name = "steamworks4j", version.ref = "steamworks4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logbackVersion" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityVersion" }

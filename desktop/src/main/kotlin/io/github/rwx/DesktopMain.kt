@@ -12,6 +12,7 @@ import io.github.rwx.render.canvas.GameFontMetrics
 import io.github.rwx.settings.GameSettingsRepository
 import io.github.rwx.slick.SlickFramePresenter
 import io.github.rwx.slick.SlickGameSession
+import io.github.rwx.steam.SteamBridge
 import io.github.rwx.ui.AppUiState
 import io.github.rwx.ui.ColorSchemeRegistry
 import io.github.rwx.ui.host.LoadingSceneHost
@@ -48,6 +49,14 @@ object DesktopMain : KoinComponent {
             settings.selectedColorSchemeId.value = options.colorSchemeId
         }
         val bridge = get<PlatformBridge>()
+        val steamBridge = SteamBridge()
+        if (steamBridge.init(options.noSteam)) {
+            GameEngine.isSteamModeEnabled = true
+            logger.info { "Steam initialized; playtime and overlay enabled" }
+        } else {
+            logger.info { "Steam unavailable; running without Steam features" }
+        }
+        Runtime.getRuntime().addShutdownHook(Thread { steamBridge.shutdown() })
         SwingUtilities.invokeLater {
             val host = SwingAppHost.create(fullscreen = SettingsEngine.getInstance().slick2dFullScreen)
             bridge.filePickerHost = host
@@ -69,7 +78,7 @@ object DesktopMain : KoinComponent {
             try {
                 val session = installApp(
                     viewportProvider = { host.viewport },
-                    scheduler = SwingFrameScheduler(),
+                    scheduler = SwingFrameScheduler(framePump = steamBridge::pump),
                     presenter = SlickFramePresenter { host.presentSnapshot(get<SlickGameSession>().currentSnapshot()) },
                     options = options,
                     onQuit = host::requestClose,

@@ -5,7 +5,10 @@ import javax.swing.SwingUtilities
 import javax.swing.Timer
 
 /** A single coalescing EDT timer; stop also cancels callbacks already queued by the timer. */
-class SwingFrameScheduler(private val delayMillis: Int = 16) : FrameScheduler {
+class SwingFrameScheduler(
+    private val delayMillis: Int = 16,
+    private val framePump: () -> Unit = {},
+) : FrameScheduler {
     init { require(delayMillis > 0) }
     private var timer: Timer? = null
 
@@ -13,7 +16,15 @@ class SwingFrameScheduler(private val delayMillis: Int = 16) : FrameScheduler {
         timer?.stop()
         val next = Timer(delayMillis, null)
         next.isCoalesce = true
-        next.addActionListener { if (timer === next) tick() }
+        next.addActionListener {
+            if (timer === next) {
+                try {
+                    framePump()
+                } catch (_: Throwable) {
+                }
+                tick()
+            }
+        }
         timer = next
         next.start()
     }

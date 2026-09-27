@@ -69,6 +69,7 @@ dependencies {
         runtimeOnly("org.lwjgl:$module:$lwjglVersion:$lwjglClassifier")
     }
     implementation(libs.slf4j.api)
+    implementation(libs.steamworks4j)
     implementation(libs.logback.classic)
     testImplementation(kotlin("test"))
     testRuntimeOnly(libs.junit.platform.launcher)
@@ -89,8 +90,13 @@ tasks.named<Copy>("processResources") {
 }
 
 afterEvaluate {
-    tasks.named<JavaExec>("run") {
-        workingDir = project.file("..")
+    // IDE/Gradle 直接跑时 $ROOTDIR 占位符不会被替换，显式覆写避免落到字面 $ROOTDIR
+    tasks.findByName("run")?.let { task ->
+        (task as JavaExec).apply {
+            workingDir = project.file("..")
+            jvmArgs = jvmArgs.filterNot { it.contains("launch.dir") }
+            systemProperty("launch.dir", project.file("..").absolutePath)
+        }
     }
 }
 
