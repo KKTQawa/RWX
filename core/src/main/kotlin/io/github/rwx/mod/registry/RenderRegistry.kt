@@ -285,31 +285,31 @@ object RenderRegistry : OwnedRegistry {
 
     @JvmStatic
     fun drawEffect(effect: Effect, gameEngine: GameEngine, shadowPass: Boolean): Boolean {
-        val rendererId = effect.a.renderExtensionId ?: return false
-        val variantId = effect.a.renderExtensionVariant ?: return false
+        val rendererId = effect.template.renderExtensionId ?: return false
+        val variantId = effect.template.renderExtensionVariant ?: return false
         val renderer = effectRenderers[rendererId] ?: return false
 
-        var worldX = effect.I
-        var worldY = effect.J
-        var height = effect.K
+        var worldX = effect.posX
+        var worldY = effect.posY
+        var height = effect.posZ
         effect.parentObject?.let { source ->
             worldX += source.posX
             worldY += source.posY
             height += source.posZ
         }
-        if (!shadowPass && !effect.e && !effect.f) {
+        if (!shadowPass && !effect.showInFog && !effect.visibilityChecked) {
             if (!gameEngine.tileMap.isWorldPointVisibleForTeam(worldX, worldY, gameEngine.playerTeam)) return true
-            effect.f = true
+            effect.visibilityChecked = true
         }
-        val age = (effect.W - effect.V).coerceIn(0f, effect.W.coerceAtLeast(0f))
-        val progress = if (effect.W <= 0f) 1f else age / effect.W
+        val age = (effect.lifeMax - effect.lifeTimer).coerceIn(0f, effect.lifeMax.coerceAtLeast(0f))
+        val progress = if (effect.lifeMax <= 0f) 1f else age / effect.lifeMax
         val scaleX = if (effect.scaleXFrom.isNaN()) {
-            effect.G + (effect.F - effect.G) * progress
+            effect.scaleFrom + (effect.scaleTo - effect.scaleFrom) * progress
         } else {
             effect.scaleXFrom + (effect.scaleXTo - effect.scaleXFrom) * progress
         }
         val scaleY = if (effect.scaleYFrom.isNaN()) {
-            effect.G + (effect.F - effect.G) * progress
+            effect.scaleFrom + (effect.scaleTo - effect.scaleFrom) * progress
         } else {
             effect.scaleYFrom + (effect.scaleYTo - effect.scaleYFrom) * progress
         }
@@ -324,9 +324,9 @@ object RenderRegistry : OwnedRegistry {
                         originX = worldX - gameEngine.viewpointXSnapped,
                         originY = worldY - (if (shadowPass) 0f else height) - gameEngine.viewpointYSnapped,
                         ageTicks = age,
-                        lifetimeTicks = effect.W,
-                        rotationDegrees = effect.Y,
-                        alpha = effect.E,
+                        lifetimeTicks = effect.lifeMax,
+                        rotationDegrees = effect.rotation,
+                        alpha = effect.alpha,
                         scaleX = scaleX,
                         scaleY = scaleY,
                         shadowPass = shadowPass,

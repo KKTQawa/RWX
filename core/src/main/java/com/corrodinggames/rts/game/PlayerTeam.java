@@ -966,7 +966,7 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
         if (!this.isTeamActive && getTotalUnitCountIncludingQueued() > 0) {
             this.isTeamActive = true;
         }
-        T();
+        onTeamActivated();
     }
 
     /* JADX INFO: renamed from: u */
@@ -1633,14 +1633,15 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
         }
     }
 
-    public void a(OrderableUnit orderableUnit) {
+    /* JADX INFO: renamed from: a */
+    public void onUnitBuilt(OrderableUnit orderableUnit) {
     }
 
     public static void b(OrderableUnit orderableUnit) {
         for (int i = 0; i < TEAM_NEUTRAL; i++) {
             PlayerTeam playerTeam = teamColorArray[i];
             if (playerTeam != null) {
-                playerTeam.a(orderableUnit);
+                playerTeam.onUnitBuilt(orderableUnit);
             }
         }
     }
@@ -1670,7 +1671,7 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
             if (!playerTeam.isTeamActive) {
                 playerTeam.isTeamActive = true;
             }
-            playerTeam.T();
+            playerTeam.onTeamActivated();
         }
     }
 
@@ -1816,7 +1817,8 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
         return i;
     }
 
-    public void T() {
+    /* JADX INFO: renamed from: T */
+    public void onTeamActivated() {
     }
 
     public void a(AnimationSet animationSet) {
@@ -1888,7 +1890,8 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
         throw new RuntimeException("Unsupported type: " + teamRelation);
     }
 
-    public void d(BaseUnit baseUnit) {
+    /* JADX INFO: renamed from: d */
+    public void onUnitRemoved(BaseUnit baseUnit) {
     }
 
     /* JADX INFO: renamed from: W */

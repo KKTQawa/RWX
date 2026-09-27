@@ -41,6 +41,7 @@ public class LineDrawer implements DrawTimeOperation {
     }
 
     @Override
+    /* JADX INFO: renamed from: a */
     public void draw(GraphicsEngine graphicsEngine) {
         if (!this.drawAsPoints) {
             graphicsEngine.a(this.vertices, 0, this.vertexIndex, this.paint);

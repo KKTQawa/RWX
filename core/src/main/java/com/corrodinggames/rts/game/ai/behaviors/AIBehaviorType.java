@@ -7,7 +7,7 @@ public enum AIBehaviorType {
 
         @Override // com.corrodinggames.rts.game.ai.behaviors.AIBehaviorType
         /* JADX INFO: renamed from: a */
-        public AIBehavior getA() {
+        public AIBehavior createBehavior() {
             return null;
         }
     },
@@ -15,11 +15,11 @@ public enum AIBehaviorType {
 
         @Override // com.corrodinggames.rts.game.ai.behaviors.AIBehaviorType
         /* JADX INFO: renamed from: a */
-        public AIBehavior getA() {
+        public AIBehavior createBehavior() {
             return new NukeBehavior();
         }
     };
 
     /* JADX INFO: renamed from: a */
-    public abstract AIBehavior getA();
+    public abstract AIBehavior createBehavior();
 }

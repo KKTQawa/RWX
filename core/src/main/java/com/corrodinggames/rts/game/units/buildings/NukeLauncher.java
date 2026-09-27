@@ -251,22 +251,22 @@ public class NukeLauncher extends FactoryWithQueue {
         gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
         Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(f, f2, this.posZ, ArgbColor.a(255, 255, 255, 255));
         if (effectCreateLightEffect != null) {
-            effectCreateLightEffect.G = 8.0f;
-            effectCreateLightEffect.F = 5.0f;
-            effectCreateLightEffect.E = 0.9f;
-            effectCreateLightEffect.V = 20.0f;
-            effectCreateLightEffect.W = effectCreateLightEffect.V;
+            effectCreateLightEffect.scaleFrom = 8.0f;
+            effectCreateLightEffect.scaleTo = 5.0f;
+            effectCreateLightEffect.alpha = 0.9f;
+            effectCreateLightEffect.lifeTimer = 20.0f;
+            effectCreateLightEffect.lifeMax = effectCreateLightEffect.lifeTimer;
             effectCreateLightEffect.fadeIn = true;
         }
         gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
         Effect effectCreateSmallExplosion = gameEngine.effectManager.createSmallExplosion(f, f2, 0.0f, -1127220);
         if (effectCreateSmallExplosion != null) {
-            effectCreateSmallExplosion.G = 0.2f;
-            effectCreateSmallExplosion.F = 2.0f;
-            effectCreateSmallExplosion.ar = (short) 2;
-            effectCreateSmallExplosion.V = 45.0f;
-            effectCreateSmallExplosion.W = effectCreateSmallExplosion.V;
-            effectCreateSmallExplosion.U = 0.0f;
+            effectCreateSmallExplosion.scaleFrom = 0.2f;
+            effectCreateSmallExplosion.scaleTo = 2.0f;
+            effectCreateSmallExplosion.drawLayer = (short) 2;
+            effectCreateSmallExplosion.lifeTimer = 45.0f;
+            effectCreateSmallExplosion.lifeMax = effectCreateSmallExplosion.lifeTimer;
+            effectCreateSmallExplosion.delayedStartTimer = 0.0f;
         }
         gameEngine.effectManager.createExplosionWithVelocity(this.posX, this.posY, this.posZ, 40.0f, 120.0f);
         return true;
@@ -350,24 +350,24 @@ public class NukeLauncher extends FactoryWithQueue {
         a(this, pointFE.x, pointFE.y, f, f2).initialDelay = 5.0f;
         Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(pointFE.x, pointFE.y, this.posZ, -1127220);
         if (effectCreateLightEffect != null) {
-            effectCreateLightEffect.U = 5.0f;
-            effectCreateLightEffect.G = 2.1f;
-            effectCreateLightEffect.F = 2.1f;
-            effectCreateLightEffect.ar = (short) 2;
+            effectCreateLightEffect.delayedStartTimer = 5.0f;
+            effectCreateLightEffect.scaleFrom = 2.1f;
+            effectCreateLightEffect.scaleTo = 2.1f;
+            effectCreateLightEffect.drawLayer = (short) 2;
             effectCreateLightEffect.fadeOut = true;
             effectCreateLightEffect.fadeDuration = 70.0f;
-            effectCreateLightEffect.V = 370.0f;
-            effectCreateLightEffect.W = effectCreateLightEffect.V;
-            effectCreateLightEffect.E = 1.0f;
+            effectCreateLightEffect.lifeTimer = 370.0f;
+            effectCreateLightEffect.lifeMax = effectCreateLightEffect.lifeTimer;
+            effectCreateLightEffect.alpha = 1.0f;
         }
         Effect effectCreateSmallExplosionInternal = gameEngine.effectManager.createSmallExplosionInternal(pointFE.x, pointFE.y, 0.0f, -1);
         if (effectCreateSmallExplosionInternal != null) {
-            effectCreateSmallExplosionInternal.G = 1.0f;
-            effectCreateSmallExplosionInternal.F = 3.1f;
-            effectCreateSmallExplosionInternal.ar = (short) 2;
-            effectCreateSmallExplosionInternal.V = 170.0f;
-            effectCreateSmallExplosionInternal.W = effectCreateSmallExplosionInternal.V;
-            effectCreateSmallExplosionInternal.U = 5.0f + 20.0f;
+            effectCreateSmallExplosionInternal.scaleFrom = 1.0f;
+            effectCreateSmallExplosionInternal.scaleTo = 3.1f;
+            effectCreateSmallExplosionInternal.drawLayer = (short) 2;
+            effectCreateSmallExplosionInternal.lifeTimer = 170.0f;
+            effectCreateSmallExplosionInternal.lifeMax = effectCreateSmallExplosionInternal.lifeTimer;
+            effectCreateSmallExplosionInternal.delayedStartTimer = 5.0f + 20.0f;
         }
         gameEngine.soundEngine.playSoundAt(SoundEngine.nukeLaunchSound, 0.27f, 0.8f, pointFE.x, pointFE.y);
     }
@@ -408,10 +408,10 @@ public class NukeLauncher extends FactoryWithQueue {
         gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
         Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(projectileA, -1118720);
         if (effectCreateLightEffect != null) {
-            effectCreateLightEffect.V = 1300.0f;
-            effectCreateLightEffect.W = effectCreateLightEffect.V;
-            effectCreateLightEffect.E = 0.2f;
-            effectCreateLightEffect.G = 1.0f;
+            effectCreateLightEffect.lifeTimer = 1300.0f;
+            effectCreateLightEffect.lifeMax = effectCreateLightEffect.lifeTimer;
+            effectCreateLightEffect.alpha = 0.2f;
+            effectCreateLightEffect.scaleFrom = 1.0f;
         }
         return projectileA;
     }

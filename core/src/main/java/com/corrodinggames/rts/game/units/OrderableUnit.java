@@ -1233,7 +1233,7 @@ public abstract class OrderableUnit extends UnitBase {
     public void W() {
         GameEngine gameEngine = GameEngine.getInstance();
         if (this.team == gameEngine.playerTeam) {
-            gameEngine.gameUI.warLogDisplay.b(this);
+            gameEngine.gameUI.warLogDisplay.logUnitUpgraded(this);
         }
     }
 
@@ -2357,7 +2357,7 @@ public abstract class OrderableUnit extends UnitBase {
                             }
                             baseUnit.r(f5);
                             if (f5 >= 1.0f && repairProgressRate < 0.3d && baseUnit.team == gameEngine.playerTeam) {
-                                gameEngine.gameUI.warLogDisplay.a(baseUnit);
+                                gameEngine.gameUI.warLogDisplay.logUnitCreated(baseUnit);
                             }
                             this.aO = false;
                             return;
@@ -4857,12 +4857,12 @@ public abstract class OrderableUnit extends UnitBase {
             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
             Effect effectCreateSmallExplosion = gameEngine.effectManager.createSmallExplosion(this.posX, this.posY, this.posZ, -1127220);
             if (effectCreateSmallExplosion != null) {
-                effectCreateSmallExplosion.G = 0.2f;
-                effectCreateSmallExplosion.F = 2.0f;
-                effectCreateSmallExplosion.ar = (short) 2;
-                effectCreateSmallExplosion.V = 45.0f;
-                effectCreateSmallExplosion.W = effectCreateSmallExplosion.V;
-                effectCreateSmallExplosion.U = 0.0f;
+                effectCreateSmallExplosion.scaleFrom = 0.2f;
+                effectCreateSmallExplosion.scaleTo = 2.0f;
+                effectCreateSmallExplosion.drawLayer = (short) 2;
+                effectCreateSmallExplosion.lifeTimer = 45.0f;
+                effectCreateSmallExplosion.lifeMax = effectCreateSmallExplosion.lifeTimer;
+                effectCreateSmallExplosion.delayedStartTimer = 0.0f;
             }
         } else if (unitSize == UnitSize.large || unitSize == UnitSize.building || unitSize == UnitSize.buildingNoShockwaveOrSmoke) {
             gameEngine.soundEngine.playSound(SoundEngine.buildingExplodeSound, 0.8f, this.posX, this.posY);
@@ -4876,12 +4876,12 @@ public abstract class OrderableUnit extends UnitBase {
             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
             Effect effectCreateSmallExplosion2 = gameEngine.effectManager.createSmallExplosion(this.posX, this.posY, this.posZ, -1127220);
             if (effectCreateSmallExplosion2 != null) {
-                effectCreateSmallExplosion2.G = 0.2f;
-                effectCreateSmallExplosion2.F = 2.0f;
-                effectCreateSmallExplosion2.ar = (short) 2;
-                effectCreateSmallExplosion2.V = 45.0f;
-                effectCreateSmallExplosion2.W = effectCreateSmallExplosion2.V;
-                effectCreateSmallExplosion2.U = 0.0f;
+                effectCreateSmallExplosion2.scaleFrom = 0.2f;
+                effectCreateSmallExplosion2.scaleTo = 2.0f;
+                effectCreateSmallExplosion2.drawLayer = (short) 2;
+                effectCreateSmallExplosion2.lifeTimer = 45.0f;
+                effectCreateSmallExplosion2.lifeMax = effectCreateSmallExplosion2.lifeTimer;
+                effectCreateSmallExplosion2.delayedStartTimer = 0.0f;
             }
         } else {
             gameEngine.soundEngine.playSoundAt(SoundEngine.unitExplodeSound, 0.8f, 1.0f + Utility.randomFloatInRange(-0.07f, 0.07f), this.posX, this.posY);
@@ -4889,15 +4889,15 @@ public abstract class OrderableUnit extends UnitBase {
         }
         if (unitSize != UnitSize.verysmall) {
             if (unitSize != UnitSize.buildingNoShockwaveOrSmoke && (effectCreateSmallExplosionInternal = gameEngine.effectManager.createSmallExplosionInternal(this.posX, this.posY, this.posZ, 0)) != null) {
-                effectCreateSmallExplosionInternal.E = 0.9f;
+                effectCreateSmallExplosionInternal.alpha = 0.9f;
             }
             if (z) {
                 if (!bO()) {
                     bo();
                 }
                 if (unitSize != UnitSize.buildingNoShockwaveOrSmoke && !isOverLiquid()) {
-                    EffectEmitter.a(this.posX, this.posY);
-                    EffectEmitter.b(this.posX, this.posY);
+                    EffectEmitter.createDefaultFireEmitter(this.posX, this.posY);
+                    EffectEmitter.createAlternateFireEmitter(this.posX, this.posY);
                     bq();
                 }
             }
@@ -5187,15 +5187,15 @@ public abstract class OrderableUnit extends UnitBase {
                 Effect effectCreateEffectInternal = GameEngine.getInstance().effectManager.createEffectInternal(vector3DBn.x, vector3DBn.y, this.posZ + vector3DBn.z, EffectType.custom, false, EffectQuality.low);
                 if (effectCreateEffectInternal != null) {
                     float angleBetweenPoints = Utility.getAngleBetweenPoints(vector3DBn.x, vector3DBn.y, (float) (((double) baseUnit.posX) + (-8.0d) + (Math.random() * 16.0d)), (float) (((double) baseUnit.posY) + (-8.0d) + (Math.random() * 16.0d)));
-                    effectCreateEffectInternal.P = Utility.fastCos(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
-                    effectCreateEffectInternal.Q = Utility.fastSin(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
-                    effectCreateEffectInternal.ap = 6;
-                    effectCreateEffectInternal.V = 20.0f;
-                    effectCreateEffectInternal.W = effectCreateEffectInternal.V;
+                    effectCreateEffectInternal.velocityX = Utility.fastCos(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
+                    effectCreateEffectInternal.velocityY = Utility.fastSin(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
+                    effectCreateEffectInternal.frameIndex = 6;
+                    effectCreateEffectInternal.lifeTimer = 20.0f;
+                    effectCreateEffectInternal.lifeMax = effectCreateEffectInternal.lifeTimer;
                     effectCreateEffectInternal.fadeIn = true;
-                    effectCreateEffectInternal.E = 0.8f;
-                    effectCreateEffectInternal.G = 0.2f;
-                    effectCreateEffectInternal.F = 1.0f;
+                    effectCreateEffectInternal.alpha = 0.8f;
+                    effectCreateEffectInternal.scaleFrom = 0.2f;
+                    effectCreateEffectInternal.scaleTo = 1.0f;
                 }
             }
         }
@@ -5210,15 +5210,15 @@ public abstract class OrderableUnit extends UnitBase {
                 Effect effectCreateEffectInternal = GameEngine.getInstance().effectManager.createEffectInternal(baseUnit.posX, baseUnit.posY, baseUnit.posZ, EffectType.custom, false, EffectQuality.low);
                 if (effectCreateEffectInternal != null) {
                     float angleBetweenPoints = Utility.getAngleBetweenPoints(baseUnit.posX, baseUnit.posY - baseUnit.posZ, (float) (((double) pointFE.x) + (-8.0d) + (Math.random() * 16.0d)), (float) (((double) pointFE.y) + (-8.0d) + (Math.random() * 16.0d)));
-                    effectCreateEffectInternal.P = Utility.fastCos(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
-                    effectCreateEffectInternal.Q = Utility.fastSin(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
-                    effectCreateEffectInternal.ap = 5;
-                    effectCreateEffectInternal.V = 20.0f;
-                    effectCreateEffectInternal.W = effectCreateEffectInternal.V;
+                    effectCreateEffectInternal.velocityX = Utility.fastCos(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
+                    effectCreateEffectInternal.velocityY = Utility.fastSin(angleBetweenPoints) * Utility.randomFloatInRange(2.0f, 4.0f);
+                    effectCreateEffectInternal.frameIndex = 5;
+                    effectCreateEffectInternal.lifeTimer = 20.0f;
+                    effectCreateEffectInternal.lifeMax = effectCreateEffectInternal.lifeTimer;
                     effectCreateEffectInternal.fadeIn = true;
-                    effectCreateEffectInternal.E = 0.8f;
-                    effectCreateEffectInternal.G = 0.2f;
-                    effectCreateEffectInternal.F = 1.0f;
+                    effectCreateEffectInternal.alpha = 0.8f;
+                    effectCreateEffectInternal.scaleFrom = 0.2f;
+                    effectCreateEffectInternal.scaleTo = 1.0f;
                 }
             }
         }

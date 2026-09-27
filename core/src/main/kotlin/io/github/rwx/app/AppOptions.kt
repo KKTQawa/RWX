@@ -16,12 +16,14 @@ data class AppOptions(
     val autoReturnMainMenuAfterGameReady: Boolean = false,
     val joinServer: String? = null,
     val isDesktop: Boolean = false,
+    val noSteam: Boolean = false,
 ) {
     companion object {
         private const val SCREEN_PREFIX = "--screen="
         private const val COLOR_SCHEME_PREFIX = "--color-scheme="
         private const val LEVEL_MODE_PREFIX = "--level-mode="
         private const val DEMO_DIALOG_ARG = "--demo-dialog"
+        private const val NO_STEAM_ARG = "--no-steam"
         private const val SETTINGS_PAGE_PREFIX = "--settings-page="
         private const val AUTO_START_SINGLE_PLAYER_UI_ARG = "--auto-start-singleplayer-ui"
         private const val AUTO_START_BATTLE_ROOM_ARG = "--auto-start-battleroom"
@@ -74,6 +76,7 @@ data class AppOptions(
             var autoStartBattleRoomTwice = false
             var autoReturnMainMenuAfterGameReady = false
             var joinServer: String? = null
+            var noSteam = false
 
             args.forEach { arg ->
                 when {
@@ -87,6 +90,7 @@ data class AppOptions(
                     }
 
                     arg == DEMO_DIALOG_ARG -> showDemoDialog = true
+                    arg == NO_STEAM_ARG -> noSteam = true
                     arg == AUTO_START_SINGLE_PLAYER_UI_ARG -> autoStartSinglePlayerFromUi = true
                     arg == AUTO_START_BATTLE_ROOM_ARG -> autoStartBattleRoom = true
                     arg == AUTO_START_BATTLE_ROOM_TWICE_ARG -> {
@@ -121,6 +125,7 @@ data class AppOptions(
                 autoReturnMainMenuAfterGameReady = autoReturnMainMenuAfterGameReady,
                 joinServer = joinServer,
                 isDesktop = isDesktop,
+                noSteam = noSteam,
             )
         }
 

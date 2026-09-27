@@ -1886,7 +1886,7 @@ public abstract class GameEngine {
     /* JADX INFO: renamed from: a */
     public void pingMinimap(BaseUnit baseUnit, float f) {
         this.minimap.ping((int) baseUnit.posX, (int) baseUnit.posY, f, baseUnit);
-        this.gameUI.warLogDisplay.c(baseUnit);
+        this.gameUI.warLogDisplay.logUnitDamaged(baseUnit);
     }
 
     public static boolean areTeamShadersSupported() {

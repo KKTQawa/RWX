@@ -482,7 +482,7 @@ public final class LayerBufferManager {
             if (resourceBackend().backendCapabilities().getClearLayerBuffersBeforeCopy()) {
                 z2 = true;
             }
-            if (GameUI.bO) {
+            if (GameUI.showModernSidebar) {
             }
             if (tileMap.fogEnabled) {
             }

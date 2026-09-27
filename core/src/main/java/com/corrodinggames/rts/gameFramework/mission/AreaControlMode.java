@@ -812,7 +812,7 @@ public class AreaControlMode {
             gameEngine.gameUI.showMediumPriorityMessage(message);
         }
         if (gameEngine.gameUI.warLogDisplay != null) {
-            gameEngine.gameUI.warLogDisplay.a(message, priority ? 4500 : 3000);
+            gameEngine.gameUI.warLogDisplay.logMessage(message, priority ? 4500 : 3000);
         }
     }
 

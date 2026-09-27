@@ -24,7 +24,8 @@ public class TeamHistoryChart {
     /* JADX INFO: renamed from: e */
     GamePaint[] markerPaints = new GamePaint[11];
 
-    public GamePaint a(int i, boolean z) {
+    /* JADX INFO: renamed from: a */
+    public GamePaint getPaintForAlpha(int i, boolean z) {
         int i2 = i / 25;
         if (i2 < 0) {
             i2 = 0;
