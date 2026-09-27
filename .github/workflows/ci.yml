@@ -75,11 +75,34 @@ jobs:
             :desktop:test \
             :desktop:packageDistributionForCurrentOS
 
+      - name: Stage desktop artifacts
+        shell: bash
+        run: |
+          mkdir -p desktop-artifacts
+          BIN=desktop/build/compose/binaries
+          OUT="$GITHUB_WORKSPACE/desktop-artifacts"
+          PLAT="${{ matrix.platform_id }}"
+          VER="$RWX_VERSION"
+          find "$BIN" -type f \( -iname '*.deb' -o -iname '*.rpm' -o -iname '*.dmg' -o -iname '*.msi' -o -iname '*.exe' -o -iname '*.AppImage' \) -not -path "$BIN/main/app/*" -print0 | while IFS= read -r -d '' f; do
+            base="$(basename "$f")"
+            raw_ext="${base##*.}"
+            low_ext="$(printf '%s' "$raw_ext" | tr '[:upper:]' '[:lower:]')"
+            if [ "$low_ext" = "appimage" ]; then ext="AppImage"; else ext="$low_ext"; fi
+            dest="$OUT/RWX-$VER-$PLAT.$ext"
+            if [ -e "$dest" ]; then
+              i=2
+              while [ -e "$OUT/RWX-$VER-$PLAT-$i.$ext" ]; do i=$((i+1)); done
+              dest="$OUT/RWX-$VER-$PLAT-$i.$ext"
+            fi
+            cp "$f" "$dest"
+          done
+          ls -lh desktop-artifacts
+
       - name: Upload desktop artifacts
         uses: actions/upload-artifact@v6
         with:
           name: RWX-${{ matrix.platform_id }}
-          path: desktop/build/compose/binaries/**
+          path: desktop-artifacts/*
           if-no-files-found: error
           retention-days: 14
 
@@ -87,7 +110,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: RWX-${{ matrix.platform_id }}-logs
+          name: diagnostics-${{ matrix.platform_id }}
           path: |
             desktop/build/compose/**
             desktop/build/reports/**
@@ -175,7 +198,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: RWX-android-logs
+          name: diagnostics-android
           path: |
             android/build/outputs/logs/**
             android/build/reports/**
@@ -211,6 +234,13 @@ jobs:
           pattern: RWX-*
           merge-multiple: true
 
+      - name: List release artifacts
+        shell: bash
+        run: |
+          ls -R release-artifacts
+          find release-artifacts -mindepth 1 -type d -empty -delete
+          find release-artifacts -mindepth 1 -type d | (grep . && exit 1 || exit 0)
+
       - name: Prepare release notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -238,5 +268,5 @@ jobs:
           replacesArtifacts: true
           bodyFile: release_notes.md
           artifacts: |
-            release-artifacts/**/*
+            release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}

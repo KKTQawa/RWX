@@ -178,6 +178,11 @@ compose {
 
 afterEvaluate {
     tasks.matching {
+        it.name in listOf("packageDmg", "packageDeb", "packageExe", "packageMsi")
+    }.configureEach {
+        dependsOn("packageAppImage")
+    }
+    tasks.matching {
         it.name in listOf(
             "createDistributable",
             "createReleaseDistributable",

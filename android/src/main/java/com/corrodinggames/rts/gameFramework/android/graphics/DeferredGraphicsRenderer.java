@@ -76,15 +76,17 @@ public final class DeferredGraphicsRenderer extends AbstractGraphicsRenderer {
                 } else if (op == com.corrodinggames.rts.gameFramework.android.graphics.opengl.GraphicsOperation.R) {
                     depth--;
                     restoreTotal++;
-                    if (depth < minDepth) {
-                        minDepth = depth;
-                        if (firstNegativeIndex < 0) {
-                            firstNegativeIndex = i2;
+                    if (depth < 0) {
+                        if (depth < minDepth) {
+                            minDepth = depth;
+                            if (firstNegativeIndex < 0) {
+                                firstNegativeIndex = i2;
+                            }
                         }
-                    }
-                    if (canvas.getSaveCount() <= baseSaveCount) {
-                        skippedRestores++;
-                        continue;
+                        if (canvas.getSaveCount() <= baseSaveCount) {
+                            skippedRestores++;
+                            continue;
+                        }
                     }
                 }
                 canvasDrawCommand.f761a.a(canvas, canvasDrawCommand);
