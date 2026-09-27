@@ -37,9 +37,9 @@ import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.*;
@@ -87,10 +87,10 @@ public abstract class BaseUnit extends SizedObject {
     public static HashMap bF = new HashMap();
     public static HashMap bG = new HashMap();
     public static HashMap bH = new HashMap();
-    public static final KoolPaint bI = new GamePaint();
-    public static final KoolPaint bJ;
+    public static final Paint bI = new GamePaint();
+    public static final Paint bJ;
     /* JADX INFO: renamed from: bK */
-    static final KoolMultiplyAddColorFilter selectedUnitColorFilter;
+    static final MultiplyAddColorFilter selectedUnitColorFilter;
 
     /* JADX INFO: renamed from: bL */
     public boolean isHighlighted;
@@ -277,21 +277,21 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: cV */
     public float totalDamageDealt;
-    public static final KoolPaint cW;
-    public static final KoolPaint cX;
-    public static final KoolPaint cY;
-    public static final KoolPaint cZ;
-    public static final KoolPaint da;
-    public static final KoolPaint db;
-    public static final KoolPaint dc;
-    public static final KoolPaint dd;
-    public static final KoolPaint de;
-    public static final KoolPaint df;
-    public static final KoolPaint dg;
-    public static final KoolPaint dh;
-    public static final KoolPaint di;
-    public static final KoolPaint dj;
-    public static final KoolPaint dk;
+    public static final Paint cW;
+    public static final Paint cX;
+    public static final Paint cY;
+    public static final Paint cZ;
+    public static final Paint da;
+    public static final Paint db;
+    public static final Paint dc;
+    public static final Paint dd;
+    public static final Paint de;
+    public static final Paint df;
+    public static final Paint dg;
+    public static final Paint dh;
+    public static final Paint di;
+    public static final Paint dj;
+    public static final Paint dk;
 
     /* JADX INFO: renamed from: dl */
     public int spatialIndexTileX;
@@ -311,8 +311,8 @@ public abstract class BaseUnit extends SizedObject {
     /* JADX INFO: renamed from: dq */
     public float damageEffectTimer2;
     static final RectF dr;
-    static KoolPaint ds;
-    static KoolPaint dt;
+    static Paint ds;
+    static Paint dt;
     public static final RectF du;
     public static final Rect dv;
     static final Rect dw;
@@ -453,7 +453,7 @@ public abstract class BaseUnit extends SizedObject {
         int iL = textureA.l();
         for (int i3 = 0; i3 < iM; i3++) {
             for (int i4 = 0; i4 < iL; i4++) {
-                textureA.a(i3, i4, KoolArgbColor.a(KoolArgbColor.a(texture.a(i3, i4)), 0, 0, 0));
+                textureA.a(i3, i4, ArgbColor.a(ArgbColor.a(texture.a(i3, i4)), 0, 0, 0));
             }
         }
         textureA.p();
@@ -469,80 +469,80 @@ public abstract class BaseUnit extends SizedObject {
         bI.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_8, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_8, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_8);
         bJ = new GamePaint();
         bJ.a(true);
-        selectedUnitColorFilter = new KoolMultiplyAddColorFilter(KoolArgbColor.a(255, 255, 255), KoolArgbColor.a(100, 100, 100));
+        selectedUnitColorFilter = new MultiplyAddColorFilter(ArgbColor.a(255, 255, 255), ArgbColor.a(100, 100, 100));
         bJ.a(255, 255, 255, 255);
         bJ.a(selectedUnitColorFilter);
-        cW = new KoolPaint();
+        cW = new Paint();
         cX = new GamePaint();
         cY = new GamePaint();
         cZ = new GamePaint();
         da = new GamePaint();
         db = new GamePaint();
         dc = new GamePaint();
-        dd = new KoolPaint();
-        de = new KoolPaint();
-        df = new KoolPaint();
+        dd = new Paint();
+        de = new Paint();
+        df = new Paint();
         dg = new GamePaint();
         dh = new GamePaint();
         di = new GamePaint();
         dj = new GamePaint();
-        dk = new KoolPaint();
-        cW.a(KoolPaint.Style.STROKE);
+        dk = new Paint();
+        cW.a(Paint.Style.STROKE);
         cW.a(2.0f);
         setPaintTransparent(cW);
         cX.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 255, 0);
-        cX.a(KoolPaint.Style.STROKE);
+        cX.a(Paint.Style.STROKE);
         cX.a(2.0f);
         setPaintTransparency(cX, true);
         cY.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 255, 0);
-        cY.a(KoolPaint.Style.STROKE);
+        cY.a(Paint.Style.STROKE);
         cY.a(2.0f);
         setPaintTransparent(cY);
         cZ.a(130, 0, 255, 0);
-        cZ.a(KoolPaint.Style.STROKE);
+        cZ.a(Paint.Style.STROKE);
         cZ.a(2.0f);
         setPaintTransparent(cZ);
         dd.a(70, 0, 255, 0);
-        dd.a(KoolPaint.Style.STROKE);
+        dd.a(Paint.Style.STROKE);
         dd.a(1.0f);
         setPaintTransparent(dd);
         da.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 255, 0, 0);
-        da.a(KoolPaint.Style.STROKE);
+        da.a(Paint.Style.STROKE);
         da.a(2.0f);
         setPaintTransparent(da);
         de.a(70, 255, 0, 0);
-        de.a(KoolPaint.Style.STROKE);
+        de.a(Paint.Style.STROKE);
         de.a(1.0f);
         setPaintTransparent(de);
         dc.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 255, 255, 0);
-        dc.a(KoolPaint.Style.STROKE);
+        dc.a(Paint.Style.STROKE);
         dc.a(2.0f);
         setPaintTransparent(dc);
         df.a(70, 255, 255, 0);
-        df.a(KoolPaint.Style.STROKE);
+        df.a(Paint.Style.STROKE);
         df.a(1.0f);
         setPaintTransparent(df);
         db.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 255, 255, 255);
-        db.a(KoolPaint.Style.STROKE);
+        db.a(Paint.Style.STROKE);
         db.a(2.0f);
         setPaintTransparent(db);
         dg.a(90, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG);
-        dg.a(KoolPaint.Style.STROKE);
+        dg.a(Paint.Style.STROKE);
         dg.a(1.0f);
         setPaintTransparent(dg);
         dh.a(100, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG);
-        dh.a(KoolPaint.Style.STROKE);
+        dh.a(Paint.Style.STROKE);
         dh.a(2.0f);
         setPaintTransparent(dh);
         di.a(90, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 0, 0);
-        di.a(KoolPaint.Style.STROKE);
+        di.a(Paint.Style.STROKE);
         di.a(1.0f);
         setPaintTransparent(di);
-        dj.a(KoolPaint.Style.STROKE);
-        dk.a(KoolPaint.Style.STROKE);
+        dj.a(Paint.Style.STROKE);
+        dk.a(Paint.Style.STROKE);
         dr = new RectF();
-        ds = new KoolPaint();
-        dt = new KoolPaint();
+        ds = new Paint();
+        dt = new Paint();
         du = new RectF();
         dv = new Rect();
         dw = new Rect();
@@ -989,12 +989,12 @@ public abstract class BaseUnit extends SizedObject {
     }
 
     /* JADX INFO: renamed from: a */
-    public static void setPaintTransparent(KoolPaint paint) {
+    public static void setPaintTransparent(Paint paint) {
         setPaintTransparency(paint, false);
     }
 
     /* JADX INFO: renamed from: a */
-    public static void setPaintTransparency(KoolPaint paint, boolean z) {
+    public static void setPaintTransparency(Paint paint, boolean z) {
         if (!GameEngine.isPC() && z) {
             paint.a(0.0f);
         }
@@ -1120,8 +1120,8 @@ public abstract class BaseUnit extends SizedObject {
                         iLongToIntArray = Utility.packArgb(200, 0, 150, 0);
                         iLongToIntArray2 = Utility.packArgb(120, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 0);
                     }
-                    KoolPaint paintA = GameViewUtils.a(iLongToIntArray, KoolPaint.Style.FILL);
-                    KoolPaint paintA2 = GameViewUtils.a(iLongToIntArray2, KoolPaint.Style.STROKE);
+                    Paint paintA = GameViewUtils.a(iLongToIntArray, Paint.Style.FILL);
+                    Paint paintA2 = GameViewUtils.a(iLongToIntArray2, Paint.Style.STROKE);
                     int i2 = 4;
                     if (z3) {
                         i2 = 1;
@@ -1139,7 +1139,7 @@ public abstract class BaseUnit extends SizedObject {
                         if (f9 >= 1.0f) {
                             f9 = 1.0f;
                         }
-                        KoolPaint paintA3 = GameViewUtils.a(Utility.packArgb(100, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 208, 26), KoolPaint.Style.FILL);
+                        Paint paintA3 = GameViewUtils.a(Utility.packArgb(100, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 208, 26), Paint.Style.FILL);
                         dr.a((f4 - f3) + (f7 * fX), f5 + f6, (f4 - f3) + (f7 * f9), f5 + f6 + i2);
                         gameEngine.renderGraphicsEngine.a(dr, paintA3);
                     }
@@ -1158,9 +1158,9 @@ public abstract class BaseUnit extends SizedObject {
                     float f14 = f11 + ((i3 - 1) * f12);
                     dr.a(f14, f5 + f6 + 3.0f, f14 + f13, f5 + f6 + 3.0f + 3.0f);
                     if (transportedUnitsWeight >= i3) {
-                        gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 0, 0, 255, KoolPaint.Style.FILL));
+                        gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 0, 0, 255, Paint.Style.FILL));
                     }
-                    gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(110, 0, 0, 210, KoolPaint.Style.STROKE));
+                    gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(110, 0, 0, 210, Paint.Style.STROKE));
                 }
                 f8 = 3.0f + 5.0f;
             }
@@ -1174,23 +1174,23 @@ public abstract class BaseUnit extends SizedObject {
             } else {
                 iLongToIntArray3 = Utility.packArgb(200, 23, 179, 207);
             }
-            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(iLongToIntArray3, KoolPaint.Style.FILL));
+            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(iLongToIntArray3, Paint.Style.FILL));
             dr.a(f4 - f3, f5 + f6 + i4 + f8, (f4 - f3) + f7, f5 + f6 + i4 + 2 + f8);
             if (zIsUnitAtPositionX) {
                 iLongToIntArray4 = Utility.packArgb(105, 123, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_AVR_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_6);
             } else {
                 iLongToIntArray4 = Utility.packArgb(120, 45, 211, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_NETWORK);
             }
-            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(iLongToIntArray4, KoolPaint.Style.STROKE));
+            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(iLongToIntArray4, Paint.Style.STROKE));
             f8 += 2;
             i = 4;
         }
         if (bV() >= 0.0f) {
             int i5 = i + 1;
             dr.a(f4 - f3, f5 + f6 + i5 + f8, (f4 - f3) + (f7 * bV()), f5 + f6 + i5 + i + f8);
-            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(200, 0, 0, 150, KoolPaint.Style.FILL));
+            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(200, 0, 0, 150, Paint.Style.FILL));
             dr.a(f4 - f3, f5 + f6 + i5 + f8, (f4 - f3) + f7, f5 + f6 + i5 + i + f8);
-            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(120, 0, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, KoolPaint.Style.STROKE));
+            gameEngine.renderGraphicsEngine.a(dr, GameViewUtils.a(120, 0, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, Paint.Style.STROKE));
             float f15 = f8 + i;
         }
         if (f2 < 1.0f) {
@@ -1241,26 +1241,26 @@ public abstract class BaseUnit extends SizedObject {
                         ds.a(0.0f);
                     }
                     if (waypointAt.getCommandType() == UnitCommandType.attack) {
-                        ds.b(KoolArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 0));
+                        ds.b(ArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 0));
                     } else if (waypointAt.getCommandType() == UnitCommandType.attackMove) {
-                        ds.b(KoolArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0));
+                        ds.b(ArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0));
                     } else if (waypointAt.getCommandType() == UnitCommandType.build || waypointAt.getCommandType() == UnitCommandType.repair) {
-                        ds.b(KoolArgbColor.a(160, 0, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT));
+                        ds.b(ArgbColor.a(160, 0, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT));
                     } else if (waypointAt.getCommandType() == UnitCommandType.loadInto || waypointAt.getCommandType() == UnitCommandType.loadUp) {
-                        ds.b(KoolArgbColor.a(160, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT));
+                        ds.b(ArgbColor.a(160, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT));
                     } else if (waypointAt.getCommandType() == UnitCommandType.reclaim) {
-                        ds.b(KoolArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 42));
+                        ds.b(ArgbColor.a(160, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0, 42));
                     } else if (waypointAt.getCommandType() == UnitCommandType.guard || waypointAt.getCommandType() == UnitCommandType.guardAt) {
-                        ds.b(KoolArgbColor.a(160, 97, 20, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_LAST_CHANNEL));
+                        ds.b(ArgbColor.a(160, 97, 20, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_LAST_CHANNEL));
                     } else if (waypointAt.getCommandType() == UnitCommandType.patrol) {
-                        ds.b(KoolArgbColor.a(160, 0, 210, 210));
+                        ds.b(ArgbColor.a(160, 0, 210, 210));
                         if (unitCommand == null) {
                             unitCommand = waypointAt;
                         } else {
                             unitCommand2 = waypointAt;
                         }
                     } else {
-                        ds.b(KoolArgbColor.a(160, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0));
+                        ds.b(ArgbColor.a(160, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0));
                     }
                     float targetX = waypointAt.getTargetX();
                     float targetY = waypointAt.getTargetY();
@@ -1287,7 +1287,7 @@ public abstract class BaseUnit extends SizedObject {
             }
         }
         if (unitCommand != null && unitCommand2 != null && unitCommand != unitCommand2) {
-            ds.b(KoolArgbColor.a(50, 0, 210, 210));
+            ds.b(ArgbColor.a(50, 0, 210, 210));
             UnitCommand unitCommand3 = unitCommand;
             gameEngine.renderGraphicsEngine.a(unitCommand2.getTargetX() - gameEngine.viewpointXSnapped, unitCommand2.getTargetY() - gameEngine.viewpointYSnapped, unitCommand3.getTargetX() - gameEngine.viewpointXSnapped, unitCommand3.getTargetY() - gameEngine.viewpointYSnapped, ds);
         }
@@ -1298,7 +1298,7 @@ public abstract class BaseUnit extends SizedObject {
 
     @Override // com.corrodinggames.rts.gameFramework.GameObject
     public void e(float f) {
-        KoolPaint paint;
+        Paint paint;
         boolean z = false;
         if (this.selectionFlashTimer != 0.0f) {
             this.selectionFlashTimer = Utility.moveTowardsZero(this.selectionFlashTimer, f);
@@ -1384,7 +1384,7 @@ public abstract class BaseUnit extends SizedObject {
 
     @Override // com.corrodinggames.rts.gameFramework.GameObject
     public boolean f(float f) {
-        KoolPaint paint;
+        Paint paint;
         Texture textureV = v();
         if (textureV == null) {
             return false;

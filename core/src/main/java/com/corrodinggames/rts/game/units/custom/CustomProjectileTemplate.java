@@ -15,7 +15,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import com.corrodinggames.rts.gameFramework.utility.IniFile;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -179,7 +179,7 @@ public class CustomProjectileTemplate extends ProjectileTemplate {
         customProjectileTemplate.V = iniFile.getBoolean(str, "lightingEffect", Boolean.valueOf(customProjectileTemplate.V)).booleanValue();
         customProjectileTemplate.W = iniFile.getBoolean(str, "laserEffect", Boolean.valueOf(customProjectileTemplate.W)).booleanValue();
         if (customProjectileTemplate.W && customProjectileTemplate.Y == null) {
-            customProjectileTemplate.color = KoolArgbColor.a(80, 255, 0, 0);
+            customProjectileTemplate.color = ArgbColor.a(80, 255, 0, 0);
         }
         if (customProjectileTemplate.V && customProjectileTemplate.s) {
             throw new RuntimeException("lightingEffect must be targeted, cannot be targetGround");

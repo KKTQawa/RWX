@@ -20,7 +20,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -312,7 +312,7 @@ public class AntiNukeLauncher extends FactoryWithQueue {
         projectileA.lifeTimer = 99999.0f;
         projectileA.speed = 0.2f;
         projectileA.targetSpeed = 6.5f;
-        projectileA.color = KoolArgbColor.a(255, 80, 60, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT);
+        projectileA.color = ArgbColor.a(255, 80, 60, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT);
         projectileA.damage = 600.0f;
         projectileA.isBallistic = true;
         projectileA.hasTrail = true;

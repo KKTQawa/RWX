@@ -1,7 +1,6 @@
 package io.github.rwx.mod.api
 
-import de.fabmax.kool.modules.ui2.Dp
-import de.fabmax.kool.modules.ui2.UiScope
+import androidx.compose.runtime.Composable
 
 interface Graphics {
     fun registerTexture(id: TextureId, file: ResourcePath, options: TextureOptions = TextureOptions())
@@ -275,13 +274,26 @@ interface Ui {
     fun addInGameMenuItem(menuId: Int? = null, text: LocalizedText, onClick: (id: Int) -> Unit)
     fun removeInGameMenuItem(menuId: Int)
     fun selectedUnits(): List<UnitRuntimeState>
-    fun registerHud(id: HudId, order: Int = 0, content: UiScope.() -> Unit)
+
+    /**
+     * Adds a Compose layer drawn over the running game. Layers are composed in ascending [order]
+     * (then by id) inside a full-screen box; pointer and key input a layer does not consume is
+     * forwarded to the game. [content] is composed on the UI thread, so read game state through
+     * snapshots or Compose state rather than touching the engine directly.
+     */
+    fun registerHud(id: HudId, order: Int = 0, content: @Composable () -> Unit)
     fun unregisterHud(id: HudId)
     fun setNativeHudVisible(visible: Boolean)
+
+    /**
+     * Registers a full-screen window shown by [openWindow]. The host draws the [title] and a back
+     * button; [content] fills the remaining responsive column. [ModWindowContext.refresh] rebuilds
+     * the content from scratch, [ModWindowContext.close] returns to the game.
+     */
     fun registerWindow(
         id: ModWindowId,
         title: LocalizedText,
-        content: UiScope.(context: ModWindowContext, contentWidth: Dp) -> Unit,
+        content: @Composable (context: ModWindowContext) -> Unit,
     )
 
     fun openWindow(id: ModWindowId)

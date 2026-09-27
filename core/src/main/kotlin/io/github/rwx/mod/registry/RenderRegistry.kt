@@ -14,8 +14,8 @@ import io.github.rwx.geometry.Rect
 import io.github.rwx.geometry.RectF
 import io.github.rwx.mod.api.*
 import io.github.rwx.mod.impl.ApiImpl
-import io.github.rwx.render.canvas.KoolCanvasBlendMode
-import io.github.rwx.render.canvas.KoolPaint
+import io.github.rwx.render.frame.GameCanvasBlendMode
+import io.github.rwx.render.canvas.Paint
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -356,7 +356,7 @@ object RenderRegistry : OwnedRegistry {
     private class EngineRenderCanvas(private val graphics: GraphicsEngine) : RenderCanvas {
         private val source = Rect()
         private val destination = RectF()
-        private val paint = KoolPaint()
+        private val paint = Paint()
         private var saveDepth = 0
 
         override fun save() {
@@ -400,8 +400,8 @@ object RenderRegistry : OwnedRegistry {
             )
             paint.a(
                 when (blendMode) {
-                    RenderBlendMode.ALPHA -> KoolCanvasBlendMode.SourceOver
-                    RenderBlendMode.ADDITIVE -> KoolCanvasBlendMode.Add
+                    RenderBlendMode.ALPHA -> GameCanvasBlendMode.SourceOver
+                    RenderBlendMode.ADDITIVE -> GameCanvasBlendMode.Add
                 }
             )
             source.a(0, 0, texture.width(), texture.height())
@@ -436,8 +436,8 @@ object RenderRegistry : OwnedRegistry {
             )
             paint.a(
                 when (blendMode) {
-                    RenderBlendMode.ALPHA -> KoolCanvasBlendMode.SourceOver
-                    RenderBlendMode.ADDITIVE -> KoolCanvasBlendMode.Add
+                    RenderBlendMode.ALPHA -> GameCanvasBlendMode.SourceOver
+                    RenderBlendMode.ADDITIVE -> GameCanvasBlendMode.Add
                 }
             )
             val left = (source.left * texture.width()).roundToInt().coerceIn(0, texture.width() - 1)

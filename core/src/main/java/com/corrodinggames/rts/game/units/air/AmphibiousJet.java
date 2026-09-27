@@ -22,8 +22,8 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class AmphibiousJet extends AirUnit {
     float t;
     float u;
     /* JADX INFO: renamed from: v */
-    protected KoolPaint waterPaint;
+    protected Paint waterPaint;
     /* JADX INFO: renamed from: w */
     PointF tempPoint;
     Rect x;
@@ -195,7 +195,7 @@ public class AmphibiousJet extends AirUnit {
                         gameEngine.renderGraphicsEngine.i();
                         gameEngine.renderGraphicsEngine.b(pointFE.x - gameEngine.viewpointXSnapped, (pointFE.y - gameEngine.viewpointYSnapped) - this.posZ);
                         gameEngine.renderGraphicsEngine.a(fE * 0.7f, fE * 0.7f);
-                        gameEngine.renderGraphicsEngine.a(MammothTank.e, 0.0f, 0.0f, (KoolPaint) null);
+                        gameEngine.renderGraphicsEngine.a(MammothTank.e, 0.0f, 0.0f, (Paint) null);
                         gameEngine.renderGraphicsEngine.j();
                     }
                 }
@@ -206,7 +206,7 @@ public class AmphibiousJet extends AirUnit {
     }
 
     public void f(boolean z2) {
-        KoolPaint paintAN;
+        Paint paintAN;
         Texture texture;
         float f2;
         GameEngine gameEngine = GameEngine.getInstance();
@@ -417,7 +417,7 @@ public class AmphibiousJet extends AirUnit {
         }
         PointF pointFE = E(i);
         Projectile projectileA = Projectile.a(this, pointFE.x, pointFE.y, this.posZ, i);
-        projectileA.color = KoolArgbColor.a(255, 247, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_EISU, 129);
+        projectileA.color = ArgbColor.a(255, 247, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_EISU, 129);
         projectileA.damage = q(i);
         projectileA.targetUnit = baseUnit;
         projectileA.lifeTimer = 10.0f;

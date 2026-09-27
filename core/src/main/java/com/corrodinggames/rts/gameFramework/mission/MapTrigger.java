@@ -12,8 +12,8 @@ import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.mission.conditions.TriggerCondition;
 import com.corrodinggames.rts.gameFramework.network.NetworkEngine;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.n.a */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/n/a.class */
@@ -50,7 +50,7 @@ public class MapTrigger {
     /* JADX INFO: renamed from: z */
     public LocaleString text;
     public LocaleString A;
-    public KoolPaint B;
+    public Paint B;
     public boolean C;
     public TriggerGroup d = new TriggerGroup();
     public TriggerGroup e = new TriggerGroup();
@@ -190,7 +190,7 @@ public class MapTrigger {
             throw f(str + ": Unknown color:" + strB);
         }
         try {
-            return KoolArgbColor.a(strB);
+            return ArgbColor.a(strB);
         } catch (IllegalArgumentException e) {
             throw f(str + ": Unknown color:" + strB);
         }

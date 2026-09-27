@@ -33,13 +33,13 @@ data class ScreenVisibility(
     val mods: Boolean = false,
     val resourceBrowser: Boolean = false,
     val battleRoom: Boolean = false,
-    val modWindow: Boolean = false,
 )
 
 /**
  * Maps each [AppScreen] to the layers it shows. The game frame stays available behind menu screens
  * when the backend provides one; the HUD and menu overlay swap in and out. A host turns this into
- * Kool scene visibility — this object owns no Kool types.
+ * Kool scene visibility — this object owns no Kool types. The mod window and the mod HUD are
+ * Compose-only: [ScreenVisibility.hud] says whether HUD layers are drawn on a screen.
  */
 object AppScreenLayout {
     fun visibilityFor(screen: AppScreen): ScreenVisibility = when (screen) {
@@ -191,7 +191,6 @@ object AppScreenLayout {
             mods = false,
             resourceBrowser = false,
             battleRoom = false,
-            modWindow = true,
         )
     }
 }
@@ -200,30 +199,6 @@ object AppScreenLayout {
 data class ScreenInput(
     val worldInteraction: Boolean,
 )
-
-/**
- * Maps each [AppScreen] to the input it accepts. On the menu the world is drawn but not
- * interactive, so world clicks (selection/move) and camera pan/zoom are off — only the menu UI
- * reacts; in game they are on. A host gates its live pointer/camera input on this — this object
- * owns no platform or input types.
- */
-object AppScreenInput {
-    fun policyFor(screen: AppScreen): ScreenInput = when (screen) {
-        AppScreen.MainMenu,
-        AppScreen.LevelSelect,
-        AppScreen.ReplaySelect,
-        AppScreen.Settings,
-        AppScreen.Loading,
-        AppScreen.Multiplayer,
-        AppScreen.Mods,
-        AppScreen.ResourceBrowser,
-        AppScreen.BattleRoom,
-        AppScreen.ModWindow,
-        AppScreen.Paused -> ScreenInput(worldInteraction = false)
-
-        AppScreen.InGame -> ScreenInput(worldInteraction = true)
-    }
-}
 
 
 class ScreenNavigator(

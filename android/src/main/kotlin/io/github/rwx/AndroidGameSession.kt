@@ -1,6 +1,12 @@
 package io.github.rwx
 
 import android.app.Activity
+import android.os.Handler
+import android.os.Looper
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -12,25 +18,30 @@ import io.github.rwx.app.launchOnIO
 import io.github.rwx.geometry.Point
 import io.github.rwx.input.MultiTouchPointerState
 import io.github.rwx.platform.CoreGameView
-import io.github.rwx.render.canvas.KoolCanvasFrame
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameFrame
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.GameSession
 import io.github.rwx.session.GameSessionRendererProfile
 import io.github.rwx.ui.BattleRoomUiBridge
 import io.github.rwx.ui.InGameMenuController
 import kotlin.math.roundToInt
+import androidx.core.view.isVisible
 
 internal class AndroidGameSession(
     override var rendererMode: AndroidRendererMode,
 ) : GameSession() {
 
     private val view = AndroidCoreGameView(inGameMenuController)
-    private var activity: Activity? = null
+    private var activity: ComponentActivity? = null
     private var host: FrameLayout? = null
-    private var koolOverlayView: View? = null
+    private var composeView: ComposeView? = null
+    private var attachmentObserver: DefaultLifecycleObserver? = null
+    private var resumed = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var visibilityUpdate: Runnable? = null
     private var framePresenter: AndroidFramePresenter? = null
     private var graphicsEngine: AndroidGraphicsEngine? = null
-    private var appliedViewport: KoolCanvasViewport = KoolCanvasViewport(0, 0)
+    private var appliedViewport: GameViewport = GameViewport(0, 0)
     private var appliedRenderSurfaceScale: Float = 0f
 
     @Volatile
@@ -40,7 +51,7 @@ internal class AndroidGameSession(
     private var requestedGameVisible = false
 
     @Volatile
-    private var requestedKoolOverlay = false
+    private var requestedOverlay = false
 
     @Volatile
     private var requestedPausedBackground = false
@@ -51,39 +62,51 @@ internal class AndroidGameSession(
     init {
         configureRendererProfile(
             GameSessionRendererProfile(
-                rendersIntoKoolCanvas = false,
-                acceptsKoolInput = false,
+                usesFrameCommandRendering = false,
                 usesNativeSurfaceForResumeBackground = true,
             )
         )
     }
 
-    fun attach(activity: Activity, host: FrameLayout, koolOverlayView: View) {
+    fun attach(activity: ComponentActivity, host: FrameLayout, composeView: ComposeView) {
+        checkMainThread()
+        if (this.activity === activity && this.host === host && this.composeView === composeView) return
+        detach()
         this.activity = activity
         this.host = host
-        this.koolOverlayView = koolOverlayView
-        val presenter = framePresenter ?: createPresenter(activity)
-        val view = presenter.view
+        this.composeView = composeView
+        val presenter = createPresenter(activity)
         if (graphicsEngine == null) {
-            graphicsEngine = AndroidGraphicsEngine(
-                context = activity.applicationContext,
-                rendererMode = rendererMode,
-            )
+            graphicsEngine = AndroidGraphicsEngine(activity.applicationContext, rendererMode)
         }
-        if (view.parent !== host) {
-            (view.parent as? ViewGroup)?.removeView(view)
-            host.addView(
-                view,
-                0,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                ),
-            )
+        host.addView(presenter.view, 0, matchParentLayoutParams())
+        (composeView.parent as? ViewGroup)?.removeView(composeView)
+        host.addView(composeView, matchParentLayoutParams())
+        val observer = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) = this@AndroidGameSession.onResume()
+            override fun onPause(owner: LifecycleOwner) = this@AndroidGameSession.onPause()
+            override fun onDestroy(owner: LifecycleOwner) {
+                if (this@AndroidGameSession.activity === activity) detach()
+            }
         }
+        attachmentObserver = observer
+        activity.lifecycle.addObserver(observer)
+    }
+
+    fun viewport(): GameViewport =
+        GameViewport(framePresenter?.view?.width ?: 0, framePresenter?.view?.height ?: 0).resolved()
+
+    private fun matchParentLayoutParams() = FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.MATCH_PARENT,
+    )
+
+    private fun checkMainThread() {
+        check(Looper.myLooper() === Looper.getMainLooper()) { "Native views must be owned by the main thread" }
     }
 
     fun switchRendererMode(rendererMode: AndroidRendererMode) {
+        checkMainThread()
         val activity = activity ?: return
         val host = host ?: return
         if (this.rendererMode == rendererMode) return
@@ -91,6 +114,9 @@ internal class AndroidGameSession(
             if (this.rendererMode == rendererMode) return
 
             val oldPresenter = framePresenter
+            visibilityUpdate?.let(mainHandler::removeCallbacks)
+            visibilityUpdate = null
+            oldPresenter?.view?.setOnTouchListener(null)
             oldPresenter?.pause()
             oldPresenter?.view?.let { oldView ->
                 (oldView.parent as? ViewGroup)?.removeView(oldView)
@@ -107,7 +133,7 @@ internal class AndroidGameSession(
                     TileMap.bindGraphicsBackend(replacement)
                 }
             }
-            appliedViewport = KoolCanvasViewport(0, 0)
+            appliedViewport = GameViewport(0, 0)
             appliedRenderSurfaceScale = 0f
 
             val presenter = createPresenter(activity)
@@ -121,9 +147,9 @@ internal class AndroidGameSession(
             )
             if (visibilityRequestInitialized) {
                 presenter.view.visibility = if (requestedGameVisible) View.VISIBLE else View.GONE
-                presenter.setVisible(requestedGameVisible)
-                if (requestedGameVisible && requestedKoolOverlay) {
-                    koolOverlayView?.bringToFront()
+                presenter.setVisible(requestedGameVisible && resumed)
+                if (requestedGameVisible && requestedOverlay) {
+                    composeView?.bringToFront()
                 }
             }
             logger.info { "Switched Android game renderer to ${rendererMode.id}" }
@@ -134,34 +160,57 @@ internal class AndroidGameSession(
         rendererMode.createPresenter(activity).also { createdPresenter ->
             createdPresenter.view.apply {
                 visibility = View.VISIBLE
+                isFocusableInTouchMode = true
                 setOnTouchListener { _, event ->
                     handleMotionEvent(event)
                     true
                 }
             }
             framePresenter = createdPresenter
+            if (!resumed) createdPresenter.pause()
         }
 
     fun detach() {
-        framePresenter?.let { presenter ->
-            val view = presenter.view
-            presenter.pause()
-            (view.parent as? ViewGroup)?.removeView(view)
+        checkMainThread()
+        attachmentObserver?.let { activity?.lifecycle?.removeObserver(it) }
+        attachmentObserver = null
+        visibilityUpdate?.let(mainHandler::removeCallbacks)
+        visibilityUpdate = null
+        synchronized(gameLock) {
+            onPause()
+            framePresenter?.view?.let { nativeView ->
+                nativeView.setOnTouchListener(null)
+                (nativeView.parent as? ViewGroup)?.removeView(nativeView)
+            }
+            // Never reuse a View whose Context is the previous Activity.
+            framePresenter = null
+            composeView?.let { overlay ->
+                overlay.disposeComposition()
+                (overlay.parent as? ViewGroup)?.removeView(overlay)
+            }
+            activity = null
+            host = null
+            composeView = null
+            visibilityRequestInitialized = false
+            appliedViewport = GameViewport(0, 0)
+            appliedRenderSurfaceScale = 0f
+            resumeBackgroundFrameReady = false
+            view.clearTouchSnapshot()
         }
-        activity = null
-        host = null
-        koolOverlayView = null
-        visibilityRequestInitialized = false
     }
 
     fun onPause() {
+        resumed = false
         framePresenter?.pause()
         view.pause()
+        view.clearTouchSnapshot()
     }
 
     fun onResume() {
+        resumed = true
+        resumeBackgroundFrameReady = false
         view.onResume()
-        framePresenter?.takeIf { it.view.visibility == View.VISIBLE }?.resume()
+        framePresenter?.takeIf { it.view.isVisible }?.resume()
     }
 
     override fun submitPointer(screenX: Float, screenY: Float, isDown: Boolean, pointerId: Int) {
@@ -172,16 +221,16 @@ internal class AndroidGameSession(
         view.movePointer(screenX, screenY)
     }
 
-  override fun updateFrame(
-        viewport: KoolCanvasViewport,
+    override fun updateFrame(
+        viewport: GameViewport,
         deltaSeconds: Float,
-        drainVisibleLayerBuffers: Boolean ,
-    ): KoolCanvasFrame {
+        drainVisibleLayerBuffers: Boolean,
+    ): GameFrame {
         if (loadState.asyncMapLoadInProgress || modReloadInProgress) {
             return lastFrame
         }
-        if (loadState.menuBackgroundActive && (!requestedGameVisible || !requestedKoolOverlay)) {
-            setGameVisible(true, viewport, koolOverlay = true)
+        if (loadState.menuBackgroundActive && (!requestedGameVisible || !requestedOverlay)) {
+            setGameVisible(true, viewport, uiOverlay = true)
         }
         synchronized(gameLock) {
             lastViewport = viewport
@@ -231,7 +280,7 @@ internal class AndroidGameSession(
                     frame.cancel()
                 }
             }
-            lastFrame = KoolCanvasFrame(viewport, emptyList())
+            lastFrame = GameFrame(viewport, emptyList())
             if (pausedForResumeBackground) {
                 resumeBackgroundFrameReady = true
             }
@@ -267,9 +316,9 @@ internal class AndroidGameSession(
         }
     }
 
-    override fun currentFrame(): KoolCanvasFrame = lastFrame
+    override fun currentFrame(): GameFrame = lastFrame
 
-    override fun prepareMenuBackgroundAsync(viewport: KoolCanvasViewport) {
+    override fun prepareMenuBackgroundAsync(viewport: GameViewport) {
         val state = loadState
         if (state.menuBackgroundActive) {
             return
@@ -292,7 +341,7 @@ internal class AndroidGameSession(
             }
         }
         val issuedGeneration = generation ?: return
-        lastFrame = KoolCanvasFrame(viewport, emptyList())
+        lastFrame = GameFrame(viewport, emptyList())
         logger.info { "Preparing Android Canvas RW menu background asynchronously" }
         launchOnIO("${rendererMode.id}-menu-background-loader") {
             loadMenuBackgroundInBackground(viewport, issuedGeneration)
@@ -305,7 +354,7 @@ internal class AndroidGameSession(
                 (state.asyncMapLoadInProgress && state.asyncMapLoadPath == MENU_BACKGROUND_REQUEST)
     }
 
-    override fun adoptStartedGameFromEngine(viewport: KoolCanvasViewport): Boolean =
+    override fun adoptStartedGameFromEngine(viewport: GameViewport): Boolean =
         synchronized(gameLock) {
             val engine = gameEngine ?: GameEngine.getInstance() ?: return@synchronized false
             if (engine.networkEngine?.gameHasBeenStarted != true) return@synchronized false
@@ -341,27 +390,27 @@ internal class AndroidGameSession(
         view.submitPointer(0f, 0f, false, -1)
     }
 
-    override fun loadPendingMapNow(): KoolCanvasFrame =
+    override fun loadPendingMapNow(): GameFrame =
         updateFrame(lastViewport, 0f)
 
     override fun setGameVisible(
         visible: Boolean,
-        viewport: KoolCanvasViewport,
-        koolOverlay: Boolean,
+        viewport: GameViewport,
+        uiOverlay: Boolean,
         pausedBackground: Boolean,
     ) {
         val presenter = framePresenter ?: return
         val view = presenter.view
         if (visibilityRequestInitialized &&
             requestedGameVisible == visible &&
-            requestedKoolOverlay == koolOverlay &&
+            requestedOverlay == uiOverlay &&
             requestedPausedBackground == pausedBackground
         ) {
             return
         }
         visibilityRequestInitialized = true
         requestedGameVisible = visible
-        requestedKoolOverlay = koolOverlay
+        requestedOverlay = uiOverlay
         requestedPausedBackground = pausedBackground
         synchronized(gameLock) {
             val engine = gameEngine
@@ -374,19 +423,24 @@ internal class AndroidGameSession(
                 resumeBackgroundFrameReady = false
             }
         }
-        view.post {
+        visibilityUpdate?.let(mainHandler::removeCallbacks)
+        val update = Runnable {
+            if (framePresenter !== presenter) return@Runnable
+            visibilityUpdate = null
             view.visibility = if (visible) View.VISIBLE else View.GONE
             if (visible) {
-                if (koolOverlay) {
-                    koolOverlayView?.bringToFront()
+                if (uiOverlay) {
+                    composeView?.bringToFront()
                 } else {
                     view.bringToFront()
                 }
-                presenter.setVisible(true)
+                presenter.setVisible(resumed)
             } else {
                 presenter.setVisible(false)
             }
         }
+        visibilityUpdate = update
+        mainHandler.post(update)
     }
 
     private fun handleMotionEvent(event: MotionEvent) {
@@ -408,12 +462,13 @@ internal class AndroidGameSession(
         }
     }
 
-    protected override fun ensureStarted(viewport: KoolCanvasViewport): GameEngine {
+    override fun ensureStarted(viewport: GameViewport): GameEngine {
         gameEngine?.let { return it }
         val androidGraphics = graphicsEngine
             ?: throw IllegalStateException("Android Canvas session is not attached")
-        val width = viewport.width.coerceAtLeast(1)
-        val height = viewport.height.coerceAtLeast(1)
+        val resolvedViewport = viewport.resolved()
+        val width = resolvedViewport.width
+        val height = resolvedViewport.height
         GameEngine.screenSize = Point(width, height)
         GameEngine.graphicsEngine = androidGraphics
         GameEngine.externalGameLoopDriver = true
@@ -425,9 +480,10 @@ internal class AndroidGameSession(
         return engine
     }
 
-    protected override fun applyViewport(engine: GameEngine, viewport: KoolCanvasViewport) {
-        val physicalWidth = viewport.width.coerceAtLeast(1)
-        val physicalHeight = viewport.height.coerceAtLeast(1)
+    override fun applyViewport(engine: GameEngine, viewport: GameViewport) {
+        val resolvedViewport = viewport.resolved()
+        val physicalWidth = resolvedViewport.width
+        val physicalHeight = resolvedViewport.height
         val doubleScale = engine.settingsEngine.renderDoubleScale
         val renderSurfaceScale = if (doubleScale) 2f else 1f
         val logicalWidth = if (doubleScale) (physicalWidth / 2).coerceAtLeast(1) else physicalWidth
@@ -441,11 +497,11 @@ internal class AndroidGameSession(
         engine.updateWindowResolution(logicalWidth, logicalHeight, renderSurfaceScale)
         graphicsEngine?.a(logicalWidth, logicalHeight)
         view.onSizeChanged()
-        appliedViewport = KoolCanvasViewport(physicalWidth, physicalHeight)
+        appliedViewport = GameViewport(physicalWidth, physicalHeight)
         appliedRenderSurfaceScale = renderSurfaceScale
     }
 
-    private fun loadMenuBackgroundInBackground(requestedViewport: KoolCanvasViewport, generation: Long) {
+    private fun loadMenuBackgroundInBackground(requestedViewport: GameViewport, generation: Long) {
         val startedAt = System.nanoTime()
         var loadedCurrentRequest = false
         runCatching {

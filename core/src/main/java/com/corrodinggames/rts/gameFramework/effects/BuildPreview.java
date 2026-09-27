@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.utility.TransactionalArrayList;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.Iterator;
 
@@ -76,7 +76,7 @@ public class BuildPreview {
     public BaseUnit attachedUnit;
 
     /* JADX INFO: renamed from: D */
-    static KoolPaint foundationPaintInactive;
+    static Paint foundationPaintInactive;
 
     /* JADX INFO: renamed from: w */
     public static TransactionalArrayList<BuildPreview> activePreviews = new TransactionalArrayList();
@@ -93,7 +93,7 @@ public class BuildPreview {
     static RectF tempRectF4 = new RectF();
 
     /* JADX INFO: renamed from: C */
-    static KoolPaint foundationPaint = new GamePaint();
+    static Paint foundationPaint = new GamePaint();
 
     /* JADX INFO: renamed from: f */
     public int previewUnitLevel = 1;
@@ -108,7 +108,7 @@ public class BuildPreview {
     public float fadeInSpeed = 0.04f;
 
     /* JADX INFO: renamed from: B */
-    KoolPaint paint = new KoolPaint();
+    Paint paint = new Paint();
 
     public BuildPreview() {
         activePreviews.add(this);
@@ -117,11 +117,11 @@ public class BuildPreview {
 
     static {
         foundationPaint.a(90, 0, 0, 255);
-        foundationPaint.a(KoolPaint.Style.STROKE);
+        foundationPaint.a(Paint.Style.STROKE);
         foundationPaint.a(2.0f);
         foundationPaintInactive = new GamePaint();
         foundationPaintInactive.a(40, 0, 0, 255);
-        foundationPaintInactive.a(KoolPaint.Style.STROKE);
+        foundationPaintInactive.a(Paint.Style.STROKE);
         foundationPaintInactive.a(2.0f);
     }
 
@@ -302,7 +302,7 @@ public class BuildPreview {
             Utility.grow(tempRectF4, (gameEngine.tileMap.halfTileWorldSizeX - 3) + (fFastCos * 5.0f));
             tempRectF4.a(this.worldX - gameEngine.viewpointXSnapped, (this.worldY - gameEngine.viewpointYSnapped) - 0.0f);
             float f5 = 3.0f + (fFastCos * 7.0f);
-            KoolPaint paint = foundationPaint;
+            Paint paint = foundationPaint;
             if (this.fadeInProgress <= 0.0f) {
                 paint = foundationPaintInactive;
             }

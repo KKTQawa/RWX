@@ -1,17 +1,16 @@
 package io.github.rwx.app
 
-import io.github.rwx.render.canvas.KoolCanvasFrame
+import io.github.rwx.render.frame.GameFrame
 import io.github.rwx.settings.GameSettingsRepository
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.model.LevelSelectAction
 import io.github.rwx.ui.model.MainMenuAction
 import io.github.rwx.ui.model.SettingsModel
-import io.github.rwx.ui.host.ModWindowSceneHost
 import io.github.rwx.ui.host.ReplaySelectSceneHost
 
 internal class ScreenLifecycleController(
     private val screenPresenter: ScreenPresenter,
-    private val externalFrame: () -> KoolCanvasFrame?,
+    private val externalFrame: () -> GameFrame?,
     private val actions: ActionHandlers,
     private val battleRoomController: BattleRoomController,
     private val battleRoomLaunchController: BattleRoomLaunchController,
@@ -19,7 +18,6 @@ internal class ScreenLifecycleController(
     private val multiplayerLobbyController: MultiplayerLobbyController,
     private val modsController: ModsController,
     private val resourceBrowserController: ResourceBrowserController,
-    private val modWindowSceneHost: ModWindowSceneHost,
     private val settingsRepository: GameSettingsRepository,
     private val settingsModel: SettingsModel,
     private val refreshMainMenu: () -> Unit,
@@ -31,6 +29,7 @@ internal class ScreenLifecycleController(
     private var pendingAutoStartBattleRoom = autoStartBattleRoom
 
     fun onScreenChanged(screen: AppScreen) {
+        if (screen != AppScreen.ResourceBrowser) resourceBrowserController.leaveScreen()
         screenPresenter.apply(screen, externalFrame())
         if (screen == AppScreen.MainMenu) {
             refreshMainMenu()
@@ -51,10 +50,10 @@ internal class ScreenLifecycleController(
         if (screen == AppScreen.Multiplayer) multiplayerLobbyController.requestRefresh()
         if (screen == AppScreen.Mods) modsController.refresh()
         if (screen == AppScreen.ResourceBrowser) {
+            resourceBrowserController.beginVisit()
             resourceBrowserController.requestInitialSearchIfEmpty()
         }
         if (screen == AppScreen.Settings) settingsRepository.loadInto(settingsModel)
-        if (screen == AppScreen.ModWindow) modWindowSceneHost.refresh()
         if (screen == AppScreen.BattleRoom && pendingAutoStartBattleRoom) {
             pendingAutoStartBattleRoom = false
             battleRoomLaunchController.startBattleRoomGame()

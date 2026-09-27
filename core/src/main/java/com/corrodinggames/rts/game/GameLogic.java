@@ -40,9 +40,9 @@ import io.github.rwx.mod.UnitEventRuntime;
 import io.github.rwx.mod.impl.ModScheduler;
 import io.github.rwx.mod.registry.UiRegistry;
 import io.github.rwx.platform.CoreGameView;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 import io.github.rwx.ui.InGameMenuController;
 
 import java.io.IOException;
@@ -86,16 +86,16 @@ public class GameLogic extends GameEngine {
 
     public transient Runnable worldFrameRenderedListener;
 
-    KoolPaint l;
+    Paint l;
 
     /* JADX INFO: renamed from: m */
-    KoolPaint fpsPaint;
+    Paint fpsPaint;
 
-    KoolPaint n;
+    Paint n;
 
-    KoolPaint o;
+    Paint o;
 
-    KoolPaint p;
+    Paint p;
 
     /* JADX INFO: renamed from: q */
     int fpsAccumulator;
@@ -116,13 +116,13 @@ public class GameLogic extends GameEngine {
 
     public ArrayList w;
 
-    KoolPaint x;
+    Paint x;
 
-    KoolPaint y;
+    Paint y;
 
-    KoolPaint z;
+    Paint z;
 
-    public KoolPaint A;
+    public Paint A;
 
     /* JADX INFO: renamed from: B */
     public GameStateData gameStateData;
@@ -231,7 +231,7 @@ public class GameLogic extends GameEngine {
         this.fpsString = "0fps";
         this.v = new Rect();
         this.w = new ArrayList();
-        this.A = new KoolPaint();
+        this.A = new Paint();
         this.cloudRenderer = new CloudRenderer();
         this.accumulator = 0.0f;
         this.speedMultiplier = 1.0f;
@@ -400,39 +400,39 @@ public class GameLogic extends GameEngine {
         Locale.initialize();
         PerformanceProfiler.a("Locale.init took:", jA2);
         PlayerTeam.loadTeamColorSettings();
-        this.l = new KoolPaint();
-        this.fpsPaint = new KoolPaint();
+        this.l = new Paint();
+        this.fpsPaint = new Paint();
         this.fpsPaint.a(255, 255, 255, 255);
         this.fpsPaint.a(true);
         updatePaintTextSize(this.fpsPaint, 16.0f);
-        this.n = new KoolPaint();
+        this.n = new Paint();
         this.n.a(255, 255, 255, 255);
         this.n.a(true);
         updatePaintTextSize(this.n, 16.0f);
-        this.o = new KoolPaint();
+        this.o = new Paint();
         this.o.a(100, 255, 0, 0);
         updatePaintTextSize(this.o, 16.0f);
-        this.p = new KoolPaint();
+        this.p = new Paint();
         this.p.a(100, 0, 255, 0);
         updatePaintTextSize(this.p, 16.0f);
-        this.teamInfoPaint = new KoolPaint();
-        this.centeredPaint = new KoolPaint();
-        this.centeredPaint.a(KoolPaint.Align.CENTER);
+        this.teamInfoPaint = new Paint();
+        this.centeredPaint = new Paint();
+        this.centeredPaint.a(Paint.Align.CENTER);
         this.centeredPaint.a(true);
-        this.centeredPaint.a(KoolTypeface.a(KoolTypeface.c, 0));
+        this.centeredPaint.a(Typeface.a(Typeface.c, 0));
         updatePaintTextSize(this.centeredPaint, 16.0f);
-        this.loadingPaint = new KoolPaint();
+        this.loadingPaint = new Paint();
         this.loadingPaint.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE);
         this.loadingPaint.a(true);
-        this.loadingPaint.a(KoolPaint.Align.CENTER);
+        this.loadingPaint.a(Paint.Align.CENTER);
         updatePaintTextSize(this.loadingPaint, 18.0f);
-        this.x = new KoolPaint();
+        this.x = new Paint();
         this.x.b(-1);
         this.x.c(100);
-        this.y = new KoolPaint();
+        this.y = new Paint();
         this.y.b(-7829368);
         this.y.c(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE);
-        this.y.a(KoolPaint.Style.STROKE);
+        this.y.a(Paint.Style.STROKE);
         this.y.a(1.0f);
         long jA3 = PerformanceProfiler.a();
         loadLevel("AudioEngine");
@@ -525,7 +525,7 @@ public class GameLogic extends GameEngine {
         long jA6 = PerformanceProfiler.a();
         this.allUnitsChecksum = BaseUnit.bM();
         PerformanceProfiler.a("allUnitsChecksum took:", jA6);
-        this.z = new KoolPaint();
+        this.z = new Paint();
         this.z.a(50, 255, 255, 255);
         onInitialContentLoaded();
         System.gc();
@@ -1651,7 +1651,7 @@ public class GameLogic extends GameEngine {
         }
         this.renderFrameCount++;
         if (this.shouldAdvanceAfterGameEnd) {
-            this.renderGraphicsEngine.b(KoolArgbColor.a(0, 0, 0));
+            this.renderGraphicsEngine.b(ArgbColor.a(0, 0, 0));
             this.renderGraphicsEngine.a("Loading..", this.halfScreenWidth, this.halfScreenHeight, this.loadingPaint);
             return;
         }
@@ -1671,7 +1671,7 @@ public class GameLogic extends GameEngine {
             if (zIsPostProcessingSupported) {
                 beginPostProcessing(this.postBaseBuffer);
                 try {
-                    this.renderGraphicsEngine.b(KoolArgbColor.a(0, 0, 0));
+                    this.renderGraphicsEngine.b(ArgbColor.a(0, 0, 0));
                     this.performanceProfiler.a(ProfilerSection.draw_game);
                     drawGame(f);
                     this.performanceProfiler.b(ProfilerSection.draw_game);
@@ -1680,7 +1680,7 @@ public class GameLogic extends GameEngine {
                     if (!this.postDisplacementBuffer.a()) {
                         beginPostProcessing(this.postDisplacementBuffer);
                         try {
-                            this.renderGraphicsEngine.b(KoolArgbColor.a(128, 128, 255));
+                            this.renderGraphicsEngine.b(ArgbColor.a(128, 128, 255));
                             applyZoomTransform();
                             int iDrawEffect = this.effectManager.drawEffect(f, 3);
                             this.effectManager.texture = null;
@@ -1755,7 +1755,7 @@ public class GameLogic extends GameEngine {
             z = true;
         }
         if (z) {
-            this.renderGraphicsEngine.b(KoolArgbColor.a(0, 0, 0));
+            this.renderGraphicsEngine.b(ArgbColor.a(0, 0, 0));
         }
     }
 

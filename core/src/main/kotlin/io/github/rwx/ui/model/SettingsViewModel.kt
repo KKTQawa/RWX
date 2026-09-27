@@ -2,24 +2,33 @@ package io.github.rwx.ui.model
 
 import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.KeyBinding
-import de.fabmax.kool.modules.ui2.MutableStateValue
-import de.fabmax.kool.modules.ui2.mutableStateOf
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import io.github.rwx.i18n.I18n
 import io.github.rwx.i18n.I18nText
 import io.github.rwx.ui.AppScreen
-import io.github.rwx.ui.ColorSchemeDefinition
 import io.github.rwx.ui.ColorSchemeId
 import io.github.rwx.ui.ColorSchemeRegistry
+import io.github.rwx.ui.DEFAULT_OVERLAY_OPACITY
+import io.github.rwx.ui.Palette
+import io.github.rwx.ui.Scheme
+import io.github.rwx.ui.UiColor
 import kotlin.math.roundToInt
 
 
-enum class SettingsPage(val title: String, val tabTitle: String) {
-    Display("Display & Input", "Display"),
-    Audio("Audio", "Audio"),
-    Interface("Interface", "Interface"),
-    Gameplay("Gameplay", "Gameplay"),
-    KeyBindings("Key Bindings", "Keys"),
-    ColorScheme("Color Scheme", "Colors"),
+enum class SettingsPage(private val titleText: I18nText, private val tabText: I18nText) {
+    Display(I18n.settings.pages.display, I18n.settings.pages.display),
+    Audio(I18n.settings.pages.audio, I18n.settings.pages.audio),
+    Gameplay(I18n.settings.pages.gameplay, I18n.settings.pages.gameplay),
+    KeyBindings(I18n.settings.pages.keybindings, I18n.settings.pages.keybindings),
+    Theme(I18n.settings.pages.theme, I18n.settings.pages.theme),
+    ;
+
+    /** Resolved at render time so locale switches apply without rebuilding the enum. */
+    val title: String get() = titleText()
+
+    /** Resolved at render time so locale switches apply without rebuilding the enum. */
+    val tabTitle: String get() = tabText()
 }
 
 sealed interface SettingsPageItem {
@@ -44,7 +53,7 @@ data class SettingsPageContent(
     val items: List<SettingsPageItem>,
 )
 
-data class SettingToggle(val i18nText: I18nText, val state: MutableStateValue<Boolean>)
+data class SettingToggle(val i18nText: I18nText, val state: MutableState<Boolean>)
 
 enum class AndroidStoragePreference(val storageType: Int, private val text: I18nText) {
     Internal(0, I18n.settings.storage.internal),
@@ -52,11 +61,6 @@ enum class AndroidStoragePreference(val storageType: Int, private val text: I18n
     ;
 
     override fun toString(): String = text()
-
-    fun shortLabel(): String = when (this) {
-        Internal -> I18n.settings.storage.internalShort()
-        External -> I18n.settings.storage.externalShort()
-    }
 
     companion object {
         fun fromStorageType(storageType: Int): AndroidStoragePreference =
@@ -66,7 +70,7 @@ enum class AndroidStoragePreference(val storageType: Int, private val text: I18n
 
 data class SettingSlider(
     val i18nText: I18nText,
-    val state: MutableStateValue<Float>,
+    val state: MutableState<Float>,
     val min: Float,
     val max: Float,
     val step: Float = 0.05f,
@@ -85,7 +89,7 @@ data class SettingColorSchemeItem(
     val label: String,
     val key: String,
     val id: ColorSchemeId,
-    val scheme: ColorSchemeDefinition,
+    val scheme: Scheme<Palette<UiColor>>,
 )
 
 data class SettingKeyBindingRow(
@@ -99,79 +103,81 @@ data class SettingKeyBindingRow(
 )
 
 class SettingsModel {
-    // Display
-    val batterySaving: MutableStateValue<Boolean> = mutableStateOf(false)
-    val highRefreshRate: MutableStateValue<Boolean> = mutableStateOf(true)
-    val slick2dFullScreen: MutableStateValue<Boolean> = mutableStateOf(true)
-    val vsync: MutableStateValue<Boolean> = mutableStateOf(false)
-    val showUnitHp: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showWaypoints: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showZoomButton: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showFps: MutableStateValue<Boolean> = mutableStateOf(false)
-    val renderClouds: MutableStateValue<Boolean> = mutableStateOf(false)
-    val renderDoubleScale: MutableStateValue<Boolean> = mutableStateOf(false)
-    val softFogFading: MutableStateValue<Boolean> = mutableStateOf(false)
-    val shaderEffects: MutableStateValue<Boolean> = mutableStateOf(false)
-    val teamShaders: MutableStateValue<Boolean> = mutableStateOf(false)
-    val useAndroidOpenGlRenderer: MutableStateValue<Boolean> = mutableStateOf(false)
-    val showMainMenuBackgroundDemo: MutableStateValue<Boolean> = mutableStateOf(false)
+    // Display & Input
+    val batterySaving: MutableState<Boolean> = mutableStateOf(false)
+    val highRefreshRate: MutableState<Boolean> = mutableStateOf(true)
+    val slick2dFullScreen: MutableState<Boolean> = mutableStateOf(true)
+    val vsync: MutableState<Boolean> = mutableStateOf(false)
+    val showUnitHp: MutableState<Boolean> = mutableStateOf(true)
+    val showWaypoints: MutableState<Boolean> = mutableStateOf(true)
+    val showZoomButton: MutableState<Boolean> = mutableStateOf(true)
+    val showFps: MutableState<Boolean> = mutableStateOf(false)
+    val renderClouds: MutableState<Boolean> = mutableStateOf(false)
+    val renderDoubleScale: MutableState<Boolean> = mutableStateOf(false)
+    val softFogFading: MutableState<Boolean> = mutableStateOf(false)
+    val shaderEffects: MutableState<Boolean> = mutableStateOf(false)
+    val teamShaders: MutableState<Boolean> = mutableStateOf(false)
+    val useAndroidOpenGlRenderer: MutableState<Boolean> = mutableStateOf(false)
+    val showMainMenuBackgroundDemo: MutableState<Boolean> = mutableStateOf(true)
+    val mouseCaptureEnabled: MutableState<Boolean> = mutableStateOf(false)
+    val mouseSupport: MutableState<Boolean> = mutableStateOf(true)
+    val keyboardSupport: MutableState<Boolean> = mutableStateOf(true)
+    val gestureZoom: MutableState<Boolean> = mutableStateOf(true)
+    val useCircleSelect: MutableState<Boolean> = mutableStateOf(false)
+    val showUnitGroups: MutableState<Boolean> = mutableStateOf(true)
+    val immersiveFullScreen: MutableState<Boolean> = mutableStateOf(true)
+    val unlockedScreenRotation: MutableState<Boolean> = mutableStateOf(false)
+    val classicInterface: MutableState<Boolean> = mutableStateOf(false)
+    val forceEnglish: MutableState<Boolean> = mutableStateOf(false)
 
     // Render layers (engine-only, no UI toggle)
-    val renderBackground: MutableStateValue<Boolean> = mutableStateOf(true)
-    val renderExtraLayers: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showHpChanges: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showUnitIcons: MutableStateValue<Boolean> = mutableStateOf(true)
-    val useMinimapAllyColors: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showWarLogOnScreen: MutableStateValue<Boolean> = mutableStateOf(true)
-
-    // Interface
-    val mouseCaptureEnabled: MutableStateValue<Boolean> = mutableStateOf(false)
-    val mouseSupport: MutableStateValue<Boolean> = mutableStateOf(true)
-    val keyboardSupport: MutableStateValue<Boolean> = mutableStateOf(true)
-    val gestureZoom: MutableStateValue<Boolean> = mutableStateOf(true)
-    val useCircleSelect: MutableStateValue<Boolean> = mutableStateOf(false)
-    val showUnitGroups: MutableStateValue<Boolean> = mutableStateOf(true)
-    val immersiveFullScreen: MutableStateValue<Boolean> = mutableStateOf(true)
-    val unlockedScreenRotation: MutableStateValue<Boolean> = mutableStateOf(false)
-    val classicInterface: MutableStateValue<Boolean> = mutableStateOf(false)
-    val forceEnglish: MutableStateValue<Boolean> = mutableStateOf(false)
+    val renderBackground: MutableState<Boolean> = mutableStateOf(true)
+    val renderExtraLayers: MutableState<Boolean> = mutableStateOf(true)
+    val showHpChanges: MutableState<Boolean> = mutableStateOf(true)
+    val showUnitIcons: MutableState<Boolean> = mutableStateOf(true)
+    val useMinimapAllyColors: MutableState<Boolean> = mutableStateOf(true)
+    val showWarLogOnScreen: MutableState<Boolean> = mutableStateOf(true)
 
     // Gameplay
-    val quickRally: MutableStateValue<Boolean> = mutableStateOf(true)
-    val doubleClickToAttackMove: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showMapPingsOnBattlefield: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showMapPingsOnMinimap: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showPlayerChatInGame: MutableStateValue<Boolean> = mutableStateOf(true)
-    val showChatAndPingShortcuts: MutableStateValue<Boolean> = mutableStateOf(true)
-    val smartSelection: MutableStateValue<Boolean> = mutableStateOf(true)
-    val autosaving: MutableStateValue<Boolean> = mutableStateOf(true)
-    val udpInMultiplayer: MutableStateValue<Boolean> = mutableStateOf(false)
-    val saveMultiplayerReplays: MutableStateValue<Boolean> = mutableStateOf(true)
-    val replaysShowRecordedChat: MutableStateValue<Boolean> = mutableStateOf(true)
-    val sendReports: MutableStateValue<Boolean> = mutableStateOf(true)
+    val quickRally: MutableState<Boolean> = mutableStateOf(true)
+    val doubleClickToAttackMove: MutableState<Boolean> = mutableStateOf(true)
+    val showMapPingsOnBattlefield: MutableState<Boolean> = mutableStateOf(true)
+    val showMapPingsOnMinimap: MutableState<Boolean> = mutableStateOf(true)
+    val showPlayerChatInGame: MutableState<Boolean> = mutableStateOf(true)
+    val showChatAndPingShortcuts: MutableState<Boolean> = mutableStateOf(true)
+    val smartSelection: MutableState<Boolean> = mutableStateOf(true)
+    val autosaving: MutableState<Boolean> = mutableStateOf(true)
+    val udpInMultiplayer: MutableState<Boolean> = mutableStateOf(false)
+    val saveMultiplayerReplays: MutableState<Boolean> = mutableStateOf(true)
+    val replaysShowRecordedChat: MutableState<Boolean> = mutableStateOf(true)
+    val sendReports: MutableState<Boolean> = mutableStateOf(true)
 
     // Audio (engine-only, no UI toggle)
-    val enableSounds: MutableStateValue<Boolean> = mutableStateOf(true)
+    val enableSounds: MutableState<Boolean> = mutableStateOf(true)
 
     // Volume
-    val masterVolume: MutableStateValue<Float> = mutableStateOf(0.5f)
-    val gameVolume: MutableStateValue<Float> = mutableStateOf(1.0f)
-    val interfaceVolume: MutableStateValue<Float> = mutableStateOf(0.8f)
-    val musicVolume: MutableStateValue<Float> = mutableStateOf(0.25f)
+    val masterVolume: MutableState<Float> = mutableStateOf(0.5f)
+    val gameVolume: MutableState<Float> = mutableStateOf(1.0f)
+    val interfaceVolume: MutableState<Float> = mutableStateOf(0.8f)
+    val musicVolume: MutableState<Float> = mutableStateOf(0.25f)
 
     // Scroll
-    val scrollSpeed: MutableStateValue<Float> = mutableStateOf(1.0f)
-    val edgeScrollSpeed: MutableStateValue<Float> = mutableStateOf(1.0f)
+    val scrollSpeed: MutableState<Float> = mutableStateOf(1.0f)
+    val edgeScrollSpeed: MutableState<Float> = mutableStateOf(1.0f)
 
     // Color scheme
-    val selectedColorSchemeId: MutableStateValue<ColorSchemeId> = mutableStateOf(ColorSchemeRegistry.defaultSchemeId)
+    val selectedColorSchemeId: MutableState<ColorSchemeId> = mutableStateOf(ColorSchemeRegistry.defaultSchemeId)
+
+    // Theme
+    val enableAnimations: MutableState<Boolean> = mutableStateOf(true)
+    val overlayOpacity: MutableState<Float> = mutableStateOf(DEFAULT_OVERLAY_OPACITY)
 
     // Android original-engine file backend.
-    val storageType: MutableStateValue<Int> = mutableStateOf(2)
+    val storageType: MutableState<Int> = mutableStateOf(2)
 
 }
 
-fun SettingsModel.colorScheme(): ColorSchemeDefinition = ColorSchemeRegistry.schemeFor(selectedColorSchemeId.value)
+fun SettingsModel.colorScheme(): Scheme<Palette<UiColor>> = ColorSchemeRegistry.schemeFor(selectedColorSchemeId.value)
 
 class SettingsViewModel(val model: SettingsModel) {
 
@@ -213,8 +219,18 @@ class SettingsViewModel(val model: SettingsModel) {
             add(SettingToggle(I18n.settings.display.teamShaders, model.teamShaders))
         }
         add(SettingToggle(I18n.settings.display.softFogFading, model.softFogFading))
-        add(SettingToggle(I18n.settings.display.showMainMenuBackgroundDemo, model.showMainMenuBackgroundDemo))
         add(SettingToggle(I18n.settings.display.showHpChanges, model.showHpChanges))
+        if (isPcPlatform()) {
+            add(SettingToggle(I18n.settings.`interface`.mouseCapture, model.mouseCaptureEnabled))
+        }
+        if (isAndroidPlatform()) {
+            add(SettingToggle(I18n.settings.`interface`.showUnitGroups, model.showUnitGroups))
+            add(SettingToggle(I18n.settings.`interface`.gestureZoom, model.gestureZoom))
+            add(SettingToggle(I18n.settings.`interface`.useCircleSelect, model.useCircleSelect))
+            add(SettingToggle(I18n.settings.`interface`.mouseSupport, model.mouseSupport))
+            add(SettingToggle(I18n.settings.`interface`.keyboardSupport, model.keyboardSupport))
+        }
+        add(SettingToggle(I18n.settings.`interface`.forceEnglish, model.forceEnglish))
     }
 
     private fun displaySliders(): List<SettingSlider> = buildList {
@@ -235,19 +251,10 @@ class SettingsViewModel(val model: SettingsModel) {
         SettingSlider(I18n.settings.audio.musicVolume, model.musicVolume, min = 0.0f, max = 1.0f),
     )
 
-    private fun interfaceToggles(): List<SettingToggle> = buildList {
-        if (isPcPlatform()) {
-            add(SettingToggle(I18n.settings.`interface`.mouseCapture, model.mouseCaptureEnabled))
-        }
-        if (isAndroidPlatform()) {
-            add(SettingToggle(I18n.settings.`interface`.showUnitGroups, model.showUnitGroups))
-            add(SettingToggle(I18n.settings.`interface`.gestureZoom, model.gestureZoom))
-            add(SettingToggle(I18n.settings.`interface`.useCircleSelect, model.useCircleSelect))
-            add(SettingToggle(I18n.settings.`interface`.mouseSupport, model.mouseSupport))
-            add(SettingToggle(I18n.settings.`interface`.keyboardSupport, model.keyboardSupport))
-        }
-        add(SettingToggle(I18n.settings.`interface`.forceEnglish, model.forceEnglish))
-    }
+    private fun themeToggles(): List<SettingToggle> = listOf(
+        SettingToggle(I18n.settings.theme.enableAnimations, model.enableAnimations),
+        SettingToggle(I18n.settings.display.showMainMenuBackgroundDemo, model.showMainMenuBackgroundDemo),
+    )
 
     private fun gameplayToggles(): List<SettingToggle> = buildList {
         add(SettingToggle(I18n.settings.gameplay.quickRally, model.quickRally))
@@ -268,7 +275,7 @@ class SettingsViewModel(val model: SettingsModel) {
         add(SettingToggle(I18n.settings.`interface`.sendReports, model.sendReports))
     }
 
-    fun items(): List<SettingToggle> = displayToggles() + audioToggles() + interfaceToggles() + gameplayToggles()
+    fun items(): List<SettingToggle> = displayToggles() + audioToggles() + gameplayToggles() + themeToggles()
 
     fun colorSchemeItems(): List<SettingColorSchemeItem> = ColorSchemeRegistry.schemes.map { scheme ->
         SettingColorSchemeItem(
@@ -280,49 +287,46 @@ class SettingsViewModel(val model: SettingsModel) {
     }
 
     fun pageAt(index: Int): SettingsPageContent {
-        val pages = visibleSettingsPages().map { page ->
-            when (page) {
-                SettingsPage.Display -> SettingsPageContent(
-                    page = page,
-                    items = displayToggles().map { SettingsPageItem.Toggle(it) } +
-                            displaySliders().map { SettingsPageItem.Slider(it) },
-                )
+        val pages = visibleSettingsPages()
+        val page = pages[index.coerceIn(0, pages.lastIndex)]
+        return when (page) {
+            SettingsPage.Display -> SettingsPageContent(
+                page = page,
+                items = if (isAndroidPlatform()) {
+                    listOf(SettingsPageItem.StorageLocation(model.storageType.value))
+                } else {
+                    emptyList()
+                } + displayToggles().map { SettingsPageItem.Toggle(it) } +
+                        displaySliders().map { SettingsPageItem.Slider(it) },
+            )
 
-                SettingsPage.Audio -> SettingsPageContent(
-                    page = page,
-                    items = audioToggles().map { SettingsPageItem.Toggle(it) } +
-                            audioSliders().map { SettingsPageItem.Slider(it) },
-                )
+            SettingsPage.Audio -> SettingsPageContent(
+                page = page,
+                items = audioToggles().map { SettingsPageItem.Toggle(it) } +
+                        audioSliders().map { SettingsPageItem.Slider(it) },
+            )
 
-                SettingsPage.Interface -> SettingsPageContent(
-                    page = page,
-                    items = if (isAndroidPlatform()) {
-                        listOf(SettingsPageItem.StorageLocation(model.storageType.value))
-                    } else {
-                        emptyList()
-                    } + interfaceToggles().map { SettingsPageItem.Toggle(it) },
-                )
+            SettingsPage.Gameplay -> SettingsPageContent(
+                page = page,
+                items = gameplayToggles().map { SettingsPageItem.Toggle(it) },
+            )
 
-                SettingsPage.Gameplay -> SettingsPageContent(
-                    page = page,
-                    items = gameplayToggles().map { SettingsPageItem.Toggle(it) },
-                )
+            SettingsPage.KeyBindings -> SettingsPageContent(
+                page = page,
+                items = emptyList(),
+            )
 
-                SettingsPage.KeyBindings -> SettingsPageContent(
-                    page = page,
-                    items = emptyList(),
-                )
-
-                SettingsPage.ColorScheme -> SettingsPageContent(
-                    page = page,
-                    items = colorSchemeItems().map { item ->
-                        SettingsPageItem.ColorSchemeSelector(item, model.selectedColorSchemeId.value == item.id)
-                    },
-                )
-            }
+            SettingsPage.Theme -> SettingsPageContent(
+                page = page,
+                items = themeToggles().map { SettingsPageItem.Toggle(it) } +
+                        SettingsPageItem.Slider(SettingSlider(
+                            I18n.settings.theme.overlayOpacity, model.overlayOpacity, min = 0f, max = 1f,
+                        )) +
+                        colorSchemeItems().map { item ->
+                            SettingsPageItem.ColorSchemeSelector(item, model.selectedColorSchemeId.value == item.id)
+                        },
+            )
         }
-        val clamped = index.coerceIn(0, pages.lastIndex)
-        return pages[clamped]
     }
 }
 

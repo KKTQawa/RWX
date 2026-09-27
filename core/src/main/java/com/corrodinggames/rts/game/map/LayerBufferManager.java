@@ -10,8 +10,8 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.ui.GameUI;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -434,9 +434,9 @@ public final class LayerBufferManager {
         graphicsEngine.p();
         if (!z) {
             if (resourceBackend().backendCapabilities().getClearLayerBuffersBeforeCopy()) {
-                layerBufferCell.cellGraphicsCopy.a(0, KoolCanvasBlendMode.Clear);
+                layerBufferCell.cellGraphicsCopy.a(0, GameCanvasBlendMode.Clear);
             }
-            layerBufferCell.cellGraphicsCopy.b(this.bufferLayerTexture, 0.0f, 0.0f, (KoolPaint) null);
+            layerBufferCell.cellGraphicsCopy.b(this.bufferLayerTexture, 0.0f, 0.0f, (Paint) null);
             layerBufferCell.cellGraphicsCopy.p();
         }
     }
@@ -473,7 +473,7 @@ public final class LayerBufferManager {
             z = true;
         }
         if (z) {
-            graphicsEngine.a(0, KoolCanvasBlendMode.Clear);
+            graphicsEngine.a(0, GameCanvasBlendMode.Clear);
         } else {
             boolean z2 = false;
             if (GameEngine.isSpaceGame()) {
@@ -491,7 +491,7 @@ public final class LayerBufferManager {
             }
         }
         if (resourceBackend().backendCapabilities().getClearLayerBuffersBeforeCopy()) {
-            graphicsEngine.a(0, KoolCanvasBlendMode.Clear);
+            graphicsEngine.a(0, GameCanvasBlendMode.Clear);
         }
         int i3 = this.gridOriginWorldX + (i * this.cellWorldStepSize);
         int i4 = this.gridOriginWorldY + (i2 * this.cellWorldStepSize);
@@ -554,9 +554,9 @@ public final class LayerBufferManager {
         graphicsEngine.p();
         if (!directToCellTexture) {
             if (z || resourceBackend().backendCapabilities().getClearLayerBuffersBeforeCopy()) {
-                layerBufferCell.cellGraphicsCopy.a(0, KoolCanvasBlendMode.Clear);
+                layerBufferCell.cellGraphicsCopy.a(0, GameCanvasBlendMode.Clear);
             }
-            layerBufferCell.cellGraphicsCopy.b(this.bufferLayerTexture, 0.0f, 0.0f, (KoolPaint) null);
+            layerBufferCell.cellGraphicsCopy.b(this.bufferLayerTexture, 0.0f, 0.0f, (Paint) null);
             layerBufferCell.cellGraphicsCopy.p();
         }
         if (TileMap.c) {

@@ -12,6 +12,7 @@ import java.awt.event.*
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.SwingUtilities
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.lwjglx.input.Cursor as LwjglCursor
 import java.awt.Cursor as AwtCursor
@@ -28,7 +29,12 @@ internal class EmbeddedSlickGameContainer(
         ?: error("Slick AWT backend requires an AWTGLCanvas parent")
     private val exitRequested = AtomicBoolean(false)
     private val inputListener = game as? InputListener
+    private val inputReleaseTracker = AwtInputReleaseTracker(
+        releaseKey = { key, char -> inputListener?.keyReleased(key, char) },
+        releaseMouse = { button, x, y -> inputListener?.mouseReleased(button, x, y) },
+    )
     private var initialized = false
+    private val uiOverlay = SlickUiOverlay()
     private var terminalFailure: Throwable? = null
     private val mouseStateLock = Any()
     private var mouseX = 0
@@ -60,7 +66,7 @@ internal class EmbeddedSlickGameContainer(
         }
         if (initialized) {
             enterOrtho()
-            getGraphics()?.setDimensions(this.width, this.height)
+            graphics?.setDimensions(this.width, this.height)
         }
     }
 
@@ -78,26 +84,54 @@ internal class EmbeddedSlickGameContainer(
                 continue
             }
             renderFrame()
+            // JAWT locks the AWT toolkit on Linux. Let Swing process menu input between frames.
+            if (targetFPS != -1) syncFrame(targetFPS)
         }
         terminalFailure?.let { throw it }
     }
 
-    private fun renderFrame() {
-        val canvasWidth = awtCanvas.width.takeIf { it > 0 } ?: width
-        val canvasHeight = awtCanvas.height.takeIf { it > 0 } ?: height
-        if (canvasWidth != width || canvasHeight != height) {
-            onParentCanvasResize(canvasWidth, canvasHeight)
-            setDisplayMode(canvasWidth, canvasHeight, false)
+    private fun awaitBootUiFrame(timeoutMillis: Long = 500L): SlickUiFrame? {
+        val deadline = System.nanoTime() + timeoutMillis * 1_000_000L
+        var frame = SlickCanvasHost.currentUiFrame()
+        while (frame == null && System.nanoTime() < deadline) {
+            Thread.sleep(10)
+            frame = SlickCanvasHost.currentUiFrame()
         }
+        return frame
+    }
 
+    private fun paintBootFrame() {
+        val framebufferSize = awtCanvas.resolveFramebufferSize(width, height)
+        val viewport = framebufferViewportSize(
+            logicalWidth = width,
+            logicalHeight = height,
+            framebufferWidth = framebufferSize.width,
+            framebufferHeight = framebufferSize.height,
+        )
+        GL11.glViewport(0, 0, viewport.width, viewport.height)
+        GL11.glClearColor(0f, 0f, 0f, 1f)
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
+        val bootUiFrame = awaitBootUiFrame()
+        graphics?.let { uiOverlay.render(bootUiFrame, width, height, it) }
+        awtCanvas.swapBuffers()
+    }
+
+    private fun renderFrame() {
         try {
             awtCanvas.runInContext {
                 try {
+                    val canvasWidth = awtCanvas.width.takeIf { it > 0 } ?: width
+                    val canvasHeight = awtCanvas.height.takeIf { it > 0 } ?: height
+                    if (canvasWidth != width || canvasHeight != height) {
+                        onParentCanvasResize(canvasWidth, canvasHeight)
+                        setDisplayMode(canvasWidth, canvasHeight, false)
+                    }
                     if (!initialized) {
                         org.lwjgl.opengl.GL.createCapabilities()
                         (awtCanvas as? SlickAwtGLCanvas)?.applyRuntimeGlSettings()
                         initSystem()
                         enterOrtho()
+                        paintBootFrame()
                         game.init(this)
                         initialized = true
                         requestCanvasFocus()
@@ -113,6 +147,7 @@ internal class EmbeddedSlickGameContainer(
                     )
                     GL11.glViewport(0, 0, viewport.width, viewport.height)
                     updateAndRender(getDelta())
+                    uiOverlay.render(SlickCanvasHost.currentUiFrame(), width, height, graphics)
                     updateFPS()
                     awtCanvas.swapBuffers()
                 } catch (error: SlickException) {
@@ -190,9 +225,6 @@ internal class EmbeddedSlickGameContainer(
             }
             GL11.glFlush()
         }
-        if (targetFPS != -1) {
-            syncFrame(targetFPS)
-        }
     }
 
     override fun setVSync(vsync: Boolean) {
@@ -262,7 +294,11 @@ internal class EmbeddedSlickGameContainer(
     fun destroy() {
         setDefaultMouseCursor()
         exit()
-        runCatching { awtCanvas.disposeCanvas() }
+        try {
+            if (initialized) awtCanvas.runInContext { uiOverlay.dispose() }
+        } finally {
+            awtCanvas.disposeCanvas()
+        }
     }
 
     private fun applyCustomCursor(image: BufferedImage, hotSpotX: Int, hotSpotY: Int) {
@@ -311,14 +347,20 @@ internal class EmbeddedSlickGameContainer(
     }
 
     private fun installAwtInput() {
+        // The matching key/button-up may now be delivered to Compose instead of this canvas.
+        awtCanvas.addFocusListener(object : FocusAdapter() {
+            override fun focusLost(event: FocusEvent) = inputReleaseTracker.releaseAll()
+        })
         awtCanvas.addKeyListener(object : KeyAdapter() {
             override fun keyPressed(event: KeyEvent) {
+                inputReleaseTracker.keyPressed(event.toSlickKey(), event.keyChar.takeUnless { it == KeyEvent.CHAR_UNDEFINED } ?: 0.toChar())
                 inputListener?.keyPressed(
                     event.toSlickKey(),
                     event.keyChar.takeUnless { it == KeyEvent.CHAR_UNDEFINED } ?: 0.toChar())
             }
 
             override fun keyReleased(event: KeyEvent) {
+                inputReleaseTracker.keyReleased(event.toSlickKey())
                 inputListener?.keyReleased(
                     event.toSlickKey(),
                     event.keyChar.takeUnless { it == KeyEvent.CHAR_UNDEFINED } ?: 0.toChar())
@@ -337,12 +379,14 @@ internal class EmbeddedSlickGameContainer(
             override fun mousePressed(event: MouseEvent) {
                 requestCanvasFocus()
                 val button = event.toSlickButton()
+                inputReleaseTracker.mousePressed(button, event.x, event.y)
                 inputListener?.mousePressed(button, event.x, event.y)
                 recordAwtMousePosition(event)
             }
 
             override fun mouseReleased(event: MouseEvent) {
                 val button = event.toSlickButton()
+                inputReleaseTracker.mouseReleased(button)
                 recordAwtMousePosition(event)
                 inputListener?.mouseReleased(button, event.x, event.y)
             }
@@ -374,6 +418,7 @@ internal class EmbeddedSlickGameContainer(
     }
 
     private fun recordAwtMousePosition(event: MouseEvent) {
+        inputReleaseTracker.mouseMoved(event.x, event.y)
         synchronized(mouseStateLock) {
             mouseX = event.x
             mouseY = event.y
@@ -428,10 +473,10 @@ internal fun framebufferViewportSize(
 )
 
 /**
- * HiDPI scale of the canvas' screen, mirroring kool's `CanvasWrapper` which renders menus
- * correctly: `canvas.width * defaultTransform.scale` is the physical pixel count that must be
- * fed to `glViewport`. lwjgl3-awt only refreshes its cached `framebufferWidth/Height` on resize
- * events (stale `0` before the first one), so the cached value is only a fast path here.
+ * HiDPI scale of the canvas' screen: `canvas.width * defaultTransform.scale` is the physical
+ * pixel count that must be fed to `glViewport`. lwjgl3-awt only refreshes its cached
+ * `framebufferWidth/Height` on resize events (stale `0` before the first one, stale size after
+ * a cross-monitor move without resize), so the cached value is only a fast path here.
  */
 internal fun Canvas.hidpiScaleFactors(): Pair<Double, Double> {
     val transform = runCatching { graphicsConfiguration?.defaultTransform }.getOrNull()
@@ -450,10 +495,14 @@ internal fun Canvas.deviceSizeFor(logicalWidth: Int, logicalHeight: Int): Dimens
 }
 
 internal fun AWTGLCanvas.resolveFramebufferSize(logicalWidth: Int, logicalHeight: Int): Dimension {
+    val computed = deviceSizeFor(logicalWidth, logicalHeight)
     if (framebufferWidth > 0 && framebufferHeight > 0) {
-        return Dimension(framebufferWidth, framebufferHeight)
+        if (abs(framebufferWidth - computed.width) <= 1 && abs(framebufferHeight - computed.height) <= 1) {
+            return Dimension(framebufferWidth, framebufferHeight)
+        }
+        return computed
     }
-    return deviceSizeFor(logicalWidth, logicalHeight)
+    return computed
 }
 
 private const val CANVAS_RETRY_SLEEP_MILLIS = 16L
@@ -653,10 +702,10 @@ private fun KeyEvent.toSlickKey(): Int = when (keyCode) {
     KeyEvent.VK_SUBTRACT -> Input.KEY_SUBTRACT
     KeyEvent.VK_DECIMAL -> Input.KEY_DECIMAL
     KeyEvent.VK_DIVIDE -> Input.KEY_DIVIDE
-    KeyEvent.VK_UP -> Input.KEY_UP
-    KeyEvent.VK_DOWN -> Input.KEY_DOWN
-    KeyEvent.VK_LEFT -> Input.KEY_LEFT
-    KeyEvent.VK_RIGHT -> Input.KEY_RIGHT
+    KeyEvent.VK_UP, KeyEvent.VK_KP_UP -> Input.KEY_UP
+    KeyEvent.VK_DOWN, KeyEvent.VK_KP_DOWN -> Input.KEY_DOWN
+    KeyEvent.VK_LEFT, KeyEvent.VK_KP_LEFT -> Input.KEY_LEFT
+    KeyEvent.VK_RIGHT, KeyEvent.VK_KP_RIGHT -> Input.KEY_RIGHT
     KeyEvent.VK_HOME -> Input.KEY_HOME
     KeyEvent.VK_END -> Input.KEY_END
     KeyEvent.VK_PAGE_UP -> Input.KEY_PRIOR

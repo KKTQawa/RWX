@@ -33,7 +33,7 @@ import com.corrodinggames.rts.gameFramework.ui.widgets.UIEventHandler;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.map.LinkedMapAvailability;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 import io.github.rwx.ui.CoreUiEventQueue;
 import io.github.rwx.ui.FormDialogSubmitHandler;
 
@@ -57,13 +57,13 @@ public class EditorOrBuilder extends LandUnit implements UnitPathPoints {
     boolean freezeAllAIs;
 
     /* JADX INFO: renamed from: d */
-    static KoolPaint targetPointPaints;
+    static Paint targetPointPaints;
 
     /* JADX INFO: renamed from: e */
-    static KoolPaint editorSelectionPaint;
+    static Paint editorSelectionPaint;
 
     /* JADX INFO: renamed from: f */
-    static KoolPaint editorSearchPaint;
+    static Paint editorSearchPaint;
 
     /* JADX INFO: renamed from: g */
     static Texture editorSelectionTexture2;
@@ -1693,15 +1693,15 @@ public class EditorOrBuilder extends LandUnit implements UnitPathPoints {
         super(z2);
         this.controlPoints = new PointF[6];
         this.targetPoints = new PointF[this.controlPoints.length];
-        targetPointPaints = new KoolPaint();
+        targetPointPaints = new Paint();
         targetPointPaints.a(40, 0, 255, 0);
         targetPointPaints.a(true);
         targetPointPaints.a(2.0f);
-        targetPointPaints.a(KoolPaint.Cap.ROUND);
-        editorSelectionPaint = new KoolPaint();
+        targetPointPaints.a(Paint.Cap.ROUND);
+        editorSelectionPaint = new Paint();
         editorSelectionPaint.a(targetPointPaints);
         editorSelectionPaint.a(55, 255, 60, 60);
-        editorSearchPaint = new KoolPaint();
+        editorSearchPaint = new Paint();
         editorSearchPaint.a(60, 255, 255, 255);
         this.E = null;
         this.F = EditorUnitTypeFilter.land;

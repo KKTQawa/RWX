@@ -7,7 +7,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 
@@ -158,7 +158,7 @@ public class ProjectileTemplate {
     /* JADX INFO: renamed from: aC */
     public float retargetingInFlightSearchLead = 15.0f;
     /* JADX INFO: renamed from: aE */
-    public int color = KoolArgbColor.a(255, 255, 255, 255);
+    public int color = ArgbColor.a(255, 255, 255, 255);
     /* JADX INFO: renamed from: aF */
     public float drawSize = 1.0f;
     /* JADX INFO: renamed from: aG */

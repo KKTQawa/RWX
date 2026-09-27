@@ -5,6 +5,8 @@ import org.lwjgl.opengl.awt.AWTGLCanvas
 import org.lwjgl.opengl.awt.GLData
 import org.lwjgl.opengl.awt.PlatformLinuxGLCanvas
 import org.lwjgl.system.Platform
+import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
 
 internal class SlickAwtGLCanvas(
     data: GLData,
@@ -15,6 +17,8 @@ internal class SlickAwtGLCanvas(
     @Volatile
     private var drawingSurfaceInitialized = false
 
+    internal val hasLiveDrawingSurface: Boolean get() = drawingSurfaceInitialized
+
     override fun beforeRender() {
         super.beforeRender()
         drawingSurfaceInitialized = true
@@ -22,13 +26,27 @@ internal class SlickAwtGLCanvas(
 
     override fun disposeCanvas() {
         if (!drawingSurfaceInitialized) return
-        drawingSurfaceInitialized = false
         super.disposeCanvas()
+        drawingSurfaceInitialized = false
     }
+
+    internal fun isGlContextCurrent(): Boolean = context != 0L && platformCanvas.isCurrent(context)
 
     override fun initGL() = Unit
 
     override fun paintGL() = Unit
+
+    override fun processMouseEvent(event: MouseEvent) {
+        if (!SlickCanvasHost.dispatchOverlayInput(event)) super.processMouseEvent(event)
+    }
+
+    override fun processMouseMotionEvent(event: MouseEvent) {
+        if (!SlickCanvasHost.dispatchOverlayInput(event)) super.processMouseMotionEvent(event)
+    }
+
+    override fun processMouseWheelEvent(event: MouseWheelEvent) {
+        if (!SlickCanvasHost.dispatchOverlayInput(event)) super.processMouseWheelEvent(event)
+    }
 
     fun requestSwapInterval(interval: Int?) {
         requestedSwapInterval = interval

@@ -1,22 +1,23 @@
 package io.github.rwx.app
 
-import de.fabmax.kool.KoolContext
-import io.github.rwx.render.canvas.KoolCanvasFrame
-import io.github.rwx.render.canvas.KoolCanvasSceneHost
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameFrame
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.CoreUiEventQueue
 
 internal class FrameLoopInstaller(
-    private val context: KoolContext,
+    private val viewportProvider: () -> GameViewport,
+    private val scheduler: FrameScheduler,
+    private val clock: FrameClock = SystemNanoFrameClock(),
+    private val onFrame: () -> Unit,
     private val gameSession: GameSession,
     private val screenPresenter: ScreenPresenter,
     private val warmupController: WarmupController,
-    private val koolCanvasSceneHost: KoolCanvasSceneHost,
+    private val presenter: GameFramePresenter,
     private val currentScreen: () -> AppScreen,
-    private val lastExternalFrame: () -> KoolCanvasFrame?,
-    private val setLastExternalFrame: (KoolCanvasFrame) -> Unit,
+    private val lastExternalFrame: () -> GameFrame?,
+    private val setLastExternalFrame: (GameFrame) -> Unit,
     private val multiplayerLobbyController: MultiplayerLobbyController,
     private val battleRoomController: BattleRoomController,
     private val battleRoomLaunchController: BattleRoomLaunchController,
@@ -29,13 +30,11 @@ internal class FrameLoopInstaller(
     private val pendingStartController: PendingStartController,
     private val externalGameController: ExternalGameController,
     private val modsController: ModsController,
-    private val inputController: InputController,
     private val gameReadyController: GameReadyController,
-    private val refreshModWindow: () -> Unit,
     private val onBattleRoomClosed: (reason: String?, message: String?) -> Unit,
 ) {
-    fun install() {
-        CoreUiEventQueue.setOverlayRequestHandler(inGameDialogController::requestKoolOverlayForQueuedEvent)
+    fun install(): OwnedFrameLoop {
+        CoreUiEventQueue.setOverlayRequestHandler(inGameDialogController::requestOverlayForQueuedEvent)
 
         val coreEventDispatcher = CoreEventDispatcher(
             currentScreen = currentScreen,
@@ -51,7 +50,6 @@ internal class FrameLoopInstaller(
             returnRwGameToBattleRoom = sessionActions::returnRwGameToBattleRoom,
             openInGameModWindow = sessionActions::openInGameModWindow,
             closeInGameModWindow = sessionActions::closeInGameModWindow,
-            refreshInGameModWindow = refreshModWindow,
             refreshMenuBackground = {
                 screenPresenter.apply(currentScreen(), lastExternalFrame())
             },
@@ -59,16 +57,16 @@ internal class FrameLoopInstaller(
         )
         val frameRenderController = FrameRenderController(
             gameSession = gameSession,
-            screenPresenter = screenPresenter,
+            shouldShowMenuBackground = screenPresenter::shouldShowRwMenuBackground,
             warmupController = warmupController,
-            koolCanvasSceneHost = koolCanvasSceneHost,
+            presenter = presenter,
             lastExternalFrame = lastExternalFrame,
             setLastExternalFrame = setLastExternalFrame,
         )
         val frameDriver = FrameDriver(
             gameSession = gameSession,
             currentScreen = currentScreen,
-            canvasViewport = ::canvasViewport,
+            canvasViewport = { viewportProvider().resolved() },
             coreEventDispatcher = coreEventDispatcher,
             updateController = updateController,
             battleRoomController = battleRoomController,
@@ -78,16 +76,12 @@ internal class FrameLoopInstaller(
             pendingStartController = pendingStartController,
             externalGameController = externalGameController,
             modsController = modsController,
-            inputController = inputController,
             frameRenderController = frameRenderController,
             gameReadyController = gameReadyController,
         )
-        frameDriver.drive()
-        context.onRender += { frameDriver.drive(isRenderLoopFrame = true) }
-    }
-
-    private fun canvasViewport(): KoolCanvasViewport {
-        val windowSize = context.window.size
-        return KoolCanvasViewport(windowSize.x, windowSize.y)
+        return OwnedFrameLoop(scheduler, clock) { delta ->
+            frameDriver.drive(delta, isRenderLoopFrame = true)
+            onFrame()
+        }.also { it.start() }
     }
 }

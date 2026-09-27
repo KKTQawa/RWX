@@ -5,6 +5,7 @@ import android.view.View
 import com.corrodinggames.rts.appFramework.GameViewOpenGL
 import com.corrodinggames.rts.gameFramework.android.graphics.GraphicsInterface
 import io.github.rwx.render.RendererMode
+import androidx.core.view.isVisible
 
 internal enum class AndroidRendererMode(
     override val id: String,
@@ -15,7 +16,6 @@ internal enum class AndroidRendererMode(
     OPENGL(
         id = "android-opengles"
     ),
-    //KOOL
 }
 
 internal class AndroidPresentedFrame(
@@ -89,7 +89,7 @@ private class AndroidOpenGlFramePresenter(
         !openGlView.paused &&
                 openGlView.surfaceExists &&
                 openGlView.isAttachedToWindow &&
-                openGlView.visibility == View.VISIBLE &&
+                openGlView.isVisible &&
                 openGlView.width > 0 &&
                 openGlView.height > 0
 
@@ -106,6 +106,11 @@ private class AndroidOpenGlFramePresenter(
         openGlView.paused = true
         openGlView.onPause()
         openGlView.onParentPause()
+        synchronized(GameViewOpenGL.makeActiveLock) {
+            if (GameViewOpenGL.lastHeldSurfaceView === openGlView) {
+                GameViewOpenGL.lastHeldSurfaceView = null
+            }
+        }
     }
 
     override fun resume() {

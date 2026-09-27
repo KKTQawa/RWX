@@ -1,8 +1,8 @@
 package io.github.rwx.app
 
 import io.github.rwx.logger
-import io.github.rwx.render.canvas.KoolCanvasFrame
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameFrame
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.host.LoadingSceneHost
@@ -18,7 +18,7 @@ internal class WarmupController(
     private var pendingRwGameLoad = false
     private var warmingRwMapPath: String? = null
     private var deferRwWarmupUntilNextFrame = false
-    private var pendingRwPreparation: ((KoolCanvasViewport) -> Unit)? = null
+    private var pendingRwPreparation: ((GameViewport) -> Unit)? = null
     private var pendingWarmupStartedAtNanos: Long? = null
     private var pendingWarmupTarget: AppScreen = AppScreen.InGame
     private var pendingStartupMenuBackgroundLoad = false
@@ -54,7 +54,7 @@ internal class WarmupController(
             navigateTo(AppScreen.Loading)
             return
         }
-        if (!gameSession.rendersIntoKoolCanvas) {
+        if (!gameSession.usesFrameCommandRendering) {
             if (mapPath == null) {
                 warmingRwMapPath = null
                 pendingRwGameLoad = true
@@ -108,12 +108,12 @@ internal class WarmupController(
         screen == AppScreen.Loading && pendingRwGameLoad
 
     fun renderStartupMenuBackgroundLoadingFrame(
-        canvasViewport: KoolCanvasViewport,
+        canvasViewport: GameViewport,
         deltaSeconds: Float,
-    ): KoolCanvasFrame {
+    ): GameFrame {
         if (deferStartupMenuBackgroundUntilNextFrame) {
             deferStartupMenuBackgroundUntilNextFrame = false
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
         if (pendingStartupMenuBackgroundPreparation) {
             pendingStartupMenuBackgroundPreparation = false
@@ -124,13 +124,13 @@ internal class WarmupController(
             logger.warn(loadError) { "Unable to prepare RW menu background" }
             pendingStartupMenuBackgroundLoad = false
             navigateTo(AppScreen.MainMenu)
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
-        if (!menuBackgroundSession.rendersIntoKoolCanvas && !startupMenuBackgroundSurfaceVisible) {
+        if (!menuBackgroundSession.usesFrameCommandRendering && !startupMenuBackgroundSurfaceVisible) {
             menuBackgroundSession.setGameVisible(
                 visible = true,
                 viewport = canvasViewport,
-                koolOverlay = true,
+                uiOverlay = true,
             )
             startupMenuBackgroundSurfaceVisible = true
         }
@@ -153,21 +153,21 @@ internal class WarmupController(
     }
 
     fun renderRwGameLoadingFrame(
-        canvasViewport: KoolCanvasViewport,
+        canvasViewport: GameViewport,
         deltaSeconds: Float,
-    ): KoolCanvasFrame {
+    ): GameFrame {
         if (deferRwWarmupUntilNextFrame) {
             deferRwWarmupUntilNextFrame = false
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
         pendingRwPreparation?.let { prepare ->
             pendingRwPreparation = null
             prepare(canvasViewport)
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
         if (warmingRwMapPath == null) {
             if (gameSession.isPreparingEngine()) {
-                return KoolCanvasFrame(canvasViewport, emptyList())
+                return GameFrame(canvasViewport, emptyList())
             }
             val gameEngine = gameSession.preload(canvasViewport)
             gameEngine.settingsEngine.numIncompleteLoadAttempts = 0
@@ -175,13 +175,13 @@ internal class WarmupController(
             gameEngine.settingsEngine.save()
             pendingRwGameLoad = false
             navigateTo(pendingWarmupTarget)
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
-        if (!gameSession.rendersIntoKoolCanvas) {
+        if (!gameSession.usesFrameCommandRendering) {
             pendingRwGameLoad = false
             warmingRwMapPath = null
             navigateTo(pendingWarmupTarget)
-            return KoolCanvasFrame(canvasViewport, emptyList())
+            return GameFrame(canvasViewport, emptyList())
         }
         val warmingMap = warmingRwMapPath
         return if (gameSession.isPreparingMap(warmingMap)) {

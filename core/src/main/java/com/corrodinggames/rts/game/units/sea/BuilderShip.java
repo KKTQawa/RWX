@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -208,9 +208,9 @@ public class BuilderShip extends WaterUnit implements UnitPathPoints {
                 gameEngine.renderGraphicsEngine.b(pointFE.x - gameEngine.viewpointXSnapped, (pointFE.y - gameEngine.viewpointYSnapped) - this.posZ);
                 gameEngine.renderGraphicsEngine.a(fE, fE);
                 if (isCurrentCommandReclaim()) {
-                    gameEngine.renderGraphicsEngine.a(BuilderUnit.builderDechargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                    gameEngine.renderGraphicsEngine.a(BuilderUnit.builderDechargeTexture, 0.0f, 0.0f, (Paint) null);
                 } else {
-                    gameEngine.renderGraphicsEngine.a(BuilderUnit.builderChargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                    gameEngine.renderGraphicsEngine.a(BuilderUnit.builderChargeTexture, 0.0f, 0.0f, (Paint) null);
                 }
                 gameEngine.renderGraphicsEngine.j();
                 return true;

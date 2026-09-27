@@ -11,13 +11,13 @@ internal class ExternalGameController(
     private var externalGameWasReady = false
 
     fun drive(screen: AppScreen, isStartingMap: Boolean) {
-        if (screen == AppScreen.InGame && !gameSession.rendersIntoKoolCanvas) {
+        if (screen == AppScreen.InGame && !gameSession.usesFrameCommandRendering) {
             if (gameSession.isReadyForDisplay()) {
                 externalGameWasReady = true
             }
             if (shouldReturnToMainMenuAfterExternalGameClosed(
                     isRwGameVisible = true,
-                    rendersIntoKoolCanvas = false,
+                    usesFrameCommandRendering = false,
                     isStartingMap = isStartingMap,
                     externalGameWasReady = externalGameWasReady,
                     canResume = gameSession.canResume(),

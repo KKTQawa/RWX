@@ -1,14 +1,14 @@
 package com.corrodinggames.rts.gameFramework.utility;
 
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.utility.aa */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/utility/aa.class */
 public class DebugDrawItem {
 
     /* JADX INFO: renamed from: a */
-    public KoolPaint paint;
+    public Paint paint;
 
     /* JADX INFO: renamed from: b */
     RectF rect;

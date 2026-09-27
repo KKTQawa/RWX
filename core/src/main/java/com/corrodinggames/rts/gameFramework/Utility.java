@@ -7,7 +7,7 @@ import com.corrodinggames.rts.gameFramework.file.FileHelper;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -794,7 +794,7 @@ public final class Utility {
 
     /* JADX INFO: renamed from: a */
     public static int lerpColor(int i2, int i3, float f2) {
-        return KoolArgbColor.a((int) lerp(KoolArgbColor.a(i2), KoolArgbColor.a(i3), f2), (int) lerp(KoolArgbColor.b(i2), KoolArgbColor.b(i3), f2), (int) lerp(KoolArgbColor.c(i2), KoolArgbColor.c(i3), f2), (int) lerp(KoolArgbColor.d(i2), KoolArgbColor.d(i3), f2));
+        return ArgbColor.a((int) lerp(ArgbColor.a(i2), ArgbColor.a(i3), f2), (int) lerp(ArgbColor.b(i2), ArgbColor.b(i3), f2), (int) lerp(ArgbColor.c(i2), ArgbColor.c(i3), f2), (int) lerp(ArgbColor.d(i2), ArgbColor.d(i3), f2));
     }
 
     /* JADX INFO: renamed from: d */

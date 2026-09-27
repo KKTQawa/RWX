@@ -22,9 +22,9 @@ import io.github.rwx.geometry.RectF;
 import io.github.rwx.mod.registry.DamageRegistry;
 import io.github.rwx.mod.registry.ProjectileObserverRegistry;
 import io.github.rwx.mod.registry.RenderRegistry;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -234,15 +234,15 @@ public class Projectile extends PositionedObject {
     static Texture d = null;
     static final Rect e = new Rect();
     static final RectF f = new RectF();
-    static final int aq = KoolArgbColor.a(255, 255, 255, 255);
+    static final int aq = ArgbColor.a(255, 255, 255, 255);
     public static final GamePaint ba = new GamePaint();
-    public static final KoolPaint bb = new KoolPaint();
-    public static final KoolPaint bd = new KoolPaint();
-    public static final KoolPaint be = new KoolPaint();
-    public static final KoolPaint bf = new KoolPaint();
-    public static final KoolPaint bg = new KoolPaint();
-    public static final KoolPaint bh = new KoolPaint();
-    public static final KoolPaint bc = new GamePaint();
+    public static final Paint bb = new Paint();
+    public static final Paint bd = new Paint();
+    public static final Paint be = new Paint();
+    public static final Paint bf = new Paint();
+    public static final Paint bg = new Paint();
+    public static final Paint bh = new Paint();
+    public static final Paint bc = new GamePaint();
 
     static {
         bc.b(-16777216);
@@ -702,7 +702,7 @@ public class Projectile extends PositionedObject {
         projectile.sourceUnit = baseUnit;
         projectile.posX = f2;
         projectile.posY = f3;
-        projectile.color = KoolArgbColor.a(255, 100, 30, 30);
+        projectile.color = ArgbColor.a(255, 100, 30, 30);
         projectile.drawOrder = baseUnit.drawOrder + 1;
         projectile.drawLayer = 4;
         return projectile;
@@ -1280,7 +1280,7 @@ public class Projectile extends PositionedObject {
                         if (this.isNuke && projectileTemplate.explodeEffect == null) {
                             gameEngine.soundEngine.playSoundAt(SoundEngine.nukeExplodeSound, 1.6f, 0.7f, this.hitX, this.hitY);
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, 255, 255));
+                            Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, 255, 255));
                             if (effectCreateLightEffect != null) {
                                 effectCreateLightEffect.G = 14.0f;
                                 effectCreateLightEffect.F = 8.0f;
@@ -1310,7 +1310,7 @@ public class Projectile extends PositionedObject {
                                 effectCreateSmallExplosion2.U = 0.0f;
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect2 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, 255, 255));
+                            Effect effectCreateLightEffect2 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, 255, 255));
                             if (effectCreateLightEffect2 != null) {
                                 effectCreateLightEffect2.G = 3.0f;
                                 effectCreateLightEffect2.F = 6.0f;
@@ -1319,7 +1319,7 @@ public class Projectile extends PositionedObject {
                                 effectCreateLightEffect2.W = effectCreateLightEffect2.V;
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect3 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, 244, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE));
+                            Effect effectCreateLightEffect3 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, 244, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE));
                             if (effectCreateLightEffect3 != null) {
                                 effectCreateLightEffect3.G = 2.0f;
                                 effectCreateLightEffect3.F = 6.0f;
@@ -1330,7 +1330,7 @@ public class Projectile extends PositionedObject {
                             }
                             for (int i3 = 0; i3 < 1; i3++) {
                                 gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                                Effect effectCreateLightEffect4 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, 244, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE));
+                                Effect effectCreateLightEffect4 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, 244, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE));
                                 if (effectCreateLightEffect4 != null) {
                                     effectCreateLightEffect4.G = 0.2f;
                                     effectCreateLightEffect4.F = 9.0f;
@@ -1341,7 +1341,7 @@ public class Projectile extends PositionedObject {
                                 }
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect5 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, 255, 255));
+                            Effect effectCreateLightEffect5 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, 255, 255));
                             if (effectCreateLightEffect5 != null) {
                                 effectCreateLightEffect5.G = 3.0f;
                                 effectCreateLightEffect5.F = 4.0f;
@@ -1352,7 +1352,7 @@ public class Projectile extends PositionedObject {
                                 effectCreateLightEffect5.U = 70.0f;
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect6 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_3D_MODE, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_CS));
+                            Effect effectCreateLightEffect6 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_3D_MODE, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_CS));
                             if (effectCreateLightEffect6 != null) {
                                 effectCreateLightEffect6.G = 4.0f;
                                 effectCreateLightEffect6.F = 1.0f;
@@ -1361,7 +1361,7 @@ public class Projectile extends PositionedObject {
                                 effectCreateLightEffect6.W = effectCreateLightEffect6.V;
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect7 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(255, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
+                            Effect effectCreateLightEffect7 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(255, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
                             if (effectCreateLightEffect7 != null) {
                                 effectCreateLightEffect7.G = 2.0f;
                                 effectCreateLightEffect7.F = 1.0f;
@@ -1372,7 +1372,7 @@ public class Projectile extends PositionedObject {
                                 effectCreateLightEffect7.fadeDuration = 20.0f;
                             }
                             gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                            Effect effectCreateLightEffect8 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(245, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_AVR_INPUT, 110));
+                            Effect effectCreateLightEffect8 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(245, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_AVR_INPUT, 110));
                             if (effectCreateLightEffect8 != null) {
                                 effectCreateLightEffect8.G = 1.5f;
                                 effectCreateLightEffect8.F = 1.5f;
@@ -1385,7 +1385,7 @@ public class Projectile extends PositionedObject {
                             }
                             for (int i4 = 0; i4 < 4; i4++) {
                                 gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                                Effect effectCreateLightEffect9 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
+                                Effect effectCreateLightEffect9 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
                                 if (effectCreateLightEffect9 != null) {
                                     effectCreateLightEffect9.G = 1.5f;
                                     effectCreateLightEffect9.F = 1.4f;
@@ -1400,7 +1400,7 @@ public class Projectile extends PositionedObject {
                             }
                             for (int i5 = 0; i5 < 2; i5++) {
                                 gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-                                Effect effectCreateLightEffect10 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PROG_YELLOW, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
+                                Effect effectCreateLightEffect10 = gameEngine.effectManager.createLightEffect(this.hitX, this.hitY, this.posZ, ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PROG_YELLOW, 255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_ANTENNA_CABLE, 129));
                                 if (effectCreateLightEffect10 != null) {
                                     effectCreateLightEffect10.G = 1.3f;
                                     effectCreateLightEffect10.F = 1.0f;
@@ -1426,7 +1426,7 @@ public class Projectile extends PositionedObject {
                                     effectCreateLightEffect11.fadeOut = true;
                                     effectCreateLightEffect11.fadeDuration = 50.0f;
                                     effectCreateLightEffect11.B = null;
-                                    effectCreateLightEffect11.startColor = KoolArgbColor.a(175, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG);
+                                    effectCreateLightEffect11.startColor = ArgbColor.a(175, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG);
                                     effectCreateLightEffect11.U = 20 + (i6 * 40);
                                 }
                             }
@@ -1443,7 +1443,7 @@ public class Projectile extends PositionedObject {
                                     effectCreateLightEffect12.fadeOut = true;
                                     effectCreateLightEffect12.fadeDuration = 50.0f;
                                     effectCreateLightEffect12.B = null;
-                                    effectCreateLightEffect12.startColor = KoolArgbColor.a(105, 115, 115, 115);
+                                    effectCreateLightEffect12.startColor = ArgbColor.a(105, 115, 115, 115);
                                     effectCreateLightEffect12.U = 20 + (i7 * 40);
                                 }
                             }
@@ -1673,7 +1673,7 @@ public class Projectile extends PositionedObject {
                 return true;
             }
             if (projectileTemplate.Y != null) {
-                KoolPaint paintF = f();
+                Paint paintF = f();
                 float f8 = 0.0f;
                 if (projectileTemplate.beamImageOffsetRate != 0.0f) {
                     f8 = 0.0f + (projectileTemplate.beamImageOffsetRate * this.age);
@@ -1835,8 +1835,8 @@ public class Projectile extends PositionedObject {
         return false;
     }
 
-    public KoolPaint f() {
-        KoolPaint paintA;
+    public Paint f() {
+        Paint paintA;
         if (this.color != aq) {
             if (GameEngine.getInstance().renderGraphicsEngine.backendCapabilities().getRequiresImageTintColorFilter()) {
                 paintA = a(this.color);
@@ -1859,7 +1859,7 @@ public class Projectile extends PositionedObject {
             return this.bj;
         }
         GamePaint gamePaint = new GamePaint();
-        gamePaint.a(new KoolMultiplyAddColorFilter(i, 0));
+        gamePaint.a(new MultiplyAddColorFilter(i, 0));
         gamePaint.b(i);
         bk = gamePaint;
         bl = i;

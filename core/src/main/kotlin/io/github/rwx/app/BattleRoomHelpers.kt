@@ -3,7 +3,6 @@ package io.github.rwx.app
 import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.network.GameRoomSettings
 import io.github.rwx.BATTLE_ROOM_AUTO_TEAM_VALUE
-import io.github.rwx.BATTLE_ROOM_CLEAR_OVERRIDE
 import io.github.rwx.BATTLE_ROOM_SPECTATOR_SPAWN_VALUE
 import io.github.rwx.i18n.I18n
 import io.github.rwx.p2p.MapFeatureDetector
@@ -42,7 +41,7 @@ internal fun battleRoomJoinPollResult(
 internal fun MultiplayerRoomItem.joinDisplayLabel(): String =
     hostName.takeIf { it.isNotBlank() }
         ?.let { host -> "$host / $mapName" }
-        ?: mapName.ifBlank { "server" }
+        ?: mapName.ifBlank { I18n.battleroom.options.serverFallback() }
 
 internal fun joinRoomDialogMessage(room: MultiplayerRoomItem): String =
     listOfNotNull(
@@ -79,8 +78,6 @@ internal fun String.toBattleRoomTeamLayoutOrNull(): BattleRoomTeamLayout? =
         else -> null
     }
 
-// GameRoomSettings <-> GameRoomSettings mapping lives in
-
 internal fun Map<String, String>.toGameRoomSettings(base: GameRoomSettings = GameRoomSettings()): GameRoomSettings =
     GameRoomSettings().apply {
         aiDifficulty = get("aiDifficulty")?.toIntOrNull() ?: base.aiDifficulty
@@ -103,20 +100,20 @@ internal fun battleRoomOptionsForm(options: GameRoomSettings, maxPlayers: Int = 
         fields = listOf(
             DialogFormField.Choice(
                 id = "maxPlayers",
-                label = "Max players",
+                label = I18n.battleroom.options.maxPlayers(),
                 options = (2..10).map { DialogFormOption(it.toString(), it.toString()) },
                 selectedIndex = (maxPlayers - 2).coerceIn(0, 8),
             ),
             DialogFormField.Choice(
                 id = "aiDifficulty",
-                label = "AI difficulty",
+                label = I18n.battleroom.options.aiDifficulty(),
                 options = listOf(
-                    DialogFormOption("Very Easy", "-2"),
-                    DialogFormOption("Easy", "-1"),
-                    DialogFormOption("Medium", "0"),
-                    DialogFormOption("Hard", "1"),
-                    DialogFormOption("Very Hard", "2"),
-                    DialogFormOption("Impossible", "3"),
+                    DialogFormOption(I18n.battleroom.options.ai.veryEasy(), "-2"),
+                    DialogFormOption(I18n.battleroom.options.ai.easy(), "-1"),
+                    DialogFormOption(I18n.battleroom.options.ai.medium(), "0"),
+                    DialogFormOption(I18n.battleroom.options.ai.hard(), "1"),
+                    DialogFormOption(I18n.battleroom.options.ai.veryHard(), "2"),
+                    DialogFormOption(I18n.battleroom.options.ai.impossible(), "3"),
                 ),
                 selectedIndex = listOf("-2", "-1", "0", "1", "2", "3")
                     .indexOf(options.aiDifficulty.toString())
@@ -124,7 +121,7 @@ internal fun battleRoomOptionsForm(options: GameRoomSettings, maxPlayers: Int = 
             ),
             DialogFormField.Choice(
                 id = "startingUnits",
-                label = "Starting units",
+                label = I18n.battleroom.options.startingUnits(),
                 options = (1..5).map {
                     DialogFormOption(startingUnitsLabel(it), it.toString())
                 },
@@ -132,18 +129,18 @@ internal fun battleRoomOptionsForm(options: GameRoomSettings, maxPlayers: Int = 
             ),
             DialogFormField.Choice(
                 id = "fogMode",
-                label = "Fog",
+                label = I18n.battleroom.options.fog(),
                 options = listOf(
-                    DialogFormOption("No fog", "0"),
-                    DialogFormOption("Basic", "1"),
-                    DialogFormOption("Line of Sight", "2"),
+                    DialogFormOption(I18n.battleroom.options.fog.none(), "0"),
+                    DialogFormOption(I18n.battleroom.options.fog.basic(), "1"),
+                    DialogFormOption(I18n.battleroom.options.fog.los(), "2"),
                 ),
                 selectedIndex = options.fogMode.coerceIn(0, 2),
             ),
-            DialogFormField.Toggle("revealedMap", "Revealed Map", options.revealedMap),
+            DialogFormField.Toggle("revealedMap", I18n.battleroom.options.revealedMap(), options.revealedMap),
             DialogFormField.Choice(
                 id = "startingCredits",
-                label = "Starting credits",
+                label = I18n.battleroom.options.startingCredits(),
                 options = (0..8).map {
                     DialogFormOption(startingCreditsLabel(it), it.toString())
                 },
@@ -153,7 +150,7 @@ internal fun battleRoomOptionsForm(options: GameRoomSettings, maxPlayers: Int = 
             ),
             DialogFormField.Choice(
                 id = "incomeMultiplier",
-                label = "Income",
+                label = I18n.battleroom.options.income(),
                 options = listOf(0.5f, 1.0f, 1.5f, 2.0f, 3.0f, 5.0f).map {
                     DialogFormOption("${it}x", it.toString())
                 },
@@ -163,71 +160,82 @@ internal fun battleRoomOptionsForm(options: GameRoomSettings, maxPlayers: Int = 
             ),
             DialogFormField.Choice(
                 id = "teamLayout",
-                label = "Team layout",
+                label = I18n.battleroom.options.teamLayout(),
                 options = listOf(
-                    DialogFormOption("No change", ""),
-                    DialogFormOption("2 Sides", "2"),
-                    DialogFormOption("3 Sides", "3"),
-                    DialogFormOption("FFA", "ffa"),
-                    DialogFormOption("Spectators", "spectators"),
-                    DialogFormOption("Random Team", "random"),
-                    DialogFormOption("All vs AI", "allvsai"),
-                    DialogFormOption("All vs 2 (survival)", "allvs2"),
+                    DialogFormOption(I18n.battleroom.options.team.noChange(), ""),
+                    DialogFormOption(I18n.battleroom.options.team.sides2(), "2"),
+                    DialogFormOption(I18n.battleroom.options.team.sides3(), "3"),
+                    DialogFormOption(I18n.battleroom.options.team.ffa(), "ffa"),
+                    DialogFormOption(I18n.battleroom.options.team.spectators(), "spectators"),
+                    DialogFormOption(I18n.battleroom.options.team.random(), "random"),
+                    DialogFormOption(I18n.battleroom.options.team.allVsAI(), "allvsai"),
+                    DialogFormOption(I18n.battleroom.options.team.allVs2(), "allvs2"),
                 ),
             ),
-            DialogFormField.Toggle("noNukes", "No nukes", options.noNukes),
-            DialogFormField.Toggle("sharedControl", "Shared control", options.sharedControl),
-            DialogFormField.Toggle("allowSpectators", "Allow spectators", options.allowSpectators),
-            DialogFormField.Toggle("teamLock", "Team lock", options.teamLock),
-            DialogFormField.Toggle("roomLocked", "Lock room (no new players)", options.roomLock),
-            DialogFormField.Toggle("fixedAllyTeams", "Fixed ally teams", options.fixedAllyTeams),
+            DialogFormField.Toggle("noNukes", I18n.battleroom.options.toggle.noNukes(), options.noNukes),
+            DialogFormField.Toggle("sharedControl", I18n.battleroom.options.toggle.sharedControl(), options.sharedControl),
+            DialogFormField.Toggle("allowSpectators", I18n.battleroom.options.toggle.allowSpectators(), options.allowSpectators),
+            DialogFormField.Toggle("teamLock", I18n.battleroom.options.toggle.teamLock(), options.teamLock),
+            DialogFormField.Toggle("roomLocked", I18n.battleroom.options.toggle.lockRoom(), options.roomLock),
+            DialogFormField.Toggle("fixedAllyTeams", I18n.battleroom.options.toggle.fixedAlly(), options.fixedAllyTeams),
         ),
     )
 
-internal fun playerConfigForm(player: BattleRoomPlayer, isHost: Boolean = false): DialogForm {
+internal fun playerConfigForm(
+    player: BattleRoomPlayer,
+    roomOptions: GameRoomSettings,
+    isHost: Boolean = false,
+): DialogForm {
     val spawn = player.spawnLabel.toIntOrNull() ?: 1
     val baseFields = listOf(
         DialogFormField.Choice(
             id = "spawn",
-            label = "Spawn point",
+            label = I18n.battleroom.options.spawnPoint(),
             options = (1..10).map { DialogFormOption(it.toString(), it.toString()) } +
-                    DialogFormOption("Spectator", BATTLE_ROOM_SPECTATOR_SPAWN_VALUE.toString()),
+                    DialogFormOption(I18n.battleroom.status.spectator(), BATTLE_ROOM_SPECTATOR_SPAWN_VALUE.toString()),
             selectedIndex = if (player.isSpectator) 10 else (spawn - 1).coerceIn(0, 9),
         ),
         DialogFormField.Choice(
             id = "team",
-            label = "Team",
-            options = listOf(DialogFormOption("Auto", BATTLE_ROOM_AUTO_TEAM_VALUE.toString())) +
+            label = I18n.battleroom.heading.team(),
+            options = listOf(DialogFormOption(I18n.battleroom.options.auto(), BATTLE_ROOM_AUTO_TEAM_VALUE.toString())) +
                     (1..10).map { DialogFormOption(teamLabelFor(it - 1), it.toString()) },
             selectedIndex = 0,
         ),
     )
-    val hostFields = if (isHost) playerOverrideFields() else emptyList()
+    val hostFields = if (isHost) playerOverrideFields(player, roomOptions) else emptyList()
     return DialogForm(fields = baseFields + hostFields)
 }
 
-private fun playerOverrideFields(): List<DialogFormField> {
-    val clear = BATTLE_ROOM_CLEAR_OVERRIDE.toString()
+private fun playerOverrideFields(player: BattleRoomPlayer, roomOptions: GameRoomSettings): List<DialogFormField> {
+    val effectiveStartingUnits = player.startingUnitsOverride ?: roomOptions.startingUnits
+    val effectiveAiDifficulty = player.aiDifficultyOverride ?: roomOptions.aiDifficulty
+    val startingUnitValues = (1..5).toList()
+    val aiDifficultyValues = listOf(-2, -1, 0, 1, 2, 3)
     return listOf(
         DialogFormField.Choice(
             id = "startingUnits",
-            label = "Starting units override",
-            options = listOf(DialogFormOption("Default", clear)) +
-                    (1..5).map { DialogFormOption(startingUnitsLabel(it), it.toString()) },
-            selectedIndex = 0,
+            label = I18n.battleroom.options.overrideStartingUnits(),
+            options = startingUnitValues.map { DialogFormOption(startingUnitsLabel(it), it.toString()) },
+            selectedIndex = startingUnitValues.indexOf(effectiveStartingUnits).coerceAtLeast(0),
         ),
         DialogFormField.Choice(
             id = "aiDifficulty",
-            label = "AI difficulty override",
-            options = listOf(DialogFormOption("Default", clear)) + listOf(
-                DialogFormOption("Very Easy", "-2"),
-                DialogFormOption("Easy", "-1"),
-                DialogFormOption("Medium", "0"),
-                DialogFormOption("Hard", "1"),
-                DialogFormOption("Very Hard", "2"),
-                DialogFormOption("Impossible", "3"),
-            ),
-            selectedIndex = 0,
+            label = I18n.battleroom.options.overrideAiDifficulty(),
+            options = aiDifficultyValues.map { value ->
+                DialogFormOption(
+                    when (value) {
+                        -2 -> I18n.battleroom.options.ai.veryEasy()
+                        -1 -> I18n.battleroom.options.ai.easy()
+                        0 -> I18n.battleroom.options.ai.medium()
+                        1 -> I18n.battleroom.options.ai.hard()
+                        2 -> I18n.battleroom.options.ai.veryHard()
+                        else -> I18n.battleroom.options.ai.impossible()
+                    },
+                    value.toString(),
+                )
+            },
+            selectedIndex = aiDifficultyValues.indexOf(effectiveAiDifficulty).coerceAtLeast(0),
         ),
     )
 }
@@ -248,12 +256,13 @@ internal fun BattleRoomSnapshot.toBattleRoomModel(
                 requiredModsSummary = requiredModsSummary,
             ),
             mapPreviewAssetPath = previewAssetPath,
+            mapAssetPath = room.mapPath,
             rwxModeLabel = rwxModeLabel,
             rwxCompatibilityLabel = rwxModeLabel?.let {
                 if (isNetworkMultiplayer) {
-                    if (rwxP2PSession) "RWX P2P enabled" else "Original multiplayer blocked"
+                    if (rwxP2PSession) I18n.battleroom.options.compat.p2pEnabled() else I18n.battleroom.options.compat.originalBlocked()
                 } else {
-                    "Single-player"
+                    I18n.battleroom.options.compat.singlePlayer()
                 }
             },
         ),
@@ -272,23 +281,23 @@ internal fun battleRoomDetailLines(
         ?.takeIf { it.isNotBlank() }
         ?.let(::originalBattleRoomStatusLines)
     val lines = statusLines ?: buildList {
-        add("Starting Credits: ${startingCreditsLabel(settings.startingCredits)}")
-        add("Fog: ${fogLabel(settings.fogMode)}")
+        add(I18n.battleroom.options.detail.startingCredits(startingCreditsLabel(settings.startingCredits)))
+        add(I18n.battleroom.options.detail.fog(fogLabel(settings.fogMode)))
         if (settings.startingUnits != 1) {
-            add("Starting Units: ${startingUnitsLabel(settings.startingUnits)}")
+            add(I18n.battleroom.options.detail.startingUnits(startingUnitsLabel(settings.startingUnits)))
         }
         if (settings.incomeMultiplier != 1.0f) {
-            add("${incomeLabel(settings.incomeMultiplier)}X income")
+            add(I18n.battleroom.options.detail.income(incomeLabel(settings.incomeMultiplier)))
         }
-        if (settings.noNukes) add("No nukes")
-        if (settings.sharedControl) add("Shared control: On")
-        if (settings.roomLock) add("Room locked")
-        if (settings.fixedAllyTeams) add("Fixed ally teams")
+        if (settings.noNukes) add(I18n.battleroom.options.detail.noNukes())
+        if (settings.sharedControl) add(I18n.battleroom.options.detail.sharedControl())
+        if (settings.roomLock) add(I18n.battleroom.options.detail.roomLocked())
+        if (settings.fixedAllyTeams) add(I18n.battleroom.options.detail.fixedAlly())
     }
     if (requiredModsSummary.isNullOrBlank() || lines.any { it.contains("Required Mods") }) {
         return lines
     }
-    return lines + "Required mods: $requiredModsSummary"
+    return lines + I18n.battleroom.options.detail.requiredMods(requiredModsSummary)
 }
 
 internal fun originalBattleRoomStatusLines(statusText: String): List<String> =
@@ -314,15 +323,15 @@ internal fun startingCreditsLabel(code: Int): String =
 
 internal fun startingUnitsLabel(value: Int): String =
     when (value) {
-        1 -> "Normal (1 builder)"
-        2 -> "Small Army"
-        3 -> "3 Engineers"
-        4 -> "3 Engineers (No Command Center)"
-        5 -> "Experimental Spider"
-        9 -> "Custom"
+        1 -> I18n.battleroom.options.units.normal()
+        2 -> I18n.battleroom.options.units.smallArmy()
+        3 -> I18n.battleroom.options.units.engineers3()
+        4 -> I18n.battleroom.options.units.engineersNoCC()
+        5 -> I18n.battleroom.options.units.spider()
+        9 -> I18n.battleroom.options.units.custom()
         else -> runCatching {
             GameEngine.getInstance()?.networkEngine?.d(value)
-        }.getOrNull()?.takeIf { it != "Unknown" } ?: "Unknown"
+        }.getOrNull()?.takeIf { it != "Unknown" } ?: I18n.common.unknown()
     }
 
 private fun incomeLabel(value: Float): String =
@@ -334,10 +343,10 @@ private fun incomeLabel(value: Float): String =
 
 private fun fogLabel(fogMode: Int): String =
     when (fogMode) {
-        0 -> "No fog"
-        1 -> "Basic"
-        2 -> "Line of Sight"
-        else -> "Unknown"
+        0 -> I18n.battleroom.options.fog.none()
+        1 -> I18n.battleroom.options.fog.basic()
+        2 -> I18n.battleroom.options.fog.los()
+        else -> I18n.common.unknown()
     }
 
 internal const val DEFAULT_MAX_PLAYERS: Int = 10

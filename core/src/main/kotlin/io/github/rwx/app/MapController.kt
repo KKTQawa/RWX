@@ -1,7 +1,6 @@
 package io.github.rwx.app
 
 import com.corrodinggames.rts.gameFramework.GameEngine
-import de.fabmax.kool.scene.Scene
 import io.github.rwx.PlatformStorage
 import io.github.rwx.i18n.I18n
 import io.github.rwx.map.LinkedMapAvailability
@@ -10,7 +9,7 @@ import io.github.rwx.map.MapMetadata
 import io.github.rwx.map.PortalTransferMessage
 import io.github.rwx.mod.registry.UiRegistry
 import io.github.rwx.p2p.P2PLobbyService
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.BattleRoomSnapshot
 import io.github.rwx.session.GameSession
 import io.github.rwx.session.MapSnapshot
@@ -23,9 +22,8 @@ import io.github.rwx.ui.model.DialogInfoRow
 
 internal class MapController(
     private val gameSession: GameSession,
-    private val koolCanvasScene: Scene,
     private val storage: () -> PlatformStorage?,
-    private val viewport: () -> KoolCanvasViewport,
+    private val viewport: () -> GameViewport,
     private val pendingStartMapPath: () -> String?,
     private val setPendingStart: (mapPath: String, failureReturnScreen: AppScreen) -> Unit,
     private val navigateToInGame: () -> Unit,
@@ -61,7 +59,7 @@ internal class MapController(
             ?: pendingStartMapPath()
             ?: currentBattleRoomSnapshotForJoin()?.room?.mapPath
         if (currentMapPath.isNullOrBlank()) {
-            showUnavailableDialog("No active RWX map.")
+            showUnavailableDialog(I18n.ingame.map.noActive())
             return
         }
         val rootPath = state.graphRootPath?.takeIf { root ->
@@ -92,12 +90,12 @@ internal class MapController(
         state.runtimeLinkedMapNames.clear()
         state.runtimeLinkedMapNames.putAll(mapRows)
         if (mapRows.size <= 1) {
-            showUnavailableDialog("This map has no linked RWX maps.")
+            showUnavailableDialog(I18n.ingame.map.noLinked())
             return
         }
         val missingTargets = (graph.missingTargetMapIds + runtimeMissingTargets).distinct()
         if (missingTargets.isNotEmpty()) {
-            showUnavailableDialog("Linked map missing: ${missingTargets.joinToString(", ")}")
+            showUnavailableDialog(I18n.ingame.map.missing(missingTargets.joinToString(", ")))
             return
         }
         state.graphRootPath = rootPath
@@ -105,8 +103,8 @@ internal class MapController(
         val localPlayerId = currentLocalPlayerId()
         showDialogOverGame(
             Dialog(
-                title = "RWX Maps",
-                message = "Select a linked map.",
+                title = I18n.ingame.map.title(),
+                message = I18n.ingame.map.message(),
                 infoRows = mapRows.map { (mapPath, displayName) ->
                     val assignment = assignments?.instances?.firstOrNull {
                         state.samePath(it.mapPath, mapPath)
@@ -117,8 +115,8 @@ internal class MapController(
                         icon = Icon.Map,
                         label = displayName,
                         value = when {
-                            isCurrent -> "Current"
-                            assignment != null -> "Sim: ${assignment.simulatorPlayerName}"
+                            isCurrent -> I18n.ingame.map.current()
+                            assignment != null -> I18n.ingame.map.sim(assignment.simulatorPlayerName)
                             else -> mapPath.substringAfterLast('/')
                         },
                         emphasis = isCurrent || isLocalSimulator,
@@ -140,17 +138,17 @@ internal class MapController(
         }
         val targetMapPath = storage()?.let { MapLinkResolver.findMapPathById(it, transfer.targetMapId) }
         if (targetMapPath == null) {
-            showUnavailableDialog("Linked map not found: ${transfer.targetMapId}")
+            showUnavailableDialog(I18n.ingame.map.notFound(transfer.targetMapId))
             return
         }
         if (GameEngine.getInstance()?.isNetworkGameActive() == true) {
             P2PLobbyService.getInstance().broadcastPortalTransfer(transfer)
-            GameEngine.getInstance()?.gameUI?.showMediumPriorityMessage("RWX portal transfer sent")
+            GameEngine.getInstance()?.gameUI?.showMediumPriorityMessage(I18n.ingame.toast.portalSent())
             return
         }
         state.queuePortalTransfer(targetMapPath, transfer)
         GameEngine.getInstance()?.gameUI?.showMediumPriorityMessage(
-            "Unit transferred to ${MapMetadata.getMapName(targetMapPath)}"
+            I18n.ingame.toast.transferred(MapMetadata.getMapName(targetMapPath))
         )
     }
 
@@ -221,7 +219,7 @@ internal class MapController(
             val localPlayerId = currentLocalPlayerId()
             if (assignment == null || assignment.simulatorPlayerId != localPlayerId) {
                 showUnavailableDialog(
-                    "This map is simulated by ${assignment?.simulatorPlayerName ?: "another player"}."
+                    I18n.ingame.map.unavailable(assignment?.simulatorPlayerName ?: I18n.multiplayer.unknown())
                 )
                 return
             }
@@ -252,7 +250,7 @@ internal class MapController(
         } else {
             null
         }
-        if (gameSession.rendersIntoKoolCanvas) {
+        if (gameSession.usesFrameCommandRendering) {
             when {
                 snapshot != null -> gameSession.prepareMapSnapshotAsync(snapshot, viewport())
                 battleRoomConfig != null -> gameSession.prepareBattleRoomAsync(battleRoomConfig, viewport())
@@ -272,12 +270,11 @@ internal class MapController(
         }
         setPendingStart(targetMapPath, AppScreen.InGame)
         navigateToInGame()
-        if (!gameSession.rendersIntoKoolCanvas) {
-            koolCanvasScene.isVisible = false
+        if (!gameSession.usesFrameCommandRendering) {
             gameSession.setGameVisible(
                 true,
                 viewport(),
-                koolOverlay = UiRegistry.hasActiveHudLayers(),
+                uiOverlay = UiRegistry.hasActiveHudLayers(),
             )
         }
     }

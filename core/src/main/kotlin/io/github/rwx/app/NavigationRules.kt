@@ -2,10 +2,12 @@ package io.github.rwx.app
 
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.AppScreen.*
-import io.github.rwx.ui.AppScreenInput
+
+internal fun supportsMenuBattleBackground(screen: AppScreen): Boolean =
+    screen == MainMenu || screen == Settings
 
 internal fun shouldShowResumeMenuBackground(screen: AppScreen, canResume: Boolean): Boolean =
-    screen == MainMenu && canResume
+    supportsMenuBattleBackground(screen) && canResume
 
 internal fun shouldSetRwGameVisibleForScreen(screen: AppScreen): Boolean =
     screen == InGame
@@ -18,18 +20,12 @@ internal fun shouldPauseRwGameForScreen(
 internal fun shouldShowExternalRwBackgroundSurface(
     isRwMenuBackgroundVisible: Boolean,
     isResumeBackgroundVisible: Boolean,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     usesNativeSurfaceForResumeBackground: Boolean = false,
 ): Boolean =
-    !rendersIntoKoolCanvas &&
+    !usesFrameCommandRendering &&
             (isRwMenuBackgroundVisible ||
                     (isResumeBackgroundVisible && usesNativeSurfaceForResumeBackground))
-
-internal fun shouldForwardKoolInputForScreen(
-    screen: AppScreen,
-    acceptsKoolInput: Boolean,
-): Boolean =
-    acceptsKoolInput && AppScreenInput.policyFor(screen).worldInteraction
 
 internal fun shouldHandleBattleRoomAction(screen: AppScreen): Boolean =
     screen == BattleRoom
@@ -49,22 +45,22 @@ internal fun shouldUseRwCanvasFrameForFrame(
     isResumeBackgroundVisible: Boolean,
     isRwGameLoading: Boolean,
     isLastExternalFrameBackgroundVisible: Boolean,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
 ): Boolean = isRwMenuBackgroundVisible ||
         isResumeBackgroundVisible ||
         isLastExternalFrameBackgroundVisible ||
-        (rendersIntoKoolCanvas && (isRwGameVisible || isRwGameLoading))
+        isRwGameVisible || (usesFrameCommandRendering && isRwGameLoading)
 
 internal fun shouldReturnToMainMenuAfterExternalGameClosed(
     isRwGameVisible: Boolean,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     isStartingMap: Boolean,
     externalGameWasReady: Boolean,
     canResume: Boolean,
     mapLoadFailed: Boolean = false,
 ): Boolean =
     isRwGameVisible &&
-            !rendersIntoKoolCanvas &&
+            !usesFrameCommandRendering &&
             !isStartingMap &&
             (externalGameWasReady || mapLoadFailed) &&
             !canResume
@@ -72,30 +68,30 @@ internal fun shouldReturnToMainMenuAfterExternalGameClosed(
 internal fun shouldDiscardExistingGameForStart(
     startNew: Boolean,
     hasLaunchConfig: Boolean,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     canResume: Boolean,
     canStartNewSessionInPlace: Boolean,
 ): Boolean =
     startNew &&
             !canStartNewSessionInPlace &&
-            (!hasLaunchConfig || rendersIntoKoolCanvas || canResume)
+            (!hasLaunchConfig || usesFrameCommandRendering || canResume)
 
 internal enum class BattleRoomGameStartedAction {
     Ignore,
-    LoadKoolGame,
+    PrepareFrameCommandGame,
     ShowExternalGame,
 }
 
 internal fun battleRoomGameStartedAction(
     currentScreen: AppScreen,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     inProcessNetworkGameStarted: Boolean,
 ): BattleRoomGameStartedAction =
     when {
         currentScreen == InGame -> BattleRoomGameStartedAction.Ignore
         !inProcessNetworkGameStarted -> BattleRoomGameStartedAction.Ignore
-        !rendersIntoKoolCanvas -> BattleRoomGameStartedAction.ShowExternalGame
-        else -> BattleRoomGameStartedAction.LoadKoolGame
+        !usesFrameCommandRendering -> BattleRoomGameStartedAction.ShowExternalGame
+        else -> BattleRoomGameStartedAction.PrepareFrameCommandGame
     }
 
 internal fun mapStartFailureReturnScreen(requestedReturnScreen: AppScreen?): AppScreen =
@@ -119,21 +115,32 @@ internal fun mapStartFailureReturnScreen(requestedReturnScreen: AppScreen?): App
 internal enum class BackNavigationAction {
     Pause,
     ShowExitDialog,
+    LevelSelect,
+    BattleRoom,
     MainMenu,
     InGame,
+    CloseModWindow,
 }
 
 internal fun backActionForScreen(
     screen: AppScreen,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
 ): BackNavigationAction =
     when (screen) {
-        AppScreen.InGame -> if (rendersIntoKoolCanvas) {
+        AppScreen.InGame -> if (usesFrameCommandRendering) {
             BackNavigationAction.Pause
         } else {
             BackNavigationAction.ShowExitDialog
         }
 
         AppScreen.Paused -> BackNavigationAction.ShowExitDialog
+        AppScreen.LevelSelect -> BackNavigationAction.LevelSelect
+        AppScreen.BattleRoom -> BackNavigationAction.BattleRoom
+        // A mod window is opened from the running game; Back returns there rather than to the menu.
+        AppScreen.ModWindow -> BackNavigationAction.CloseModWindow
         else -> BackNavigationAction.MainMenu
     }
+
+/** A server disconnect should leave its map picker too, but not redirect unrelated screens. */
+internal fun isBattleRoomOwnedScreen(screen: AppScreen, selectingRoomMap: Boolean): Boolean =
+    screen == AppScreen.BattleRoom || (screen == AppScreen.LevelSelect && selectingRoomMap)

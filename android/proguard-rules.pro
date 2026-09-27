@@ -6,11 +6,6 @@
     public static <fields>;
 }
 
-# Kool's Android native library registers JNI entry points in JNI_OnLoad.
--keepclassmembers,includedescriptorclasses class de.fabmax.kool.** {
-    native <methods>;
-}
-
 # WebRTC's native library creates Java bridge objects and invokes their callbacks through JNI.
 # The published AAR does not provide consumer rules for these entry points.
 -keep class org.webrtc.** { *; }

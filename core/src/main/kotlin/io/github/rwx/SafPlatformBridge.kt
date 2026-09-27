@@ -92,4 +92,6 @@ object SafPlatformBridge {
         root.trimEnd('/', '\\') + "/" + child.trimStart('/', '\\')
 
     private const val LEGACY_ROOT_DIRECTORY = "rustedWarfare"
+
+    const val SAF_LINK_SUFFIX = ".[saflink]"
 }

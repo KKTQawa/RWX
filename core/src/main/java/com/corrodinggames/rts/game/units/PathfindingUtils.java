@@ -8,12 +8,12 @@ import com.corrodinggames.rts.gameFramework.pathfinding.PathCostMap;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.aq */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/aq.class */
 public final class PathfindingUtils {
-    public static final KoolPaint a = new KoolPaint();
+    public static final Paint a = new Paint();
     static final Point b = new Point();
     static final Rect c = new Rect();
     static final PointF d = new PointF();

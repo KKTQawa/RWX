@@ -7,6 +7,8 @@ import io.github.rwx.Preference
 import io.github.rwx.PreferenceStorage
 import io.github.rwx.ui.ColorSchemeId
 import io.github.rwx.ui.ColorSchemeRegistry
+import io.github.rwx.ui.DEFAULT_OVERLAY_OPACITY
+import io.github.rwx.ui.normalizeOverlayOpacity
 import io.github.rwx.ui.model.SettingsModel
 
 const val KEY_ANDROID_OPENGL_RENDERER = "newRender"
@@ -18,81 +20,137 @@ class GameSettingsRepository(
         get() = preferenceStorage.preference(PREFERENCE_NAME)
 
     fun loadInto(model: SettingsModel) {
-        val live = GameEngine.getInstance()?.settingsEngine
+        loadFromPreferences(model)
+        val live = GameEngine.getInstance()?.settingsEngine ?: return
+        model.batterySaving.value = live.batterySaving
+        model.highRefreshRate.value = live.highRefreshRate
+        model.slick2dFullScreen.value = live.slick2dFullScreen
+        model.vsync.value = live.renderVsync
+        model.showUnitHp.value = live.showHp
+        model.showWaypoints.value = live.showUnitWaypoints
+        model.showZoomButton.value = live.showZoomButton
+        model.showFps.value = live.showFps
+        model.renderClouds.value = live.renderClouds
+        model.renderDoubleScale.value = live.renderDoubleScale
+        model.softFogFading.value = live.softFogFading
+        model.shaderEffects.value = live.shaderEffects
+        model.teamShaders.value = live.teamShaders
+        model.useAndroidOpenGlRenderer.value = live.newRender
+        model.renderBackground.value = live.renderBackground
+        model.renderExtraLayers.value = live.renderExtraLayers
+        model.showHpChanges.value = live.showHpChanges
+        model.showUnitIcons.value = live.showUnitIcons
+        model.useMinimapAllyColors.value = live.useMinimapAllyColors
+        model.showWarLogOnScreen.value = live.showWarLogOnScreen
+
+        model.mouseCaptureEnabled.value = live.enableMouseCapture
+        model.mouseSupport.value = live.mouseSupport
+        model.keyboardSupport.value = live.keyboardSupport
+        model.gestureZoom.value = live.gestureZoom
+        model.useCircleSelect.value = live.useCircleSelect
+        model.showUnitGroups.value = live.showUnitGroups
+        model.immersiveFullScreen.value = live.immersiveFullScreen
+        model.unlockedScreenRotation.value = live.unlockedScreenRotation
+        model.classicInterface.value = live.classicInterface
+        model.forceEnglish.value = live.forceEnglish
+
+        model.quickRally.value = live.quickRally
+        model.doubleClickToAttackMove.value = live.doubleClickToAttackMove
+        model.showMapPingsOnBattlefield.value = live.showMapPingsOnBattlefield
+        model.showMapPingsOnMinimap.value = live.showMapPingsOnMinimap
+        model.showPlayerChatInGame.value = live.showPlayerChatInGame
+        model.showChatAndPingShortcuts.value = live.showChatAndPingShortcuts
+        model.smartSelection.value = live.smartSelection_v2
+        model.autosaving.value = live.autosaving
+        model.udpInMultiplayer.value = live.udpInMultiplayer
+        model.saveMultiplayerReplays.value = live.saveMultiplayerReplays
+        model.replaysShowRecordedChat.value = live.replaysShowRecordedChat
+        model.sendReports.value = live.sendReports
+
+        model.enableSounds.value = live.enableSounds
+        model.masterVolume.value = live.masterVolume.coerceIn(0f, 1f)
+        model.gameVolume.value = live.gameVolume.coerceIn(0f, 1f)
+        model.interfaceVolume.value = live.interfaceVolume.coerceIn(0f, 1f)
+        model.musicVolume.value = live.musicVolume.coerceIn(0f, 1f)
+        model.scrollSpeed.value = live.scrollSpeed
+        model.edgeScrollSpeed.value = live.edgeScrollSpeed
+        val externalStorageLink = live.externalSAFLink
+        model.storageType.value = if (
+            GameEngine.isAndroidPlatform() &&
+            live.storageType >= 2 &&
+            externalStorageLink.isNullOrBlank()
+        ) {
+            0
+        } else {
+            live.storageType
+        }
+    }
+
+    fun discardChanges(model: SettingsModel) {
+        loadFromPreferences(model)
+        applyToLiveSettings(model, runtimeSettings())
+        GameEngine.getInstance()?.musicManager?.onSettingsChanged()
+    }
+
+    private fun loadFromPreferences(model: SettingsModel) {
         val prefs = preferences
-        model.batterySaving.value = live?.batterySaving ?: prefs.getBoolean(KEY_BATTERY_SAVING, false)
-        model.highRefreshRate.value =
-            live?.highRefreshRate ?: prefs.getBoolean(KEY_HIGH_REFRESH_RATE, GameEngine.isPC())
-        model.slick2dFullScreen.value =
-            live?.slick2dFullScreen ?: prefs.getBoolean(KEY_SLICK2D_FULL_SCREEN, GameEngine.isPC())
-        model.vsync.value = live?.renderVsync ?: prefs.getBoolean(KEY_RENDER_VSYNC, false)
-        model.showUnitHp.value = live?.showHp ?: prefs.getBoolean(KEY_SHOW_HP, true)
-        model.showWaypoints.value = live?.showUnitWaypoints ?: prefs.getBoolean(KEY_SHOW_UNIT_WAYPOINTS, true)
-        model.showZoomButton.value = live?.showZoomButton ?: prefs.getBoolean(KEY_SHOW_ZOOM_BUTTON, true)
-        model.showFps.value = live?.showFps ?: prefs.getBoolean(KEY_SHOW_FPS, false)
-        model.renderClouds.value = live?.renderClouds ?: prefs.getBoolean(KEY_RENDER_CLOUDS, false)
-        model.renderDoubleScale.value = live?.renderDoubleScale ?: prefs.getBoolean(KEY_RENDER_DOUBLE_SCALE, false)
-        model.softFogFading.value = live?.softFogFading ?: prefs.getBoolean(KEY_SOFT_FOG_FADING, false)
-        model.shaderEffects.value = live?.shaderEffects ?: prefs.getBoolean(KEY_SHADER_EFFECTS, false)
-        model.teamShaders.value = live?.teamShaders ?: prefs.getBoolean(KEY_TEAM_SHADERS, false)
-        model.useAndroidOpenGlRenderer.value =
-            live?.newRender ?: prefs.getBoolean(KEY_ANDROID_OPENGL_RENDERER, false)
-        model.showMainMenuBackgroundDemo.value = prefs.getBoolean(KEY_SHOW_MAIN_MENU_BACKGROUND_DEMO, false)
-        model.renderBackground.value = live?.renderBackground ?: prefs.getBoolean(KEY_RENDER_BACKGROUND, true)
-        model.renderExtraLayers.value = live?.renderExtraLayers ?: prefs.getBoolean(KEY_RENDER_EXTRA_LAYERS, true)
-        model.showHpChanges.value = live?.showHpChanges ?: prefs.getBoolean(KEY_SHOW_HP_CHANGES, true)
-        model.showUnitIcons.value = live?.showUnitIcons ?: prefs.getBoolean(KEY_SHOW_UNIT_ICONS, true)
-        model.useMinimapAllyColors.value =
-            live?.useMinimapAllyColors ?: prefs.getBoolean(KEY_USE_MINIMAP_ALLY_COLORS, true)
-        model.showWarLogOnScreen.value =
-            live?.showWarLogOnScreen ?: prefs.getBoolean(KEY_SHOW_WAR_LOG_ON_SCREEN, true)
+        model.batterySaving.value = prefs.getBoolean(KEY_BATTERY_SAVING, false)
+        model.highRefreshRate.value = prefs.getBoolean(KEY_HIGH_REFRESH_RATE, GameEngine.isPC())
+        model.slick2dFullScreen.value = prefs.getBoolean(KEY_SLICK2D_FULL_SCREEN, GameEngine.isPC())
+        model.vsync.value = prefs.getBoolean(KEY_RENDER_VSYNC, false)
+        model.showUnitHp.value = prefs.getBoolean(KEY_SHOW_HP, true)
+        model.showWaypoints.value = prefs.getBoolean(KEY_SHOW_UNIT_WAYPOINTS, true)
+        model.showZoomButton.value = prefs.getBoolean(KEY_SHOW_ZOOM_BUTTON, true)
+        model.showFps.value = prefs.getBoolean(KEY_SHOW_FPS, false)
+        model.renderClouds.value = prefs.getBoolean(KEY_RENDER_CLOUDS, false)
+        model.renderDoubleScale.value = prefs.getBoolean(KEY_RENDER_DOUBLE_SCALE, false)
+        model.softFogFading.value = prefs.getBoolean(KEY_SOFT_FOG_FADING, false)
+        model.shaderEffects.value = prefs.getBoolean(KEY_SHADER_EFFECTS, false)
+        model.teamShaders.value = prefs.getBoolean(KEY_TEAM_SHADERS, false)
+        model.useAndroidOpenGlRenderer.value = prefs.getBoolean(KEY_ANDROID_OPENGL_RENDERER, false)
+        model.showMainMenuBackgroundDemo.value = prefs.getBoolean(KEY_SHOW_MAIN_MENU_BACKGROUND_DEMO, true)
+        model.renderBackground.value = prefs.getBoolean(KEY_RENDER_BACKGROUND, true)
+        model.renderExtraLayers.value = prefs.getBoolean(KEY_RENDER_EXTRA_LAYERS, true)
+        model.showHpChanges.value = prefs.getBoolean(KEY_SHOW_HP_CHANGES, true)
+        model.showUnitIcons.value = prefs.getBoolean(KEY_SHOW_UNIT_ICONS, true)
+        model.useMinimapAllyColors.value = prefs.getBoolean(KEY_USE_MINIMAP_ALLY_COLORS, true)
+        model.showWarLogOnScreen.value = prefs.getBoolean(KEY_SHOW_WAR_LOG_ON_SCREEN, true)
 
-        model.mouseCaptureEnabled.value = live?.enableMouseCapture ?: prefs.getBoolean(KEY_ENABLE_MOUSE_CAPTURE, false)
-        model.mouseSupport.value = live?.mouseSupport ?: prefs.getBoolean(KEY_MOUSE_SUPPORT, !GameEngine.isBlueStacks())
-        model.keyboardSupport.value = live?.keyboardSupport ?: prefs.getBoolean(KEY_KEYBOARD_SUPPORT, true)
-        model.gestureZoom.value = live?.gestureZoom ?: prefs.getBoolean(KEY_GESTURE_ZOOM, true)
-        model.useCircleSelect.value = live?.useCircleSelect ?: prefs.getBoolean(KEY_USE_CIRCLE_SELECT, false)
-        model.showUnitGroups.value = live?.showUnitGroups ?: prefs.getBoolean(KEY_SHOW_UNIT_GROUPS, true)
-        model.immersiveFullScreen.value = live?.immersiveFullScreen ?: prefs.getBoolean(KEY_IMMERSIVE_FULL_SCREEN, true)
-        model.unlockedScreenRotation.value =
-            live?.unlockedScreenRotation ?: prefs.getBoolean(KEY_UNLOCKED_SCREEN_ROTATION, false)
-        model.classicInterface.value = live?.classicInterface ?: prefs.getBoolean(KEY_CLASSIC_INTERFACE, false)
-        model.forceEnglish.value = live?.forceEnglish ?: prefs.getBoolean(KEY_FORCE_ENGLISH, false)
+        model.mouseCaptureEnabled.value = prefs.getBoolean(KEY_ENABLE_MOUSE_CAPTURE, false)
+        model.mouseSupport.value = prefs.getBoolean(KEY_MOUSE_SUPPORT, !GameEngine.isBlueStacks())
+        model.keyboardSupport.value = prefs.getBoolean(KEY_KEYBOARD_SUPPORT, true)
+        model.gestureZoom.value = prefs.getBoolean(KEY_GESTURE_ZOOM, true)
+        model.useCircleSelect.value = prefs.getBoolean(KEY_USE_CIRCLE_SELECT, false)
+        model.showUnitGroups.value = prefs.getBoolean(KEY_SHOW_UNIT_GROUPS, true)
+        model.immersiveFullScreen.value = prefs.getBoolean(KEY_IMMERSIVE_FULL_SCREEN, true)
+        model.unlockedScreenRotation.value = prefs.getBoolean(KEY_UNLOCKED_SCREEN_ROTATION, false)
+        model.classicInterface.value = prefs.getBoolean(KEY_CLASSIC_INTERFACE, false)
+        model.forceEnglish.value = prefs.getBoolean(KEY_FORCE_ENGLISH, false)
+        model.enableAnimations.value = prefs.getBoolean(KEY_ENABLE_ANIMATIONS, true)
+        model.overlayOpacity.value = normalizeOverlayOpacity(prefs.getFloat(KEY_OVERLAY_OPACITY, DEFAULT_OVERLAY_OPACITY))
 
-        model.quickRally.value = live?.quickRally ?: prefs.getBoolean(KEY_QUICK_RALLY, true)
-        model.doubleClickToAttackMove.value =
-            live?.doubleClickToAttackMove ?: prefs.getBoolean(KEY_DOUBLE_CLICK_TO_ATTACK_MOVE, true)
-        model.showMapPingsOnBattlefield.value =
-            live?.showMapPingsOnBattlefield ?: prefs.getBoolean(KEY_SHOW_MAP_PINGS_ON_BATTLEFIELD, true)
-        model.showMapPingsOnMinimap.value =
-            live?.showMapPingsOnMinimap ?: prefs.getBoolean(KEY_SHOW_MAP_PINGS_ON_MINIMAP, true)
-        model.showPlayerChatInGame.value =
-            live?.showPlayerChatInGame ?: prefs.getBoolean(KEY_SHOW_PLAYER_CHAT_IN_GAME, true)
-        model.showChatAndPingShortcuts.value =
-            live?.showChatAndPingShortcuts ?: prefs.getBoolean(KEY_SHOW_CHAT_AND_PING_SHORTCUTS, true)
-        model.smartSelection.value = live?.smartSelection_v2 ?: prefs.getBoolean(KEY_SMART_SELECTION, true)
-        model.autosaving.value = live?.autosaving ?: prefs.getBoolean(KEY_AUTOSAVING, true)
-        model.udpInMultiplayer.value = live?.udpInMultiplayer ?: prefs.getBoolean(KEY_UDP_IN_MULTIPLAYER, false)
-        model.saveMultiplayerReplays.value =
-            live?.saveMultiplayerReplays ?: prefs.getBoolean(KEY_SAVE_MULTIPLAYER_REPLAYS, GameEngine.isPC())
-        model.replaysShowRecordedChat.value =
-            live?.replaysShowRecordedChat ?: prefs.getBoolean(KEY_REPLAYS_SHOW_RECORDED_CHAT, true)
-        model.sendReports.value = live?.sendReports ?: prefs.getBoolean(KEY_SEND_REPORTS, true)
+        model.quickRally.value = prefs.getBoolean(KEY_QUICK_RALLY, true)
+        model.doubleClickToAttackMove.value = prefs.getBoolean(KEY_DOUBLE_CLICK_TO_ATTACK_MOVE, true)
+        model.showMapPingsOnBattlefield.value = prefs.getBoolean(KEY_SHOW_MAP_PINGS_ON_BATTLEFIELD, true)
+        model.showMapPingsOnMinimap.value = prefs.getBoolean(KEY_SHOW_MAP_PINGS_ON_MINIMAP, true)
+        model.showPlayerChatInGame.value = prefs.getBoolean(KEY_SHOW_PLAYER_CHAT_IN_GAME, true)
+        model.showChatAndPingShortcuts.value = prefs.getBoolean(KEY_SHOW_CHAT_AND_PING_SHORTCUTS, true)
+        model.smartSelection.value = prefs.getBoolean(KEY_SMART_SELECTION, true)
+        model.autosaving.value = prefs.getBoolean(KEY_AUTOSAVING, true)
+        model.udpInMultiplayer.value = prefs.getBoolean(KEY_UDP_IN_MULTIPLAYER, false)
+        model.saveMultiplayerReplays.value = prefs.getBoolean(KEY_SAVE_MULTIPLAYER_REPLAYS, GameEngine.isPC())
+        model.replaysShowRecordedChat.value = prefs.getBoolean(KEY_REPLAYS_SHOW_RECORDED_CHAT, true)
+        model.sendReports.value = prefs.getBoolean(KEY_SEND_REPORTS, true)
 
-        model.enableSounds.value = live?.enableSounds ?: prefs.getBoolean(KEY_ENABLE_SOUNDS, true)
-        model.masterVolume.value = (live?.masterVolume ?: prefs.getFloat(KEY_MASTER_VOLUME, 0.5f))
-            .coerceIn(0f, 1f)
-        model.gameVolume.value = (live?.gameVolume ?: prefs.getFloat(KEY_GAME_VOLUME, 1.0f))
-            .coerceIn(0f, 1f)
-        model.interfaceVolume.value = (live?.interfaceVolume ?: prefs.getFloat(KEY_INTERFACE_VOLUME, 0.8f))
-            .coerceIn(0f, 1f)
-        model.musicVolume.value = (live?.musicVolume ?: prefs.getFloat(KEY_MUSIC_VOLUME, 0.25f))
-            .coerceIn(0f, 1f)
-        model.scrollSpeed.value = live?.scrollSpeed ?: prefs.getFloat(KEY_SCROLL_SPEED, 1.0f)
-        model.edgeScrollSpeed.value = live?.edgeScrollSpeed ?: prefs.getFloat(KEY_EDGE_SCROLL_SPEED, 1.0f)
-        val storedStorageType = live?.storageType
-            ?: prefs.getInt(KEY_STORAGE_TYPE, if (GameEngine.isAndroidPlatform()) 2 else 0)
-        val externalStorageLink = live?.externalSAFLink ?: prefs.getString(KEY_EXTERNAL_SAF_LINK, null)
+        model.enableSounds.value = prefs.getBoolean(KEY_ENABLE_SOUNDS, true)
+        model.masterVolume.value = prefs.getFloat(KEY_MASTER_VOLUME, 0.5f).coerceIn(0f, 1f)
+        model.gameVolume.value = prefs.getFloat(KEY_GAME_VOLUME, 1.0f).coerceIn(0f, 1f)
+        model.interfaceVolume.value = prefs.getFloat(KEY_INTERFACE_VOLUME, 0.8f).coerceIn(0f, 1f)
+        model.musicVolume.value = prefs.getFloat(KEY_MUSIC_VOLUME, 0.25f).coerceIn(0f, 1f)
+        model.scrollSpeed.value = prefs.getFloat(KEY_SCROLL_SPEED, 1.0f)
+        model.edgeScrollSpeed.value = prefs.getFloat(KEY_EDGE_SCROLL_SPEED, 1.0f)
+        val storedStorageType = prefs.getInt(KEY_STORAGE_TYPE, if (GameEngine.isAndroidPlatform()) 2 else 0)
+        val externalStorageLink = prefs.getString(KEY_EXTERNAL_SAF_LINK, null)
         model.storageType.value = if (
             GameEngine.isAndroidPlatform() &&
             storedStorageType >= 2 &&
@@ -103,12 +161,10 @@ class GameSettingsRepository(
             storedStorageType
         }
 
-        val colorSchemeId = prefs.getString(KEY_RWX_COLOR_SCHEME, null)
+        prefs.getString(KEY_RWX_COLOR_SCHEME, null)
             ?.let(::ColorSchemeId)
             ?.takeIf { id -> ColorSchemeRegistry.schemes.any { it.id == id } }
-        if (colorSchemeId != null) {
-            model.selectedColorSchemeId.value = colorSchemeId
-        }
+            ?.let { model.selectedColorSchemeId.value = it }
     }
 
     /**
@@ -121,6 +177,12 @@ class GameSettingsRepository(
         normalizeAudioSettings(model)
         applySliderSettings(model, runtimeSettings())
         GameEngine.getInstance()?.musicManager?.onSettingsChanged()
+    }
+
+    fun saveExternalStorageLink(uri: String) {
+        preferences.putString(KEY_EXTERNAL_SAF_LINK, uri)
+        preferenceStorage.flush()
+        runtimeSettings().externalSAFLink = uri
     }
 
     fun saveFrom(model: SettingsModel) {
@@ -249,6 +311,8 @@ class GameSettingsRepository(
             .putBoolean(KEY_UNLOCKED_SCREEN_ROTATION, model.unlockedScreenRotation.value)
             .putBoolean(KEY_CLASSIC_INTERFACE, model.classicInterface.value)
             .putBoolean(KEY_FORCE_ENGLISH, model.forceEnglish.value)
+            .putBoolean(KEY_ENABLE_ANIMATIONS, model.enableAnimations.value)
+            .putFloat(KEY_OVERLAY_OPACITY, normalizeOverlayOpacity(model.overlayOpacity.value))
             .putBoolean(KEY_QUICK_RALLY, model.quickRally.value)
             .putBoolean(KEY_DOUBLE_CLICK_TO_ATTACK_MOVE, model.doubleClickToAttackMove.value)
             .putBoolean(KEY_SHOW_MAP_PINGS_ON_BATTLEFIELD, model.showMapPingsOnBattlefield.value)
@@ -274,6 +338,8 @@ class GameSettingsRepository(
 
     companion object {
         private const val KEY_RWX_COLOR_SCHEME = "rwxColorSchemeId"
+        private const val KEY_ENABLE_ANIMATIONS = "enableAnimations"
+        private const val KEY_OVERLAY_OPACITY = "overlayOpacity"
         private const val KEY_BATTERY_SAVING = "batterySaving"
         private const val KEY_HIGH_REFRESH_RATE = "highRefreshRate"
         private const val KEY_SLICK2D_FULL_SCREEN = "slick2dFullScreen"

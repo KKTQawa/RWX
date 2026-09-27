@@ -38,10 +38,10 @@ import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -154,70 +154,70 @@ public final class GameUI extends Serializable {
     public int screenFlashBlue;
 
     /* JADX INFO: renamed from: au */
-    public KoolPaint unitHealthBarPaint;
+    public Paint unitHealthBarPaint;
 
     /* JADX INFO: renamed from: av */
-    public KoolPaint unitHealthBarBackgroundPaint;
+    public Paint unitHealthBarBackgroundPaint;
 
     /* JADX INFO: renamed from: aw */
-    public KoolPaint unitShieldBarPaint;
+    public Paint unitShieldBarPaint;
 
     /* JADX INFO: renamed from: ax */
-    public KoolPaint unitSelectionPaint;
+    public Paint unitSelectionPaint;
 
     /* JADX INFO: renamed from: ay */
-    public KoolPaint unitSelectionBorderPaint;
+    public Paint unitSelectionBorderPaint;
 
     /* JADX INFO: renamed from: az */
-    public KoolPaint selectionBoxPaint;
+    public Paint selectionBoxPaint;
 
     /* JADX INFO: renamed from: aA */
-    public KoolPaint selectionBoxBorderPaint;
+    public Paint selectionBoxBorderPaint;
 
     /* JADX INFO: renamed from: aB */
-    public KoolPaint rallyPointPaint;
+    public Paint rallyPointPaint;
 
     /* JADX INFO: renamed from: aC */
-    public KoolPaint buildingPreviewPaint;
+    public Paint buildingPreviewPaint;
 
     /* JADX INFO: renamed from: aD */
-    public KoolPaint buildingPreviewInvalidPaint;
+    public Paint buildingPreviewInvalidPaint;
 
     /* JADX INFO: renamed from: aE */
-    public KoolPaint unitRangePaint;
+    public Paint unitRangePaint;
 
     /* JADX INFO: renamed from: aF */
-    public KoolPaint unitRangeBorderPaint;
+    public Paint unitRangeBorderPaint;
 
     /* JADX INFO: renamed from: aG */
-    public KoolPaint unitPathPaint;
+    public Paint unitPathPaint;
 
     /* JADX INFO: renamed from: aH */
-    public KoolPaint unitPathBorderPaint;
+    public Paint unitPathBorderPaint;
 
     /* JADX INFO: renamed from: aI */
-    public KoolPaint unitTargetLinePaint;
+    public Paint unitTargetLinePaint;
 
     /* JADX INFO: renamed from: aJ */
-    public KoolPaint unitTargetLineBorderPaint;
+    public Paint unitTargetLineBorderPaint;
 
     /* JADX INFO: renamed from: aK */
-    KoolPaint fogOfWarPaint;
+    Paint fogOfWarPaint;
 
     /* JADX INFO: renamed from: aL */
-    KoolPaint minimapPaint;
+    Paint minimapPaint;
 
     /* JADX INFO: renamed from: aM */
-    KoolPaint minimapBorderPaint;
+    Paint minimapBorderPaint;
 
     /* JADX INFO: renamed from: aN */
-    KoolPaint minimapUnitPaint;
+    Paint minimapUnitPaint;
 
     /* JADX INFO: renamed from: aO */
-    KoolPaint minimapViewportPaint;
+    Paint minimapViewportPaint;
 
     /* JADX INFO: renamed from: aP */
-    KoolPaint minimapViewportBorderPaint;
+    Paint minimapViewportBorderPaint;
 
     /* JADX INFO: renamed from: aQ */
     GamePaint unitIconPaint;
@@ -244,10 +244,10 @@ public final class GameUI extends Serializable {
     float tooltipTimer;
 
     /* JADX INFO: renamed from: bf */
-    KoolPaint tooltipBackgroundPaint;
+    Paint tooltipBackgroundPaint;
 
     /* JADX INFO: renamed from: bg */
-    KoolPaint tooltipBorderPaint;
+    Paint tooltipBorderPaint;
 
     /* JADX INFO: renamed from: bn */
     public Texture uiTexture1;
@@ -417,10 +417,10 @@ public final class GameUI extends Serializable {
     /* JADX INFO: renamed from: V */
     boolean isRightClickDrag = false;
     public final boolean ab = true;
-    public final KoolPaint at = new KoolPaint();
+    public final Paint at = new Paint();
     final RectF areaEditorDragRect = new RectF();
-    final KoolPaint areaEditorDragFillPaint = new KoolPaint();
-    final KoolPaint areaEditorDragBorderPaint = new KoolPaint();
+    final Paint areaEditorDragFillPaint = new Paint();
+    final Paint areaEditorDragBorderPaint = new Paint();
     boolean areaEditorDragActive;
     float areaEditorDragStartX;
     float areaEditorDragStartY;
@@ -452,12 +452,12 @@ public final class GameUI extends Serializable {
     final Rect bx = new Rect();
     final Rect by = new Rect();
     final Rect bz = new Rect();
-    final KoolPaint bA = new KoolPaint();
-    final KoolPaint bB = new KoolPaint();
-    final KoolPaint bC = new GamePaint();
-    public final KoolPaint bD = new GamePaint();
-    final KoolPaint bE = new GamePaint();
-    final KoolPaint bF = new KoolPaint();
+    final Paint bA = new Paint();
+    final Paint bB = new Paint();
+    final Paint bC = new GamePaint();
+    public final Paint bD = new GamePaint();
+    final Paint bE = new GamePaint();
+    final Paint bF = new Paint();
 
     /* JADX INFO: renamed from: bM */
     public ArrayList selectedUnits = new ArrayList();
@@ -484,7 +484,7 @@ public final class GameUI extends Serializable {
     public UnitList selectedUnitsList = new UnitList();
 
     /* JADX INFO: renamed from: cb */
-    KoolPaint debugTextPaint = new KoolPaint();
+    Paint debugTextPaint = new Paint();
 
     /* JADX INFO: renamed from: cc */
     Rect debugTextRect = new Rect();
@@ -650,9 +650,9 @@ public final class GameUI extends Serializable {
         this.ba = gameEngine.renderGraphicsEngine.a(R.drawable.button_no);
         this.bb = gameEngine.renderGraphicsEngine.a(R.drawable.button_yes);
         this.bc = gameEngine.renderGraphicsEngine.a(R.drawable.button_more);
-        this.tooltipBackgroundPaint = new KoolPaint();
+        this.tooltipBackgroundPaint = new Paint();
         this.tooltipBackgroundPaint.d(true);
-        this.tooltipBorderPaint = new KoolPaint();
+        this.tooltipBorderPaint = new Paint();
         this.tooltipBorderPaint.d(true);
         this.tooltipBorderPaint.a(40, 255, 255, 255);
         this.bh = gameEngine.renderGraphicsEngine.a(R.drawable.button_add);
@@ -679,30 +679,30 @@ public final class GameUI extends Serializable {
         this.bE.a(6.0f);
         GamePaint.b(this.bE);
         this.bD.a(true);
-        this.unitHealthBarPaint = new KoolPaint();
+        this.unitHealthBarPaint = new Paint();
         this.unitHealthBarBackgroundPaint = new GamePaint();
         this.unitHealthBarBackgroundPaint.a(255, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 0);
         this.unitHealthBarBackgroundPaint.a(true);
         this.unitHealthBarBackgroundPaint.c(true);
-        this.unitHealthBarBackgroundPaint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.unitHealthBarBackgroundPaint.a(Typeface.a(Typeface.c, 1));
         gameEngine.updatePaintTextSize(this.unitHealthBarBackgroundPaint, 20.0f);
-        this.unitHealthBarBackgroundPaint.a(KoolPaint.Align.LEFT);
+        this.unitHealthBarBackgroundPaint.a(Paint.Align.LEFT);
         this.unitSelectionBorderPaint = new GamePaint();
         this.unitSelectionBorderPaint.a(255, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 0);
         this.unitSelectionBorderPaint.a(true);
         this.unitSelectionBorderPaint.c(true);
-        this.unitSelectionBorderPaint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.unitSelectionBorderPaint.a(Typeface.a(Typeface.c, 1));
         gameEngine.updatePaintTextSize(this.unitSelectionBorderPaint, 18.0f);
-        this.unitSelectionBorderPaint.a(KoolPaint.Align.LEFT);
+        this.unitSelectionBorderPaint.a(Paint.Align.LEFT);
         this.unitShieldBarPaint = new GamePaint();
         this.unitShieldBarPaint.a(this.unitHealthBarBackgroundPaint);
         this.unitShieldBarPaint.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 0);
         this.unitSelectionPaint = new GamePaint();
-        this.unitSelectionPaint.b(KoolArgbColor.a(100, 0, 0, 0));
-        this.unitSelectionPaint.a(KoolPaint.Style.FILL_AND_STROKE);
+        this.unitSelectionPaint.b(ArgbColor.a(100, 0, 0, 0));
+        this.unitSelectionPaint.a(Paint.Style.FILL_AND_STROKE);
         this.selectionBoxPaint = new GamePaint();
         this.selectionBoxPaint.a(100, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30);
-        this.selectionBoxPaint.a(KoolPaint.Align.LEFT);
+        this.selectionBoxPaint.a(Paint.Align.LEFT);
         this.selectionBoxPaint.c(true);
         this.selectionBoxPaint.a(true);
         gameEngine.updatePaintTextSize(this.selectionBoxPaint, 12.0f);
@@ -713,7 +713,7 @@ public final class GameUI extends Serializable {
         } else {
             this.buildingPreviewPaint.a(255, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30);
         }
-        this.buildingPreviewPaint.a(KoolPaint.Align.CENTER);
+        this.buildingPreviewPaint.a(Paint.Align.CENTER);
         this.buildingPreviewPaint.c(true);
         this.buildingPreviewPaint.a(true);
         gameEngine.updatePaintTextSize(this.buildingPreviewPaint, 12.0f);
@@ -733,14 +733,14 @@ public final class GameUI extends Serializable {
         } else {
             this.buildingPreviewInvalidPaint.a(255, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30);
         }
-        this.buildingPreviewInvalidPaint.a(KoolPaint.Align.CENTER);
+        this.buildingPreviewInvalidPaint.a(Paint.Align.CENTER);
         this.buildingPreviewInvalidPaint.c(true);
         this.buildingPreviewInvalidPaint.a(true);
         gameEngine.updatePaintTextSize(this.buildingPreviewInvalidPaint, 20.0f);
         GamePaint.b(this.buildingPreviewInvalidPaint);
         this.unitRangePaint = new GamePaint();
         this.unitRangePaint.a(255, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30);
-        this.unitRangePaint.a(KoolPaint.Align.CENTER);
+        this.unitRangePaint.a(Paint.Align.CENTER);
         this.unitRangePaint.c(true);
         this.unitRangePaint.a(true);
         gameEngine.updatePaintTextSize(this.unitRangePaint, 20.0f);
@@ -753,7 +753,7 @@ public final class GameUI extends Serializable {
         this.unitRangeBorderPaint.a(this.buildingPreviewInvalidPaint);
         this.unitRangeBorderPaint.a(255, 128, 0, 0);
         gameEngine.updatePaintTextSize(this.unitRangeBorderPaint, 14.0f);
-        this.unitRangeBorderPaint.a(KoolPaint.Align.CENTER);
+        this.unitRangeBorderPaint.a(Paint.Align.CENTER);
         GamePaint.b(this.unitRangeBorderPaint);
         this.unitPathPaint = new GamePaint();
         this.unitPathPaint.a(this.unitRangeBorderPaint);
@@ -762,28 +762,28 @@ public final class GameUI extends Serializable {
         this.unitPathBorderPaint.a(this.buildingPreviewInvalidPaint);
         gameEngine.updatePaintTextSize(this.unitPathBorderPaint, 12.0f);
         this.unitPathBorderPaint.a(125, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE);
-        this.unitPathBorderPaint.a(KoolPaint.Align.CENTER);
+        this.unitPathBorderPaint.a(Paint.Align.CENTER);
         GamePaint.b(this.unitPathBorderPaint);
         this.unitIconPaint = new GamePaint();
         this.unitIconPaint.b(-16777216);
         this.unitIconPaint.a(true);
         this.unitIconPaint.c(true);
-        this.unitIconPaint.a(KoolTypeface.a(KoolTypeface.c, 0));
+        this.unitIconPaint.a(Typeface.a(Typeface.c, 0));
         gameEngine.updatePaintTextSize(this.unitIconPaint, 14.0f);
         this.buildingIconPaint = new GamePaint();
         this.buildingIconPaint.a(this.unitIconPaint);
-        this.buildingIconPaint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.buildingIconPaint.a(Typeface.a(Typeface.c, 1));
         gameEngine.updatePaintTextSize(this.buildingIconPaint, 16.0f);
         this.effectIconPaint = new GamePaint();
         this.effectIconPaint.a(this.buildingIconPaint);
-        this.effectIconPaint.b(KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 63, 80));
+        this.effectIconPaint.b(ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 63, 80));
         gameEngine.updatePaintTextSize(this.effectIconPaint, 16.0f);
         this.fogOfWarPaint = new GamePaint();
         this.fogOfWarPaint.b(-16777216);
-        this.fogOfWarPaint.a(KoolPaint.Align.CENTER);
+        this.fogOfWarPaint.a(Paint.Align.CENTER);
         this.fogOfWarPaint.a(true);
         this.fogOfWarPaint.c(true);
-        this.fogOfWarPaint.a(KoolTypeface.a(KoolTypeface.c, 0));
+        this.fogOfWarPaint.a(Typeface.a(Typeface.c, 0));
         gameEngine.updatePaintTextSize(this.fogOfWarPaint, 20.0f);
         this.minimapPaint = new GamePaint();
         this.minimapPaint.b(-1);
@@ -799,18 +799,18 @@ public final class GameUI extends Serializable {
         this.minimapViewportBorderPaint = new GamePaint();
         this.minimapViewportBorderPaint.b(-7829368);
         this.minimapViewportBorderPaint.c(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE);
-        this.minimapViewportBorderPaint.a(KoolPaint.Style.STROKE);
+        this.minimapViewportBorderPaint.a(Paint.Style.STROKE);
         this.minimapViewportBorderPaint.a(1.0f);
         gameEngine.updatePaint(this.minimapViewportBorderPaint);
         this.minimapUnitPaint = new GamePaint();
         this.minimapUnitPaint.b(-16711936);
         this.minimapUnitPaint.c(80);
-        this.minimapUnitPaint.a(KoolPaint.Style.FILL);
+        this.minimapUnitPaint.a(Paint.Style.FILL);
         this.minimapUnitPaint.a(4.0f);
         gameEngine.updatePaint(this.minimapUnitPaint);
         this.minimapViewportPaint = new GamePaint();
-        this.minimapViewportPaint.b(KoolArgbColor.a(120, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 167, 49));
-        this.minimapViewportPaint.a(KoolPaint.Style.FILL);
+        this.minimapViewportPaint.b(ArgbColor.a(120, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 167, 49));
+        this.minimapViewportPaint.a(Paint.Style.FILL);
         this.minimapViewportPaint.a(8.0f);
         gameEngine.updatePaint(this.minimapViewportPaint);
         this.unitTargetLineBorderPaint = new GamePaint();
@@ -1329,15 +1329,15 @@ public final class GameUI extends Serializable {
         if (!bO) {
             if (this.isUILoggingEnabled) {
                 this.bA.a();
-                this.bA.b(KoolArgbColor.a(255, 33, 40, 52));
-                this.bA.a(KoolPaint.Style.FILL);
+                this.bA.b(ArgbColor.a(255, 33, 40, 52));
+                this.bA.a(Paint.Style.FILL);
                 gameEngine.renderGraphicsEngine.b(this.bx, this.bA);
             } else {
-                gameEngine.renderGraphicsEngine.a(this.bl, this.bx, (KoolPaint) null);
+                gameEngine.renderGraphicsEngine.a(this.bl, this.bx, (Paint) null);
             }
             this.bA.a();
-            this.bA.b(KoolArgbColor.a(255, 0, 0, 0));
-            this.bA.a(KoolPaint.Style.STROKE);
+            this.bA.b(ArgbColor.a(255, 0, 0, 0));
+            this.bA.a(Paint.Style.STROKE);
             gameEngine.renderGraphicsEngine.b(this.bx, this.bA);
         }
         this.cf = 0;
@@ -1380,8 +1380,8 @@ public final class GameUI extends Serializable {
                 str = str + "AIs frozen\n";
             }
             this.bA.a();
-            this.bA.b(KoolArgbColor.a(0, 0, 0, 0));
-            this.bA.a(KoolPaint.Style.FILL);
+            this.bA.b(ArgbColor.a(0, 0, 0, 0));
+            this.bA.a(Paint.Style.FILL);
             float f2 = 70.0f * gameEngine.screenScale;
             float f3 = 40.0f;
             if (gameEngine.screenWidth < 600.0f && gameEngine.screenHeight > 650.0f) {
@@ -1455,7 +1455,7 @@ public final class GameUI extends Serializable {
         }
         int n3 = (int) (l.screenWidth - l.sidebarWidth);
         n3 -= this.highlightOffsetX;
-        KoolPaint paint4 = this.unitHealthBarBackgroundPaint;
+        Paint paint4 = this.unitHealthBarBackgroundPaint;
         if (boolean3) {
             paint4 = this.unitShieldBarPaint;
         } else {
@@ -1726,9 +1726,9 @@ public final class GameUI extends Serializable {
         float screenTop = (top - gameEngine.viewpointYSnapped) * zoom;
         float screenRight = (right - gameEngine.viewpointXSnapped) * zoom;
         float screenBottom = (bottom - gameEngine.viewpointYSnapped) * zoom;
-        this.areaEditorDragFillPaint.a(KoolPaint.Style.FILL);
+        this.areaEditorDragFillPaint.a(Paint.Style.FILL);
         this.areaEditorDragFillPaint.a(46, 94, 188, 108);
-        this.areaEditorDragBorderPaint.a(KoolPaint.Style.STROKE);
+        this.areaEditorDragBorderPaint.a(Paint.Style.STROKE);
         this.areaEditorDragBorderPaint.a(2.0f);
         this.areaEditorDragBorderPaint.a(230, 176, 224, 126);
         if (circle) {
@@ -1879,20 +1879,20 @@ public final class GameUI extends Serializable {
             }
         }
         if (this.currentAction == null && this.isMousePressed && !this.isInputDisabled && !this.isRightMousePressed && !this.showDebugInfo) {
-            this.unitHealthBarPaint.a(KoolPaint.Style.FILL);
+            this.unitHealthBarPaint.a(Paint.Style.FILL);
             this.unitHealthBarPaint.a(1.0f);
             if (this.uiScale > 20.0f && shouldUseCircleSelect()) {
                 float fCalculateUIWidth2 = calculateUIWidth();
                 this.unitHealthBarPaint.a(100, 0, 255, 0);
                 gameEngine.renderGraphicsEngine.a(this.selectionBoxStartX, this.selectionBoxStartY, fCalculateUIWidth2, this.unitHealthBarPaint);
-                this.unitHealthBarPaint.a(KoolPaint.Style.STROKE);
+                this.unitHealthBarPaint.a(Paint.Style.STROKE);
                 this.unitHealthBarPaint.a(1.0f);
                 this.unitHealthBarPaint.a(200, 0, 255, 0);
                 gameEngine.renderGraphicsEngine.a(this.selectionBoxStartX, this.selectionBoxStartY, fCalculateUIWidth2, this.unitHealthBarPaint);
             }
         }
         if (gameEngine.isGamePausedOrMinimized && gameEngine.isTouchDown() && gameEngine.getTouchPointerCount() > 0) {
-            KoolPaint paint = new KoolPaint();
+            Paint paint = new Paint();
             paint.c(100);
             for (int i = 0; i < gameEngine.getTouchPointerCount(); i++) {
                 gameEngine.renderGraphicsEngine.i();
@@ -3355,7 +3355,7 @@ public final class GameUI extends Serializable {
                 if (playerTeam != null) {
                     effectCreateEffect2.startColor = playerTeam.getTeamColorArgb();
                     if (gameEngine.renderGraphicsEngine.backendCapabilities().getRequiresImageTintColorFilter()) {
-                        effectCreateEffect2.B = new KoolMultiplyAddColorFilter(effectCreateEffect2.startColor, 0);
+                        effectCreateEffect2.B = new MultiplyAddColorFilter(effectCreateEffect2.startColor, 0);
                     }
                 }
             }
@@ -3393,7 +3393,7 @@ public final class GameUI extends Serializable {
                 if (playerTeam != null) {
                     effectCreateEffect3.startColor = playerTeam.getTeamColorArgb();
                     if (gameEngine.renderGraphicsEngine.backendCapabilities().getRequiresImageTintColorFilter()) {
-                        effectCreateEffect3.B = new KoolMultiplyAddColorFilter(effectCreateEffect3.startColor, 0);
+                        effectCreateEffect3.B = new MultiplyAddColorFilter(effectCreateEffect3.startColor, 0);
                     }
                 }
                 effectCreateEffect3.G = 1.0f;
@@ -4083,8 +4083,8 @@ public final class GameUI extends Serializable {
         this.currentAction = this.pingMapAction;
     }
 
-    public void a(String str, Rect rect, KoolPaint paint, KoolPaint paint2) {
-        KoolPaint paint3;
+    public void a(String str, Rect rect, Paint paint, Paint paint2) {
+        Paint paint3;
         GameEngine gameEngine = GameEngine.getInstance();
         int i = 0;
         for (String str2 : Utility.splitByChar(str, '\n')) {
@@ -4093,7 +4093,7 @@ public final class GameUI extends Serializable {
             } else {
                 paint3 = paint2;
             }
-            KoolPaint paint4 = paint3;
+            Paint paint4 = paint3;
             int lineHeight = TextUtils.getLineHeight(paint4);
             gameEngine.renderGraphicsEngine.a(str2, rect.d(), rect.b + (lineHeight / 2) + (i * lineHeight), paint4);
             i++;
@@ -4156,8 +4156,8 @@ public final class GameUI extends Serializable {
         final TextRenderQueue textRenderQueue = new TextRenderQueue();
         textRenderQueue.defaultPaint = this.unitIconPaint;
         textRenderQueue.highlightPaint = this.buildingIconPaint;
-        final KoolPaint paint3 = null;
-        KoolPaint effectIconTexture = null;
+        final Paint paint3 = null;
+        Paint effectIconTexture = null;
         if (b6) {
             effectIconTexture = this.effectIconPaint;
         }
@@ -4299,9 +4299,9 @@ public final class GameUI extends Serializable {
                     clampTo255 = Utility.clampTo255(clampTo255, 0.0f, 1.0f);
                     int integer1;
                     if (timerValue > 0.0f) {
-                        integer1 = KoolArgbColor.a(110, 30, 240, 30);
+                        integer1 = ArgbColor.a(110, 30, 240, 30);
                     } else {
-                        integer1 = KoolArgbColor.a(110, 240, 30, 30);
+                        integer1 = ArgbColor.a(110, 240, 30, 30);
                     }
                     Utility.lerpColor(integer1, this.fogOfWarPaint.e(), clampTo255);
                 }
@@ -4321,7 +4321,7 @@ public final class GameUI extends Serializable {
             int n6 = (int) (this.bw.d() + 60.0f * float7);
             int i = (int) (this.bw.d - 65.0f * float7);
             this.by.a(n6, i, n6 + n5, i + n5);
-            KoolPaint paint4;
+            Paint paint4;
             if (b12) {
                 paint4 = this.tooltipBackgroundPaint;
             } else {
@@ -4332,9 +4332,9 @@ public final class GameUI extends Serializable {
                 n7 = Utility.clampTo255(n7, 0.0f, 1.0f);
                 int n8;
                 if (timerValue > 0.0f) {
-                    n8 = KoolArgbColor.a(110, 210, 210, 210);
+                    n8 = ArgbColor.a(110, 210, 210, 210);
                 } else {
-                    n8 = KoolArgbColor.a(110, 210, 110, 110);
+                    n8 = ArgbColor.a(110, 210, 110, 110);
                 }
                 final int n9 = Utility.lerpColor(n8, paint4.e(), n7);
                 paint4 = this.bA;
@@ -4352,7 +4352,7 @@ public final class GameUI extends Serializable {
             n6 = (int) (this.bw.d() - n5 - 60.0f * float7);
             i = (int) (this.bw.d - 65.0f * float7);
             this.by.a(n6, i, n6 + n5, i + n5);
-            KoolPaint paint5;
+            Paint paint5;
             if (b13) {
                 paint5 = this.tooltipBackgroundPaint;
             } else {
@@ -4363,9 +4363,9 @@ public final class GameUI extends Serializable {
                 n7 = Utility.clampTo255(n7, 0.0f, 1.0f);
                 int n8;
                 if (timerValue > 0.0f) {
-                    n8 = KoolArgbColor.a(110, 210, 210, 210);
+                    n8 = ArgbColor.a(110, 210, 210, 210);
                 } else {
-                    n8 = KoolArgbColor.a(110, 210, 110, 110);
+                    n8 = ArgbColor.a(110, 210, 110, 110);
                 }
                 final int n9 = Utility.lerpColor(n8, paint5.e(), n7);
                 paint5 = this.bA;
@@ -4426,7 +4426,7 @@ public final class GameUI extends Serializable {
         return !b2 && GameEngine.isNonPCPlatform() && this.isSelectionBoxActive && !this.isInputDisabled && !this.bw.b((int) this.selectionBoxStartX, (int) this.selectionBoxStartY);
     }
 
-    public void a(Rect rect, KoolPaint paint, KoolPaint paint2) {
+    public void a(Rect rect, Paint paint, Paint paint2) {
         GameEngine gameEngine = GameEngine.getInstance();
         if (bO) {
             gameEngine.renderGraphicsEngine.a(this.bl, rect, paint2, rect.a, rect.b, 0, 0);
@@ -4446,11 +4446,11 @@ public final class GameUI extends Serializable {
     public void a(Rect rect, int i, boolean z) {
         GameEngine gameEngine = GameEngine.getInstance();
         this.bF.b(i);
-        this.bF.a(KoolPaint.Style.STROKE);
+        this.bF.a(Paint.Style.STROKE);
         this.bF.a(1.0f);
         gameEngine.renderGraphicsEngine.b(rect, this.bF);
         if (this.isUILoggingEnabled) {
-            this.bF.b(KoolArgbColor.a(255, 116, 136, 160));
+            this.bF.b(ArgbColor.a(255, 116, 136, 160));
             int i2 = 1;
             if (z && rect.b() > 100) {
                 i2 = 2;
@@ -4465,29 +4465,29 @@ public final class GameUI extends Serializable {
         }
     }
 
-    public void a(int i, int i2, int i3, int i4, String str, int i5, KoolPaint paint, boolean z, UIStyle uIStyle, UIState uIState) {
+    public void a(int i, int i2, int i3, int i4, String str, int i5, Paint paint, boolean z, UIStyle uIStyle, UIState uIState) {
         GameEngine gameEngine = GameEngine.getInstance();
         this.bx.a(i, i2, i + i3, i2 + i4);
         this.bF.b(i5);
         if (uIStyle != null) {
             uIStyle.a(gameEngine.renderGraphicsEngine, this.bx, uIState);
         } else if (!z) {
-            this.bF.a(KoolPaint.Style.FILL);
+            this.bF.a(Paint.Style.FILL);
             gameEngine.renderGraphicsEngine.b(this.bx, this.bF);
         } else {
-            a(this.bx, (KoolPaint) null, this.bF);
+            a(this.bx, (Paint) null, this.bF);
         }
         if (uIStyle == null) {
-            int iA = KoolArgbColor.a(255, 0, 0, 0);
+            int iA = ArgbColor.a(255, 0, 0, 0);
             if (bO) {
-                iA = KoolArgbColor.a(100, 0, 0, 0);
+                iA = ArgbColor.a(100, 0, 0, 0);
             }
             a(this.bx, iA, false);
         }
         a(i, i2, i3, i4, str, i5, paint);
     }
 
-    public void a(int i, int i2, int i3, int i4, String str, int i5, KoolPaint paint) {
+    public void a(int i, int i2, int i3, int i4, String str, int i5, Paint paint) {
         GameEngine gameEngine = GameEngine.getInstance();
         this.bx.a(i, i2, i + i3, i2 + i4);
         if (GameEngine.isPCOrIOSVersion) {
@@ -4513,11 +4513,11 @@ public final class GameUI extends Serializable {
         return a(i, i2, i3, i4, str, iconGroup, z, i5, this.buildingPreviewPaint, true, null);
     }
 
-    public boolean a(int i, int i2, int i3, int i4, String str, IconGroup iconGroup, boolean z, int i5, KoolPaint paint, UIStyle uIStyle) {
+    public boolean a(int i, int i2, int i3, int i4, String str, IconGroup iconGroup, boolean z, int i5, Paint paint, UIStyle uIStyle) {
         return a(i, i2, i3, i4, str, iconGroup, z, i5, paint, false, uIStyle);
     }
 
-    public boolean a(int i, int i2, int i3, int i4, String str, IconGroup iconGroup, boolean z, int i5, KoolPaint paint, boolean z2, UIStyle uIStyle) {
+    public boolean a(int i, int i2, int i3, int i4, String str, IconGroup iconGroup, boolean z, int i5, Paint paint, boolean z2, UIStyle uIStyle) {
         boolean zA = a(i, i2, i3, i4, iconGroup);
         boolean zA2 = a(i, i2, i3, i4, iconGroup, z);
         UIState uIState = UIState.normal;

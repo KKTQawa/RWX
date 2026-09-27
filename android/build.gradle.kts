@@ -40,23 +40,31 @@ kotlin {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":ui"))
     implementation(libs.android.webrtc)
     implementation(libs.koin.android)
+    implementation(libs.activity.compose)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(kotlin("test-junit5"))
+    testImplementation(libs.robolectric)
+    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 android {
     namespace = project.group.toString()
-    compileSdk = 36
+    compileSdk = 37
     useLibrary("org.apache.http.legacy")
+    testOptions.unitTests.isIncludeAndroidResources = true
 
     defaultConfig {
         applicationId = project.group.toString()
         minSdk = 28
-        targetSdk = 36
+        //noinspection EditedTargetSdkVersion
+        targetSdk = 37
         versionCode = releaseVersionCode
         versionName = project.version.toString()
         ndk {
@@ -97,10 +105,6 @@ android {
         }
     }
 
-    androidResources {
-        ignoreAssetsPattern = "*.otf:*.ttf"
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_25
         targetCompatibility = JavaVersion.VERSION_25
@@ -128,3 +132,41 @@ tasks.matching { task -> task.name.contains("lintVital", ignoreCase = true) }
     .configureEach {
         dependsOn(assetListGeneration.task)
     }
+
+// WORKAROUND (CMP-9547): with AGP 9.x + com.android.kotlin.multiplatform.library,
+// :ui composeResources are not published as assets automatically. Register the
+// workaround copy output (see ui/build.gradle.kts) as a static asset source and
+// order it before asset merging. Remove once upstream fixes it.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        val composeResourcesAssetsDir = rootProject.file(
+            "ui/build/generated/compose/resourceGenerator/androidMain/assets"
+        )
+        variant.sources.assets?.addStaticSourceDirectory(composeResourcesAssetsDir.absolutePath)
+    }
+}
+
+afterEvaluate {
+    val composeResourceTasks = listOf(
+        ":ui:copyAndroidMainComposeResourcesToAndroidAssets",
+        ":ui:prepareComposeResourcesTaskForCommonMain",
+        ":ui:convertXmlValueResourcesForCommonMain",
+        ":ui:copyNonXmlValueResourcesForCommonMain"
+    )
+
+    tasks.matching { task ->
+        task.name.contains("merge") && task.name.contains("Assets")
+    }.configureEach {
+        composeResourceTasks.forEach { taskPath ->
+            dependsOn(taskPath)
+        }
+    }
+
+    tasks.matching { task ->
+        task.name.contains("lintVital", ignoreCase = true)
+    }.configureEach {
+        composeResourceTasks.forEach { taskPath ->
+            dependsOn(taskPath)
+        }
+    }
+}

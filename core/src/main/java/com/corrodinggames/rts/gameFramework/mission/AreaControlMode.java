@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.file.FileHelper;
 import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -50,19 +50,19 @@ public class AreaControlMode {
     private boolean announcedStart;
     private int winningAllyGroup = -1;
     private final RectF hudRect = new RectF();
-    private KoolPaint hudBackgroundPaint;
-    private KoolPaint hudBorderPaint;
-    private KoolPaint hudTitlePaint;
-    private KoolPaint hudTextPaint;
-    private KoolPaint hudMutedTextPaint;
-    private KoolPaint hudAccentPaint;
-    private KoolPaint hudCellPaint;
+    private Paint hudBackgroundPaint;
+    private Paint hudBorderPaint;
+    private Paint hudTitlePaint;
+    private Paint hudTextPaint;
+    private Paint hudMutedTextPaint;
+    private Paint hudAccentPaint;
+    private Paint hudCellPaint;
     private final RectF worldZoneRect = new RectF();
-    private KoolPaint worldZoneFillPaint;
-    private KoolPaint worldZoneBorderPaint;
-    private KoolPaint worldZoneLabelPaint;
-    private KoolPaint worldZoneProgressPaint;
-    private KoolPaint worldZoneProgressRingPaint;
+    private Paint worldZoneFillPaint;
+    private Paint worldZoneBorderPaint;
+    private Paint worldZoneLabelPaint;
+    private Paint worldZoneProgressPaint;
+    private Paint worldZoneProgressRingPaint;
 
     private AreaControlMode(int scoreLimit, ControlZone[] zones) {
         this.scoreLimit = scoreLimit;
@@ -360,7 +360,7 @@ public class AreaControlMode {
         }
     }
 
-    public void draw(KoolPaint titlePaint, KoolPaint detailPaint) {
+    public void draw(Paint titlePaint, Paint detailPaint) {
         GameEngine gameEngine = GameEngine.getInstance();
         if (gameEngine == null || gameEngine.renderGraphicsEngine == null || this.zones.length == 0) {
             return;
@@ -447,7 +447,7 @@ public class AreaControlMode {
         }
     }
 
-    private void drawCircleProgress(GameEngine gameEngine, float centerX, float centerY, float radius, float progress, KoolPaint paint) {
+    private void drawCircleProgress(GameEngine gameEngine, float centerX, float centerY, float radius, float progress, Paint paint) {
         if (progress <= 0.0f || radius <= 0.0f) {
             return;
         }
@@ -497,50 +497,50 @@ public class AreaControlMode {
         }
     }
 
-    private void ensureHudPaints(GameEngine gameEngine, KoolPaint titlePaint, KoolPaint detailPaint) {
+    private void ensureHudPaints(GameEngine gameEngine, Paint titlePaint, Paint detailPaint) {
         if (this.hudBackgroundPaint == null) {
-            this.hudBackgroundPaint = new KoolPaint();
-            this.hudBorderPaint = new KoolPaint();
-            this.hudTitlePaint = new KoolPaint();
-            this.hudTextPaint = new KoolPaint();
-            this.hudMutedTextPaint = new KoolPaint();
-            this.hudAccentPaint = new KoolPaint();
-            this.hudCellPaint = new KoolPaint();
-            this.worldZoneFillPaint = new KoolPaint();
-            this.worldZoneBorderPaint = new KoolPaint();
-            this.worldZoneLabelPaint = new KoolPaint();
-            this.worldZoneProgressPaint = new KoolPaint();
-            this.worldZoneProgressRingPaint = new KoolPaint();
+            this.hudBackgroundPaint = new Paint();
+            this.hudBorderPaint = new Paint();
+            this.hudTitlePaint = new Paint();
+            this.hudTextPaint = new Paint();
+            this.hudMutedTextPaint = new Paint();
+            this.hudAccentPaint = new Paint();
+            this.hudCellPaint = new Paint();
+            this.worldZoneFillPaint = new Paint();
+            this.worldZoneBorderPaint = new Paint();
+            this.worldZoneLabelPaint = new Paint();
+            this.worldZoneProgressPaint = new Paint();
+            this.worldZoneProgressRingPaint = new Paint();
         }
         this.hudBackgroundPaint.a(180, 18, 18, 18);
-        this.hudBackgroundPaint.a(KoolPaint.Style.FILL);
+        this.hudBackgroundPaint.a(Paint.Style.FILL);
         this.hudBorderPaint.a(210, 151, 188, 98);
-        this.hudBorderPaint.a(KoolPaint.Style.STROKE);
+        this.hudBorderPaint.a(Paint.Style.STROKE);
         this.hudBorderPaint.a(1.0f);
         this.hudTitlePaint.a(titlePaint);
-        this.hudTitlePaint.a(KoolPaint.Align.CENTER);
+        this.hudTitlePaint.a(Paint.Align.CENTER);
         this.hudTitlePaint.a(255, 232, 242, 220);
         gameEngine.setScaledTextSize(this.hudTitlePaint, 13.0f);
         this.hudTextPaint.a(detailPaint);
-        this.hudTextPaint.a(KoolPaint.Align.LEFT);
+        this.hudTextPaint.a(Paint.Align.LEFT);
         this.hudTextPaint.a(255, 255, 255, 255);
         gameEngine.setScaledTextSize(this.hudTextPaint, 10.0f);
         this.hudMutedTextPaint.a(detailPaint);
-        this.hudMutedTextPaint.a(KoolPaint.Align.CENTER);
+        this.hudMutedTextPaint.a(Paint.Align.CENTER);
         this.hudMutedTextPaint.a(255, 230, 230, 230);
         gameEngine.setScaledTextSize(this.hudMutedTextPaint, 8.0f);
-        this.hudAccentPaint.a(KoolPaint.Style.STROKE);
+        this.hudAccentPaint.a(Paint.Style.STROKE);
         this.hudAccentPaint.a(1.0f);
-        this.hudCellPaint.a(KoolPaint.Style.FILL);
-        this.worldZoneFillPaint.a(KoolPaint.Style.FILL);
-        this.worldZoneBorderPaint.a(KoolPaint.Style.STROKE);
+        this.hudCellPaint.a(Paint.Style.FILL);
+        this.worldZoneFillPaint.a(Paint.Style.FILL);
+        this.worldZoneBorderPaint.a(Paint.Style.STROKE);
         this.worldZoneBorderPaint.a(2.0f);
         this.worldZoneLabelPaint.a(detailPaint);
-        this.worldZoneLabelPaint.a(KoolPaint.Align.CENTER);
+        this.worldZoneLabelPaint.a(Paint.Align.CENTER);
         this.worldZoneLabelPaint.a(255, 245, 246, 241);
         gameEngine.setScaledTextSize(this.worldZoneLabelPaint, 11.0f);
-        this.worldZoneProgressPaint.a(KoolPaint.Style.FILL);
-        this.worldZoneProgressRingPaint.a(KoolPaint.Style.STROKE);
+        this.worldZoneProgressPaint.a(Paint.Style.FILL);
+        this.worldZoneProgressRingPaint.a(Paint.Style.STROKE);
         this.worldZoneProgressRingPaint.a(4.0f);
     }
 
@@ -587,7 +587,7 @@ public class AreaControlMode {
         }
         PlayerTeam localTeam = GameEngine.getInstance().playerTeam;
         if (sortedScores.isEmpty() && localTeam != null && !localTeam.isSpectatorTeamColor()) {
-            sortedScores.put(Integer.valueOf(localTeam.teamId), Integer.valueOf(0));
+            sortedScores.put(Integer.valueOf(localTeam.teamColorId), Integer.valueOf(0));
         }
         return sortedScores;
     }
@@ -596,7 +596,7 @@ public class AreaControlMode {
         return teamLabel(entry.getKey().intValue()) + ": " + entry.getValue().intValue();
     }
 
-    private void drawRect(GameEngine gameEngine, float left, float top, float right, float bottom, KoolPaint paint) {
+    private void drawRect(GameEngine gameEngine, float left, float top, float right, float bottom, Paint paint) {
         this.hudRect.a(left, top, right, bottom);
         gameEngine.renderGraphicsEngine.a(this.hudRect, paint);
     }
@@ -822,7 +822,7 @@ public class AreaControlMode {
             return;
         }
         PlayerTeam localTeam = gameEngine.playerTeam;
-        if (localTeam != null && !localTeam.isSpectatorTeamColor() && localTeam.teamId == allyGroup) {
+        if (localTeam != null && !localTeam.isSpectatorTeamColor() && localTeam.teamColorId == allyGroup) {
             gameEngine.gameUI.startGameEndSequence();
         } else {
             gameEngine.gameUI.endGameSequence();
@@ -922,6 +922,12 @@ public class AreaControlMode {
     private static PlayerTeam playerTeamForGroup(int allyGroup) {
         if (allyGroup < 0 || allyGroup >= PlayerTeam.TEAM_ENEMIES) {
             return null;
+        }
+        for (int i = 0; i < PlayerTeam.TEAM_NEUTRAL; i++) {
+            PlayerTeam team = PlayerTeam.k(i);
+            if (team != null && !team.isSpectatorTeamColor() && team.teamColorId == allyGroup) {
+                return team;
+            }
         }
         return PlayerTeam.k(allyGroup);
     }
@@ -1376,7 +1382,7 @@ public class AreaControlMode {
                 if (!containsUnit(unit)) {
                     continue;
                 }
-                Integer key = Integer.valueOf(unit.team.teamId);
+                Integer key = Integer.valueOf(unit.team.teamColorId);
                 Float current = weightsByGroup.get(key);
                 float newWeight = (current == null ? 0.0f : current.floatValue()) + 1.0f;
                 if (newWeight > this.maxCaptureWeight) {

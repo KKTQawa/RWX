@@ -1,49 +1,98 @@
 package io.github.rwx.ui.host
 
-import de.fabmax.kool.modules.ui2.UiScene
-import de.fabmax.kool.modules.ui2.UiSurface
-import de.fabmax.kool.modules.ui2.mutableStateOf
-import de.fabmax.kool.scene.Scene
-import io.github.rwx.ui.component.MessageDialog
-import io.github.rwx.ui.component.PanelStyle
-import io.github.rwx.ui.component.addPanelSurface
-import io.github.rwx.ui.model.Dialog
-import io.github.rwx.ui.model.SettingsModel
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import io.github.rwx.ui.model.*
 
 class DialogSceneHost(
-    private val model: SettingsModel = SettingsModel(),
+    @Suppress("unused") private val model: SettingsModel = SettingsModel(),
     private val onVisibilityChanged: (Boolean) -> Unit = {},
 ) {
-    private val dialogState = mutableStateOf<Dialog?>(null)
-    private var dialogSurface: UiSurface? = null
+    private val resultScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val choiceLock = Any()
+    private val pendingChoices = mutableSetOf<DialogInputChoice>()
+    @Volatile
+    private var closed = false
+    private var composeOwned = false
+    private val store = DialogStateStore(onChanged = ::syncPresentation)
 
-    fun show(dialog: Dialog) {
-        dialogState.value = dialog
-        syncSurfaceInput()
-        onVisibilityChanged(true)
+    /** Logical visibility is independent of which renderer owns the modal. */
+    val isVisible: Boolean get() = !closed && store.isVisible
+    fun snapshot(): DialogUiState? = if (closed) null else store.snapshot()
+    fun refreshValidity() { if (!closed) store.refreshValidity() }
+
+    fun show(dialog: Dialog, isValid: () -> Boolean = { true }) {
+        if (closed) return
+        val input = dialog.textInput
+        val choose = input?.onChooseInput
+        val ownedDialog = if (choose == null) dialog else dialog.copy(
+            textInput = input.copy(onChooseInput = { complete ->
+                choose { choice -> postChoice(choice, complete) }
+            }),
+        )
+        store.show(ownedDialog, isValid)
     }
 
-    fun hide() {
-        dialogState.value = null
-        syncSurfaceInput()
-        onVisibilityChanged(false)
-    }
+    fun hide() { if (!closed) store.hide() }
+    fun hide(revision: Long) { if (!closed) store.hide(revision) }
+    fun dispatch(revision: Long, action: DialogUiAction): Boolean = !closed && store.dispatch(revision, action)
 
-    fun createScene(): Scene = UiScene(ERROR_DIALOG_SCENE_NAME) {
-        dialogSurface = addPanelSurface(PanelStyle.Dialog, "dialog-panel", model) { theme ->
-            val dialog = dialogState.use() ?: return@addPanelSurface
-            MessageDialog(dialog, theme) { hide() }
+    /** Terminal, frontend-confined close. Chooser callbacks may still arrive on other threads. */
+    fun close() {
+        val pending = synchronized(choiceLock) {
+            if (closed) return
+            closed = true
+            pendingChoices.toList().also { pendingChoices.clear() }
         }
-        syncSurfaceInput()
+        resultScope.cancel()
+        try {
+            store.hide()
+        } finally {
+            // A cancelled Main task may never run. Its resource cleanup cannot live only in its body.
+            pending.forEach { it.dispose() }
+        }
     }
 
-    private fun syncSurfaceInput() {
-        dialogSurface?.inputMode = if (dialogState.value != null) {
-            UiSurface.InputCaptureMode.CaptureInsideBounds
-        } else {
-            UiSurface.InputCaptureMode.CaptureDisabled
+    private fun postChoice(choice: DialogInputChoice?, complete: (DialogInputChoice?) -> Unit) {
+        val accepted = synchronized(choiceLock) {
+            if (closed) false else {
+                choice?.let(pendingChoices::add)
+                true
+            }
         }
+        if (!accepted) {
+            choice?.dispose()
+            return
+        }
+        resultScope.launch {
+            val deliver = synchronized(choiceLock) {
+                pendingChoices.remove(choice)
+                !closed
+            }
+            if (deliver) complete(choice) else choice?.dispose()
+        }.invokeOnCompletion { error ->
+            if (error != null) {
+                synchronized(choiceLock) { pendingChoices.remove(choice) }
+                choice?.dispose()
+            }
+        }
+    }
+
+    fun setComposeOwned(owned: Boolean) {
+        if (closed || composeOwned == owned) return
+        composeOwned = owned
+        notifyVisibility()
+    }
+
+    private fun syncPresentation() {
+        notifyVisibility()
+    }
+
+    private fun notifyVisibility(notifyVisibility: Boolean = true) {
+        if (notifyVisibility) onVisibilityChanged(isVisible && !composeOwned)
     }
 
     companion object {

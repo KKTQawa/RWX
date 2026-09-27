@@ -14,7 +14,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -25,8 +25,8 @@ public class AnimationTrackingManager {
     public static TrackingSpatialCallback f;
     static final Rect a = new Rect();
     static final RectF b = new RectF();
-    static final KoolPaint c = new KoolPaint();
-    static KoolPaint e = new KoolPaint();
+    static final Paint c = new Paint();
+    static Paint e = new Paint();
 
     static {
         e.a(255, 0, 0, 200);
@@ -104,7 +104,7 @@ public class AnimationTrackingManager {
                         gameEngine.renderGraphicsEngine.a(angleBetweenPoints + 90.0f, f3, f4);
                         a.a(0, (int) (texture.q - fSqrt), texture.p, texture.q);
                         b.a(f3 - texture.r, f4 - fSqrt, f3 + texture.r, f4);
-                        KoolPaint paint = GamePaint.r;
+                        Paint paint = GamePaint.r;
                         if (trackingData.d != 0.0f) {
                             paint = c;
                             int iAbs = (int) Math.abs(trackingData.d * 5.0f);

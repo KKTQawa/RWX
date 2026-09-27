@@ -1,12 +1,12 @@
 package com.corrodinggames.rts.gameFramework.graphics
 
 import com.corrodinggames.rts.gameFramework.GameEngine
-import io.github.rwx.render.canvas.KoolDisplacementEffect
-import io.github.rwx.render.canvas.KoolPaint
-import io.github.rwx.render.canvas.KoolTypeface
+import io.github.rwx.render.canvas.DisplacementEffect
+import io.github.rwx.render.canvas.Paint
+import io.github.rwx.render.canvas.Typeface
 
-class GamePaint : KoolPaint() {
-    private var displacementEffect: KoolDisplacementEffect? = null
+class GamePaint : Paint() {
+    private var displacementEffect: DisplacementEffect? = null
     private var shaderProgram: ShaderProgram? = null
     private var hasFlag: Boolean = false
     private var locked: Boolean = false
@@ -28,7 +28,7 @@ class GamePaint : KoolPaint() {
         super.b(value)
     }
 
-    override fun a(typeface: KoolTypeface?): KoolTypeface? {
+    override fun a(typeface: Typeface?): Typeface? {
         if (locked) {
             GameEngine.logColored("UniquePaint changed when locked down:")
             GameEngine.printStackTrace()
@@ -45,18 +45,18 @@ class GamePaint : KoolPaint() {
         super.a(value)
     }
 
-    fun q(): KoolDisplacementEffect? = displacementEffect
+    fun q(): DisplacementEffect? = displacementEffect
 
-    fun displacementEffect(): KoolDisplacementEffect? = q()
+    fun displacementEffect(): DisplacementEffect? = q()
 
-    fun a(effect: KoolDisplacementEffect?) {
+    fun a(effect: DisplacementEffect?) {
         if (displacementEffect !== effect) {
             displacementEffect = effect
             markBackendStateChanged()
         }
     }
 
-    fun setDisplacementEffect(effect: KoolDisplacementEffect?) = a(effect)
+    fun setDisplacementEffect(effect: DisplacementEffect?) = a(effect)
 
     fun shaderProgram(): ShaderProgram? = shaderProgram
 
@@ -77,7 +77,7 @@ class GamePaint : KoolPaint() {
         }
 
         @JvmStatic
-        fun b(paint: KoolPaint) {
+        fun b(paint: Paint) {
             (paint as GamePaint).o()
         }
     }

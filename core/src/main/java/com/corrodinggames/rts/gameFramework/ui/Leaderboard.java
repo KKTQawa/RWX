@@ -9,9 +9,9 @@ import com.corrodinggames.rts.gameFramework.stats.GameObjectComparator;
 import com.corrodinggames.rts.gameFramework.stats.StatType;
 import com.corrodinggames.rts.gameFramework.stats.TeamStats;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.util.ArrayList;
 
@@ -26,10 +26,10 @@ public class Leaderboard {
     GameEngine gameEngine;
 
     /* JADX INFO: renamed from: c */
-    KoolPaint textPaint;
+    Paint textPaint;
 
     /* JADX INFO: renamed from: d */
-    KoolPaint titlePaint;
+    Paint titlePaint;
 
     /* JADX INFO: renamed from: e */
     RectF backgroundRect = new RectF();
@@ -42,17 +42,17 @@ public class Leaderboard {
 
     /* JADX INFO: renamed from: a */
     public void initialize() {
-        this.titlePaint = new KoolPaint();
+        this.titlePaint = new Paint();
         this.titlePaint.a(255, 255, 255, 255);
         this.titlePaint.a(true);
         this.titlePaint.c(true);
-        this.titlePaint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.titlePaint.a(Typeface.a(Typeface.c, 1));
         this.gameEngine.updatePaintTextSize(this.titlePaint, 16.0f);
-        this.textPaint = new KoolPaint();
+        this.textPaint = new Paint();
         this.textPaint.a(255, 255, 255, 255);
         this.textPaint.a(true);
         this.textPaint.c(true);
-        this.textPaint.a(KoolTypeface.a(KoolTypeface.c, 0));
+        this.textPaint.a(Typeface.a(Typeface.c, 0));
         this.gameEngine.updatePaintTextSize(this.textPaint, 16.0f);
     }
 
@@ -99,8 +99,8 @@ public class Leaderboard {
         this.backgroundRect.b = (i2 - 6) - i4;
         this.backgroundRect.d = i2 + 6 + ((arrayList.size() - 1) * i4);
         GamePaint gamePaint = new GamePaint();
-        gamePaint.b(KoolArgbColor.a(100, 0, 0, 0));
-        gamePaint.a(KoolPaint.Style.FILL_AND_STROKE);
+        gamePaint.b(ArgbColor.a(100, 0, 0, 0));
+        gamePaint.a(Paint.Style.FILL_AND_STROKE);
         gameEngine.renderGraphicsEngine.a(this.backgroundRect, gamePaint);
         for (int i6 = 0; i6 < arrayList.size(); i6++) {
             LeaderboardRow leaderboardRow4 = (LeaderboardRow) arrayList.get(i6);

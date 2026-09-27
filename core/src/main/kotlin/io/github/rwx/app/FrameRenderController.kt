@@ -1,38 +1,38 @@
 package io.github.rwx.app
 
-import io.github.rwx.render.canvas.*
+import io.github.rwx.render.frame.*
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 
 internal class FrameRenderController(
     private val gameSession: GameSession,
-    private val screenPresenter: ScreenPresenter,
+    private val shouldShowMenuBackground: (AppScreen) -> Boolean,
     private val warmupController: WarmupController,
-    private val koolCanvasSceneHost: KoolCanvasSceneHost,
-    private val lastExternalFrame: () -> KoolCanvasFrame?,
-    private val setLastExternalFrame: (KoolCanvasFrame) -> Unit,
+    private val presenter: GameFramePresenter,
+    private val lastExternalFrame: () -> GameFrame?,
+    private val setLastExternalFrame: (GameFrame) -> Unit,
 ) {
     fun render(
         screen: AppScreen,
         isExternalBattleRoomJoinPending: Boolean,
         canResumeForFrame: Boolean,
-        canvasViewport: KoolCanvasViewport,
+        canvasViewport: GameViewport,
         deltaSeconds: Float,
     ) {
         val isRwGameVisible = screen == AppScreen.InGame
         val isRwMenuBackgroundVisible = !isExternalBattleRoomJoinPending &&
-                screenPresenter.shouldShowRwMenuBackground(screen)
+                shouldShowMenuBackground(screen)
         val isResumeBackgroundVisible = shouldShowResumeMenuBackground(
             screen = screen,
             canResume = canResumeForFrame,
         )
-        val isLastExternalFrameBackgroundVisible = screen == AppScreen.MainMenu &&
-                !gameSession.rendersIntoKoolCanvas &&
+        val isLastExternalFrameBackgroundVisible = supportsMenuBattleBackground(screen) &&
+                !gameSession.usesFrameCommandRendering &&
                 lastExternalFrame() != null
         val isStartupMenuBackgroundLoading = warmupController.isStartupMenuBackgroundLoading(screen)
         val isRwGameLoading = warmupController.isRwGameLoading(screen)
         val rwCanvasFrame = when {
-            isExternalBattleRoomJoinPending -> KoolCanvasFrame(canvasViewport, emptyList())
+            isExternalBattleRoomJoinPending -> GameFrame(canvasViewport, emptyList())
             isRwGameVisible -> gameSession.updateFrame(canvasViewport, deltaSeconds)
             isRwMenuBackgroundVisible -> {
                 gameSession.updateFrame(
@@ -58,7 +58,7 @@ internal class FrameRenderController(
 
             else -> gameSession.currentFrame()
         }
-        if (!gameSession.rendersIntoKoolCanvas && isRwGameVisible && rwCanvasFrame.commands.isNotEmpty()) {
+        if (!gameSession.usesFrameCommandRendering && isRwGameVisible && rwCanvasFrame.commands.isNotEmpty()) {
             setLastExternalFrame(rwCanvasFrame)
         }
         warmupController.updateLoadingStatus(screen)
@@ -74,17 +74,16 @@ internal class FrameRenderController(
             isResumeBackgroundVisible = isResumeBackgroundVisible,
             isRwGameLoading = isRwGameLoading,
             isLastExternalFrameBackgroundVisible = isLastExternalFrameBackgroundVisible,
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
         )
-        koolCanvasSceneHost.render(
+        presenter.present(
             if (shouldUseRwCanvasFrame) {
                 val frame = externalFrameBackground ?: rwCanvasFrame
-                // Canvas/OpenGL Android backends render into a native surface below Kool's transparent
-                // surface. A synthetic opaque clear here hides that native frame completely;
-                // only the Kool-owned backend needs the fallback black clear.
-                if (gameSession.rendersIntoKoolCanvas) frame.withDefaultSurfaceClear() else frame
+                // Native backends own their surface clears. Only a command-rendered frame
+                // needs a fallback clear; otherwise it would cover the native game.
+                if (gameSession.usesFrameCommandRendering) frame.withDefaultSurfaceClear() else frame
             } else {
-                KoolCanvasFrame(canvasViewport, emptyList())
+                GameFrame(canvasViewport, emptyList())
             },
         )
     }
@@ -92,10 +91,10 @@ internal class FrameRenderController(
 
 internal fun resumeBackgroundFrameForSession(
     gameSession: GameSession,
-    canvasViewport: KoolCanvasViewport,
+    canvasViewport: GameViewport,
     deltaSeconds: Float,
-): KoolCanvasFrame =
-    if (gameSession.rendersIntoKoolCanvas) {
+): GameFrame =
+    if (gameSession.usesFrameCommandRendering) {
         gameSession.currentFrame()
     } else {
         gameSession.updateFrame(
@@ -105,15 +104,15 @@ internal fun resumeBackgroundFrameForSession(
         )
     }
 
-internal fun KoolCanvasFrame.withDefaultSurfaceClear(): KoolCanvasFrame {
-    if (commands.any { it is KoolCanvasCommand.Clear && it.renderTarget == null }) {
+internal fun GameFrame.withDefaultSurfaceClear(): GameFrame {
+    if (commands.any { it is GameCanvasCommand.Clear && it.renderTarget == null }) {
         return this
     }
     return copy(
         commands = listOf(
-            KoolCanvasCommand.Clear(
-                color = KoolCanvasColor(0xff000000.toInt()),
-                blendMode = KoolCanvasBlendMode.Source,
+            GameCanvasCommand.Clear(
+                color = GameCanvasColor(0xff000000.toInt()),
+                blendMode = GameCanvasBlendMode.Source,
             ),
         ) + commands,
     )

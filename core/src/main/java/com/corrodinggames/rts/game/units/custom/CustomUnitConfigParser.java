@@ -37,7 +37,7 @@ import com.corrodinggames.rts.gameFramework.utility.*;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.mod.asset.JvmModAssetBridge;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -2796,7 +2796,7 @@ public class CustomUnitConfigParser {
                 customActionDef.iconExtraIsVisible = null;
             }
             customActionDef.iconExtraImage = customUnitConfig.a(iniFile, str, str2 + "iconExtraImage");
-            customActionDef.iconExtraColor = iniFile.getColorAsInt(str, str2 + "iconExtraColor", Integer.valueOf(KoolArgbColor.a(100, 255, 255, 255))).intValue();
+            customActionDef.iconExtraColor = iniFile.getColorAsInt(str, str2 + "iconExtraColor", Integer.valueOf(ArgbColor.a(100, 255, 255, 255))).intValue();
             customActionDef.unitShownInUI = UnitReference.parseUnitTypeOrReferenceFromConf(customUnitConfig, iniFile, str, str2 + "unitShownInUI", null);
             if (customActionDef.unitShownInUI != null && customActionDef.iconImage != null) {
                 throw new RuntimeException("[" + str + "]unitShownInUI and iconImage: doesn't make sense to use both at the same time");

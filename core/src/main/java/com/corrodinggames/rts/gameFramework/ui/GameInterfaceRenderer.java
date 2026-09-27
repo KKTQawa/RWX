@@ -30,10 +30,10 @@ import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
 import io.github.rwx.platform.CoreGameView;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolBlendColorFilter;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.BlendColorFilter;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.Paint;
 import io.github.rwx.ui.InGameMenuController;
 
 import java.io.IOException;
@@ -66,10 +66,10 @@ public class GameInterfaceRenderer extends Serializable {
     GamePaint buildActionIconPaint;
 
     /* JADX INFO: renamed from: q */
-    KoolPaint textPaint;
+    Paint textPaint;
 
     /* JADX INFO: renamed from: r */
-    KoolPaint textPaint2;
+    Paint textPaint2;
 
     /* JADX INFO: renamed from: D */
     boolean isZoomButtonPressed;
@@ -115,10 +115,10 @@ public class GameInterfaceRenderer extends Serializable {
     float gestureZoomTimer;
 
     /* JADX INFO: renamed from: Y */
-    static KoolPaint staticPaint = new KoolPaint();
+    static Paint staticPaint = new Paint();
 
     /* JADX INFO: renamed from: Z */
-    static KoolBlendColorFilter staticColorFilter = new KoolBlendColorFilter(KoolArgbColor.a(200, 255, 200), KoolCanvasBlendMode.Multiply);
+    static BlendColorFilter staticColorFilter = new BlendColorFilter(ArgbColor.a(200, 255, 200), GameCanvasBlendMode.Multiply);
 
     /* JADX INFO: renamed from: aa */
     BaseUnit selectedUnit;
@@ -172,28 +172,28 @@ public class GameInterfaceRenderer extends Serializable {
     public boolean isDraggingSelectionBox = false;
 
     /* JADX INFO: renamed from: g */
-    KoolPaint paintSelectionBox = new KoolPaint();
+    Paint paintSelectionBox = new Paint();
 
     /* JADX INFO: renamed from: h */
-    KoolPaint paintHealthBar = new KoolPaint();
+    Paint paintHealthBar = new Paint();
 
     /* JADX INFO: renamed from: i */
-    KoolPaint paintUnitInfo = new KoolPaint();
+    Paint paintUnitInfo = new Paint();
 
     /* JADX INFO: renamed from: j */
-    KoolPaint paintUnitName = new KoolPaint();
+    Paint paintUnitName = new Paint();
 
     /* JADX INFO: renamed from: k */
-    KoolPaint paintUnitType = new KoolPaint();
+    Paint paintUnitType = new Paint();
 
     /* JADX INFO: renamed from: l */
-    KoolPaint paintUnitTeam = new KoolPaint();
+    Paint paintUnitTeam = new Paint();
 
     /* JADX INFO: renamed from: m */
-    KoolPaint paintUnitStatus = new KoolPaint();
+    Paint paintUnitStatus = new Paint();
 
     /* JADX INFO: renamed from: p */
-    KoolPaint paintMinimap = new KoolPaint();
+    Paint paintMinimap = new Paint();
 
     /* JADX INFO: renamed from: s */
     Rect zoomButtonRect = new Rect();
@@ -315,21 +315,21 @@ public class GameInterfaceRenderer extends Serializable {
         staticPaint.a(255, 30, 30, 30);
         staticPaint.a(staticColorFilter);
         staticPaint.d(true);
-        this.textPaint = new KoolPaint();
+        this.textPaint = new Paint();
         this.textPaint.a(255, 255, 255, 255);
-        this.textPaint.a(KoolPaint.Align.LEFT);
+        this.textPaint.a(Paint.Align.LEFT);
         this.textPaint.c(true);
         this.textPaint.a(true);
-        this.textPaint2 = new KoolPaint();
+        this.textPaint2 = new Paint();
         this.textPaint2.a(255, 255, 255, 255);
-        this.textPaint2.a(KoolPaint.Align.LEFT);
+        this.textPaint2.a(Paint.Align.LEFT);
         this.textPaint2.c(true);
         this.textPaint2.a(true);
         this.actionIconPaint = new GamePaint();
-        this.actionIconPaint.b(KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 255, 255, 255));
+        this.actionIconPaint.b(ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 255, 255, 255));
         this.actionIconPaint.o();
         this.buildActionIconPaint = new GamePaint();
-        this.buildActionIconPaint.b(KoolArgbColor.a(133, 255, 255, 255));
+        this.buildActionIconPaint.b(ArgbColor.a(133, 255, 255, 255));
         this.buildActionIconPaint.o();
         this.unitGroupMarkers.clear();
         int i = 0;
@@ -378,7 +378,7 @@ public class GameInterfaceRenderer extends Serializable {
             if (this.isZoomButtonPressed) {
                 this.zoomButtonRect.a(i - 4, (int) (i2 - (50.0f * this.gameEngine.screenScale)), i + 4, (int) (i2 + (50.0f * this.gameEngine.screenScale)));
                 this.paintUnitInfo.a();
-                this.paintUnitInfo.b(KoolArgbColor.a(255, 0, 0, 0));
+                this.paintUnitInfo.b(ArgbColor.a(255, 0, 0, 0));
                 this.gameEngine.renderGraphicsEngine.b(this.zoomButtonRect, this.paintUnitInfo);
             }
             float f4 = i2;
@@ -609,8 +609,8 @@ public class GameInterfaceRenderer extends Serializable {
                     this.selectionRect.a = (int) this.selectionRectF2.a;
                     this.selectionRect.c = (int) this.selectionRectF2.c;
                     Utility.normalizeRect(this.selectionRect);
-                    this.paintSelectionBox.b(KoolArgbColor.a(255, 0, 255, 0));
-                    this.paintSelectionBox.a(KoolPaint.Style.STROKE);
+                    this.paintSelectionBox.b(ArgbColor.a(255, 0, 255, 0));
+                    this.paintSelectionBox.a(Paint.Style.STROKE);
                     this.paintSelectionBox.a(1.0f);
                     this.gameEngine.renderGraphicsEngine.b(this.selectionRect, this.paintSelectionBox);
                     this.isSelecting = true;
@@ -1339,7 +1339,7 @@ public class GameInterfaceRenderer extends Serializable {
                 this.zoomButtonRect.c = (int) (width + n7 - 2.0f);
                 this.zoomButtonRect.b = (int) (currentScreenHeightPixels - h * n17);
                 this.zoomButtonRect.d = (int) (this.zoomButtonRect.b + h * n17);
-                if (this.gameUI.a(this.zoomButtonRect.a, this.zoomButtonRect.b, this.zoomButtonRect.b(), this.zoomButtonRect.c(), "\\/", IconGroup.none, false, KoolArgbColor.a(80, 100, 150, 100), this.gameUI.buildingPreviewPaint, null) && this.gameUI.isInputEnabled()) {
+                if (this.gameUI.a(this.zoomButtonRect.a, this.zoomButtonRect.b, this.zoomButtonRect.b(), this.zoomButtonRect.c(), "\\/", IconGroup.none, false, ArgbColor.a(80, 100, 150, 100), this.gameUI.buildingPreviewPaint, null) && this.gameUI.isInputEnabled()) {
                     n16 += 3.0f * n6;
                     this.gameUI.isSelectionBoxActive = false;
                 }
@@ -1351,7 +1351,7 @@ public class GameInterfaceRenderer extends Serializable {
                 this.zoomButtonRect.c = (int) (width + n7 - 2.0f);
                 this.zoomButtonRect.b = (int) n14;
                 this.zoomButtonRect.d = (int) (this.zoomButtonRect.b + h * n17);
-                if (this.gameUI.a(this.zoomButtonRect.a, this.zoomButtonRect.b, this.zoomButtonRect.b(), this.zoomButtonRect.c(), "/\\", IconGroup.none, false, KoolArgbColor.a(80, 100, 150, 100), this.gameUI.buildingPreviewPaint, null) && this.gameUI.isInputEnabled()) {
+                if (this.gameUI.a(this.zoomButtonRect.a, this.zoomButtonRect.b, this.zoomButtonRect.b(), this.zoomButtonRect.c(), "/\\", IconGroup.none, false, ArgbColor.a(80, 100, 150, 100), this.gameUI.buildingPreviewPaint, null) && this.gameUI.isInputEnabled()) {
                     n16 -= 3.0f * n6;
                     this.gameUI.isSelectionBoxActive = false;
                 }
@@ -1457,18 +1457,18 @@ public class GameInterfaceRenderer extends Serializable {
                 final boolean b7 = c;
                 final boolean a2 = a(unitCommand);
                 final boolean buildOption = unitCommand.isBuildOption();
-                KoolPaint paint2 = this.paintUnitName;
+                Paint paint2 = this.paintUnitName;
                 boolean b8 = b7;
                 if (alsoSelected == ActionDisplayType.infoOnlyStockpile) {
                     b8 = true;
                 }
                 if (b8) {
-                    paint2.b(KoolArgbColor.a(70, 100, 100, 100));
+                    paint2.b(ArgbColor.a(70, 100, 100, 100));
                 } else {
-                    paint2.b(KoolArgbColor.a(50, 170, 100, 100));
+                    paint2.b(ArgbColor.a(50, 170, 100, 100));
                 }
                 if (a2) {
-                    paint2.b(KoolArgbColor.a(100, 180, 100, 100));
+                    paint2.b(ArgbColor.a(100, 180, 100, 100));
                 }
                 boolean b9 = false;
                 boolean b10 = false;
@@ -1480,10 +1480,10 @@ public class GameInterfaceRenderer extends Serializable {
                     b10 = true;
                 }
                 if (b9) {
-                    paint2.b(KoolArgbColor.a(80, 100, 100, 200));
+                    paint2.b(ArgbColor.a(80, 100, 100, 200));
                 }
                 if (b10) {
-                    paint2.b(KoolArgbColor.a(80, 100, 200, 100));
+                    paint2.b(ArgbColor.a(80, 100, 200, 100));
                 }
                 GamePaint paint3;
                 if (buildOption) {
@@ -1507,9 +1507,9 @@ public class GameInterfaceRenderer extends Serializable {
                             n25 = Utility.clampTo255(n25, 0.0f, 1.0f);
                             int n26;
                             if (timerValue > 0.0f) {
-                                n26 = KoolArgbColor.a(110, 210, 210, 210);
+                                n26 = ArgbColor.a(110, 210, 210, 210);
                             } else {
-                                n26 = KoolArgbColor.a(110, 210, 110, 110);
+                                n26 = ArgbColor.a(110, 210, 110, 110);
                             }
                             final int randomIntInRange = Utility.lerpColor(n26, paint2.e(), n25);
                             paint2 = this.paintUnitInfo;
@@ -1537,17 +1537,17 @@ public class GameInterfaceRenderer extends Serializable {
                                 this.gameEngine.renderGraphicsEngine.a((float) this.minimapRect.c, (float) this.minimapRect.b, (float) this.minimapRect.c, (float) this.minimapRect.d, this.paintUnitTeam);
                             }
                         }
-                        int n26 = KoolArgbColor.a(255, 0, 0, 0);
+                        int n26 = ArgbColor.a(255, 0, 0, 0);
                         if (GameUI.bO) {
-                            n26 = KoolArgbColor.a(100, 0, 0, 0);
+                            n26 = ArgbColor.a(100, 0, 0, 0);
                             if (buildOption) {
-                                n26 = KoolArgbColor.a(50, 155, 155, 155);
+                                n26 = ArgbColor.a(50, 155, 155, 155);
                             }
                         }
                         boolean boolean3 = false;
                         if (setMenuDialog) {
                             boolean3 = true;
-                            n26 = KoolArgbColor.a((int) (100.0f + 150.0f * abs), 255, 255, 255);
+                            n26 = ArgbColor.a((int) (100.0f + 150.0f * abs), 255, 255, 255);
                         }
                         this.gameUI.a(this.zoomButtonRect, n26, boolean3);
                     }
@@ -1609,8 +1609,8 @@ public class GameInterfaceRenderer extends Serializable {
                                 final int n29 = 120;
                                 final int n30 = Utility.packArgb(200, 0, 0, 150);
                                 final int j = Utility.packArgb(120, 0, 0, 230);
-                                final KoolPaint a5 = GameViewUtils.a(n30, KoolPaint.Style.FILL);
-                                final KoolPaint a6 = GameViewUtils.a(j, KoolPaint.Style.STROKE);
+                                final Paint a5 = GameViewUtils.a(n30, Paint.Style.FILL);
+                                final Paint a6 = GameViewUtils.a(j, Paint.Style.STROKE);
                                 final int n31 = 3;
                                 final int n32 = (int) (this.selectionRectF.b() / 3.0f) - 3;
                                 final int n33 = 0;
@@ -1623,8 +1623,8 @@ public class GameInterfaceRenderer extends Serializable {
                                 final int n29 = 120;
                                 final int n30 = Utility.packArgb(200, 0, 150, 0);
                                 final int j = Utility.packArgb(120, 0, 230, 0);
-                                final KoolPaint a7 = GameViewUtils.a(n30, KoolPaint.Style.FILL);
-                                final KoolPaint a8 = GameViewUtils.a(j, KoolPaint.Style.STROKE);
+                                final Paint a7 = GameViewUtils.a(n30, Paint.Style.FILL);
+                                final Paint a8 = GameViewUtils.a(j, Paint.Style.STROKE);
                                 final int n31 = 3;
                                 final int n32 = (int) (this.selectionRectF.b() / 3.0f) - 3;
                                 final int n33 = 0;
@@ -1672,7 +1672,7 @@ public class GameInterfaceRenderer extends Serializable {
                         this.paintUnitInfo.a(this.gameUI.buildingPreviewPaint);
                     }
                     if (!b8) {
-                        this.paintUnitInfo.b(KoolArgbColor.a(255, 0, 100, 0));
+                        this.paintUnitInfo.b(ArgbColor.a(255, 0, 100, 0));
                     }
                     if (alsoSelected == ActionDisplayType.rally) {
                         this.paintUnitInfo.a(255, 255, 255, 255);
@@ -1979,7 +1979,7 @@ public class GameInterfaceRenderer extends Serializable {
                 z = false;
             }
             if (z) {
-                if (this.gameUI.b((int) ((this.gameEngine.screenWidth - this.gameEngine.minimap.width) + 2.0f), this.gameEngine.minimap.getBottomY() + 2, (int) (this.gameEngine.minimap.width - 4.0f), (int) i(), this.unselectAllText, IconGroup.unselectAllButton, false, KoolArgbColor.a(140, 100, 100, 100)) && !this.gameUI.isInputDisabled) {
+                if (this.gameUI.b((int) ((this.gameEngine.screenWidth - this.gameEngine.minimap.width) + 2.0f), this.gameEngine.minimap.getBottomY() + 2, (int) (this.gameEngine.minimap.width - 4.0f), (int) i(), this.unselectAllText, IconGroup.unselectAllButton, false, ArgbColor.a(140, 100, 100, 100)) && !this.gameUI.isInputDisabled) {
                     this.gameUI.resetMouseState();
                     this.gameUI.clearCurrentAction();
                     this.gameUI.clearSelection();
@@ -2029,7 +2029,7 @@ public class GameInterfaceRenderer extends Serializable {
             boolean z4 = false;
             if (!GameUI.bQ) {
                 if (i < 3 && !z2 && playerTeam != null) {
-                    KoolPaint paint = this.gameUI.unitRangeBorderPaint;
+                    Paint paint = this.gameUI.unitRangeBorderPaint;
                     if (this.gameEngine.playerTeam.d(playerTeam)) {
                         paint = this.gameUI.unitPathPaint;
                     }
@@ -2042,9 +2042,9 @@ public class GameInterfaceRenderer extends Serializable {
                         if (z4) {
                             strA = "\n" + ("\n" + ("\n" + strA));
                         }
-                        KoolPaint paint2 = this.paintUnitInfo;
+                        Paint paint2 = this.paintUnitInfo;
                         paint2.a();
-                        paint2.b(KoolArgbColor.a(50, 100, 100, 100));
+                        paint2.b(ArgbColor.a(50, 100, 100, 100));
                         this.gameUI.a(strA, this.zoomButtonRect, this.gameUI.unitPathBorderPaint, this.gameUI.unitPathBorderPaint);
                     }
                 }
@@ -2323,14 +2323,14 @@ public class GameInterfaceRenderer extends Serializable {
         this.messageTimer = 0.0f;
     }
 
-    void a(final int integer1, final int integer2, final int integer3, final String string4, final String string5, final KoolPaint paint, final float float7) {
+    void a(final int integer1, final int integer2, final int integer3, final String string4, final String string5, final Paint paint, final float float7) {
         final int integer4 = (int) (integer3 * 2.5);
         final int integer5 = (int) (40.0f * this.gameEngine.screenScale);
         final int n = integer1 + integer3 / 2;
         final int integer6 = (int) (integer2 - integer5 - 35.0f * this.gameEngine.screenScale);
         final int n2 = n - integer4 / 2;
         this.rect.a(n2, integer6, n2 + integer4, integer6 + integer5);
-        this.gameUI.a(n2, integer6, integer4, integer5, "", KoolArgbColor.a(180, 100, 100, 100), this.gameUI.buildingPreviewPaint, false, null, null);
+        this.gameUI.a(n2, integer6, integer4, integer5, "", ArgbColor.a(180, 100, 100, 100), this.gameUI.buildingPreviewPaint, false, null, null);
         float f = float7;
         if (f < 0.0f) {
             f = 0.0f;
@@ -2454,7 +2454,7 @@ public class GameInterfaceRenderer extends Serializable {
             final int screenPixels3 = this.gameEngine.toScreenPixels(152);
             final int n8 = (int) (this.gameEngine.currentScreenWidthPixels / 2.0f - screenPixels3 / 2);
             int n9 = n7;
-            final int a = KoolArgbColor.a(140, 100, 100, 100);
+            final int a = ArgbColor.a(140, 100, 100, 100);
             boolean resumeHit = this.gameUI.a(n8, n9, screenPixels3, screenPixels2, Locale.get("menus.ingame.resume"), IconGroup.none, false, a, this.gameUI.buildingPreviewInvalidPaint, this.gameUI.ninePatchStyle3);
             debugSlickMenuButton("resume", -1, n8, n9, screenPixels3, screenPixels2, resumeHit);
             if (resumeHit) {
@@ -2589,20 +2589,20 @@ public class GameInterfaceRenderer extends Serializable {
                 unitGroupMarker.d = Utility.moveTowardsZero(unitGroupMarker.d, 0.01f * f);
                 unitGroupMarker.e = Utility.moveTowardsZero(unitGroupMarker.e, 0.01f * f);
                 unitGroupMarker.f = Utility.moveTowardsZero(unitGroupMarker.f, 0.01f * f);
-                if (this.gameUI.a(i2, i, i4, (int) (31.0f * this.gameEngine.screenScale), str, IconGroup.none, true, KoolArgbColor.a(50, (int) (100.0f + (unitGroupMarker.f * 100.0f)), (int) (100.0f + (unitGroupMarker.e * 100.0f)), (int) (100.0f + (unitGroupMarker.d * 100.0f)))) && this.gameUI.currentAction == null && !this.gameUI.isInputDisabled) {
+                if (this.gameUI.a(i2, i, i4, (int) (31.0f * this.gameEngine.screenScale), str, IconGroup.none, true, ArgbColor.a(50, (int) (100.0f + (unitGroupMarker.f * 100.0f)), (int) (100.0f + (unitGroupMarker.e * 100.0f)), (int) (100.0f + (unitGroupMarker.d * 100.0f)))) && this.gameUI.currentAction == null && !this.gameUI.isInputDisabled) {
                     z = true;
                     unitGroupMarker.radius += f;
                     this.gameUI.resetMouseState();
                     float f2 = 1.0f;
                     this.paintUnitInfo.a();
-                    this.paintUnitInfo.b(KoolArgbColor.a(120, 200, 0, 0));
+                    this.paintUnitInfo.b(ArgbColor.a(120, 200, 0, 0));
                     if (unitGroupMarker.radius < 50.0f) {
                         f2 = unitGroupMarker.radius / 50.0f;
-                        this.paintUnitInfo.b(KoolArgbColor.a((int) (150.0f + (f2 * 40.0f)), 0, 200, 0));
+                        this.paintUnitInfo.b(ArgbColor.a((int) (150.0f + (f2 * 40.0f)), 0, 200, 0));
                         a(i2, i, i4, "Select Group", "(Hold for more..)", this.paintUnitInfo, f2);
                     } else if (unitGroupMarker.radius < 100.0f) {
                         f2 = (unitGroupMarker.radius - 50.0f) / 50.0f;
-                        this.paintUnitInfo.b(KoolArgbColor.a((int) (150.0f + (f2 * 40.0f)), 200, 0, 0));
+                        this.paintUnitInfo.b(ArgbColor.a((int) (150.0f + (f2 * 40.0f)), 200, 0, 0));
                         a(i2, i, i4, "Add to Group", "(Hold for more..)", this.paintUnitInfo, f2);
                     } else {
                         a(i2, i, i4, "Replace Group", VariableScope.nullOrMissingString, this.paintUnitInfo, 0.0f);

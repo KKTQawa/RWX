@@ -18,10 +18,13 @@ import com.corrodinggames.rts.gameFramework.utility.AssetInputStream
 import io.github.rwx.geometry.Rect
 import io.github.rwx.geometry.RectF
 import io.github.rwx.render.canvas.*
+import io.github.rwx.render.frame.GameCanvasBlendMode
+import timber.log.Timber
 import java.io.File
 import java.io.InputStream
 import java.util.*
 import java.util.concurrent.locks.Lock
+import androidx.core.graphics.createBitmap
 
 /**
  * Android-only bridge from the core RW graphics interface to the copied Android graphics renderer.
@@ -52,16 +55,16 @@ internal class AndroidGraphicsEngine(
     private val fallbackTexture: Texture
     private val fallbackUnitTexture: UnitTexture
     private val fallbackResources: AndroidFallbackResources
-    private val paintCache: MutableMap<KoolPaint, AndroidPaintBinding> = IdentityHashMap()
-    private val colorFilterCache: MutableMap<KoolColorFilter, ColorFilter> = IdentityHashMap()
+    private val paintCache: MutableMap<io.github.rwx.render.canvas.Paint, AndroidPaintBinding> = IdentityHashMap()
+    private val colorFilterCache: MutableMap<io.github.rwx.render.canvas.ColorFilter, android.graphics.ColorFilter> = IdentityHashMap()
     private val androidRectA = android.graphics.Rect()
     private val androidRectB = android.graphics.Rect()
     private val androidRectF = android.graphics.RectF()
     private var lastTexture: Texture? = null
     private var lastTextureBinding: TextureBinding? = null
-    private var lastPaint: KoolPaint? = null
+    private var lastPaint: io.github.rwx.render.canvas.Paint? = null
     private var lastPaintRevision: Int = Int.MIN_VALUE
-    private var lastAndroidPaint: Paint? = null
+    private var lastAndroidPaint: android.graphics.Paint? = null
 
     init {
         fallbackResources = sharedFallbackResources ?: run {
@@ -183,12 +186,12 @@ internal class AndroidGraphicsEngine(
     override fun b(i: Int, i2: Int, z: Boolean): Texture =
         graphicsContext.b(i.coerceAtLeast(1), i2.coerceAtLeast(1), z).toCoreTexture("generated/${i}x$i2")
 
-    override fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         graphicsContext.a(textureBinding(texture).unitTexture, f, f2, f3, paint.toAndroidPaint())
     }
 
-    override fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         rect ?: return
         graphicsContext.a(
@@ -201,7 +204,7 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         rect ?: return
         rect2 ?: return
@@ -213,7 +216,7 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         rect ?: return
         rectF ?: return
@@ -225,12 +228,12 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, f: Float, f2: Float, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         graphicsContext.a(textureBinding(texture).unitTexture, f, f2, paint.toAndroidPaint())
     }
 
-    override fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?, f3: Float, f4: Float) {
+    override fun a(texture: Texture?, f: Float, f2: Float, paint: io.github.rwx.render.canvas.Paint?, f3: Float, f4: Float) {
         texture ?: return
         k()
         if (f3 != 0f) {
@@ -243,12 +246,12 @@ internal class AndroidGraphicsEngine(
         l()
     }
 
-    override fun b(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun b(texture: Texture?, f: Float, f2: Float, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         graphicsContext.b(textureBinding(texture).unitTexture, f, f2, paint.toAndroidPaint())
     }
 
-    override fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?) {
+    override fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         rect ?: return
         rect2 ?: return
@@ -262,12 +265,12 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(rect: Rect?, paint: KoolPaint?) {
+    override fun a(rect: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         rect ?: return
         graphicsContext.a(rect.copyTo(androidRectA), paint.toAndroidPaint())
     }
 
-    override fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         texture ?: return
         rect ?: return
         val unitTexture = textureBinding(texture).unitTexture
@@ -283,7 +286,7 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?, i: Int, i2: Int, i3: Int, i4: Int) {
+    override fun a(texture: Texture?, rect: Rect?, paint: io.github.rwx.render.canvas.Paint?, i: Int, i2: Int, i3: Int, i4: Int) {
         texture ?: return
         rect ?: return
         graphicsContext.a(
@@ -297,7 +300,7 @@ internal class AndroidGraphicsEngine(
         )
     }
 
-    override fun a(texture: Texture?, rectF: RectF?, paint: KoolPaint?, f: Float, f2: Float, i: Int, i2: Int) {
+    override fun a(texture: Texture?, rectF: RectF?, paint: io.github.rwx.render.canvas.Paint?, f: Float, f2: Float, i: Int, i2: Int) {
         texture ?: return
         rectF ?: return
         graphicsContext.a(
@@ -313,23 +316,23 @@ internal class AndroidGraphicsEngine(
         graphicsContext.b(i)
     }
 
-    override fun a(i: Int, mode: KoolCanvasBlendMode?) {
-        if (mode == KoolCanvasBlendMode.Clear || mode == KoolCanvasBlendMode.ClearAlpha) {
+    override fun a(i: Int, mode: GameCanvasBlendMode?) {
+        if (mode == GameCanvasBlendMode.Clear || mode == GameCanvasBlendMode.ClearAlpha) {
             graphicsContext.a(PorterDuff.Mode.CLEAR)
         } else {
             graphicsContext.b(i)
         }
     }
 
-    override fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?, paint2: KoolPaint?, f3: Float) {
+    override fun a(str: String?, f: Float, f2: Float, paint: io.github.rwx.render.canvas.Paint?, paint2: io.github.rwx.render.canvas.Paint?, f3: Float) {
         graphicsContext.a(str.orEmpty(), f, f2, paint.toAndroidPaint(), paint2.toAndroidPaint(), f3)
     }
 
-    override fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun a(str: String?, f: Float, f2: Float, paint: io.github.rwx.render.canvas.Paint?) {
         graphicsContext.a(str.orEmpty(), f, f2, paint.toAndroidPaint())
     }
 
-    override fun b(rect: Rect?, paint: KoolPaint?) {
+    override fun b(rect: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         rect ?: return
         graphicsContext.b(rect.copyTo(androidRectA), paint.toAndroidPaint())
     }
@@ -342,12 +345,12 @@ internal class AndroidGraphicsEngine(
         graphicsContext.d()
     }
 
-    override fun a(rectF: RectF?, paint: KoolPaint?) {
+    override fun a(rectF: RectF?, paint: io.github.rwx.render.canvas.Paint?) {
         rectF ?: return
         graphicsContext.a(rectF.copyTo(androidRectF), paint.toAndroidPaint())
     }
 
-    override fun c(rect: Rect?, paint: KoolPaint?) {
+    override fun c(rect: Rect?, paint: io.github.rwx.render.canvas.Paint?) {
         rect ?: return
         graphicsContext.c(rect.copyTo(androidRectA), paint.toAndroidPaint())
     }
@@ -362,15 +365,15 @@ internal class AndroidGraphicsEngine(
         graphicsContext.a(rectF.copyTo(androidRectF))
     }
 
-    override fun a(f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(f: Float, f2: Float, f3: Float, paint: io.github.rwx.render.canvas.Paint?) {
         graphicsContext.a(f, f2, f3, paint.toAndroidPaint())
     }
 
-    override fun b(f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun b(f: Float, f2: Float, f3: Float, paint: io.github.rwx.render.canvas.Paint?) {
         graphicsContext.b(f, f2, f3, paint.toAndroidPaint())
     }
 
-    override fun a(fArr: FloatArray?, i: Int, i2: Int, paint: KoolPaint?) {
+    override fun a(fArr: FloatArray?, i: Int, i2: Int, paint: io.github.rwx.render.canvas.Paint?) {
         fArr ?: return
         val points = if (i == 0) fArr else fArr.copyOfRange(i, (i + i2).coerceAtMost(fArr.size))
         graphicsContext.a(points, i2.coerceAtMost(points.size), paint.toAndroidPaint())
@@ -408,7 +411,7 @@ internal class AndroidGraphicsEngine(
         graphicsContext.b(f, f2)
     }
 
-    override fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: KoolPaint?) {
+    override fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: io.github.rwx.render.canvas.Paint?) {
         graphicsContext.a(f, f2, f3, f4, paint.toAndroidPaint())
     }
 
@@ -442,10 +445,10 @@ internal class AndroidGraphicsEngine(
         graphicsContext.a(syncShader(shaderProgram))
     }
 
-    override fun a(str: String?, paint: KoolPaint?): Int =
+    override fun a(str: String?, paint: io.github.rwx.render.canvas.Paint?): Int =
         graphicsContext.a(paint.toAndroidPaint())
 
-    override fun b(str: String?, paint: KoolPaint?): Int =
+    override fun b(str: String?, paint: io.github.rwx.render.canvas.Paint?): Int =
         graphicsContext.a(str.orEmpty(), paint.toAndroidPaint())
 
     override fun r(): Texture = fallbackTexture
@@ -577,7 +580,7 @@ internal class AndroidGraphicsEngine(
     private fun Texture.toUnitTexture(): UnitTexture {
         val width = width().coerceAtLeast(1)
         val height = height().coerceAtLeast(1)
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(width, height)
         val pixels = argbPixelsCopy
         if (pixels != null) {
             bitmap.setPixels(pixels.copyOf(width * height), 0, width, 0, 0, width, height)
@@ -589,7 +592,7 @@ internal class AndroidGraphicsEngine(
         }
     }
 
-    private fun KoolPaint?.toAndroidPaint(): Paint {
+    private fun io.github.rwx.render.canvas.Paint?.toAndroidPaint(): android.graphics.Paint {
         if (this == null) {
             return DEFAULT_PAINT
         }
@@ -619,24 +622,24 @@ internal class AndroidGraphicsEngine(
             paint.isDither = isDither()
             paint.isSubpixelText = isSubpixelText()
             paint.style = when (m) {
-                KoolPaint.Style.STROKE -> Paint.Style.STROKE
-                KoolPaint.Style.FILL_AND_STROKE -> Paint.Style.FILL_AND_STROKE
-                else -> Paint.Style.FILL
+                io.github.rwx.render.canvas.Paint.Style.STROKE -> android.graphics.Paint.Style.STROKE
+                io.github.rwx.render.canvas.Paint.Style.FILL_AND_STROKE -> android.graphics.Paint.Style.FILL_AND_STROKE
+                else -> android.graphics.Paint.Style.FILL
             }
             val koolColorFilter = colorFilter()
             paint.color = if (rendererMode == AndroidRendererMode.OPENGL) {
-                n.applyKoolColorFilter(koolColorFilter)
+                n.applyColorFilter(koolColorFilter)
             } else {
                 n
             }
             paint.strokeWidth = o.coerceAtLeast(0f)
             paint.textSize = q.coerceAtLeast(1f)
             paint.textAlign = when (p) {
-                KoolPaint.Align.CENTER -> Paint.Align.CENTER
-                KoolPaint.Align.RIGHT -> Paint.Align.RIGHT
-                else -> Paint.Align.LEFT
+                io.github.rwx.render.canvas.Paint.Align.CENTER -> android.graphics.Paint.Align.CENTER
+                io.github.rwx.render.canvas.Paint.Align.RIGHT -> android.graphics.Paint.Align.RIGHT
+                else -> android.graphics.Paint.Align.LEFT
             }
-            paint.typeface = if (typeface()?.a() == true) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+            paint.typeface = AndroidGameFontMetrics.typeface(typeface()?.key)
             paint.colorFilter = koolColorFilter.toCachedAndroidColorFilter()
             if (rendererMode == AndroidRendererMode.OPENGL) {
                 paint.xfermode = null
@@ -651,21 +654,21 @@ internal class AndroidGraphicsEngine(
         }
     }
 
-    private fun cacheLastPaint(source: KoolPaint, revision: Int, paint: Paint): Paint {
+    private fun cacheLastPaint(source: io.github.rwx.render.canvas.Paint, revision: Int, paint: android.graphics.Paint): android.graphics.Paint {
         lastPaint = source
         lastPaintRevision = revision
         lastAndroidPaint = paint
         return paint
     }
 
-    private fun KoolPaint.createAndroidPaint(): Paint =
+    private fun io.github.rwx.render.canvas.Paint.createAndroidPaint(): android.graphics.Paint =
         if (rendererMode == AndroidRendererMode.CANVAS && this is GamePaint) {
             UniquePaint()
         } else {
-            BlendPaint(Paint.ANTI_ALIAS_FLAG)
+            BlendPaint(android.graphics.Paint.ANTI_ALIAS_FLAG)
         }
 
-    private class AndroidPaintBinding(val paint: Paint) {
+    private class AndroidPaintBinding(val paint: android.graphics.Paint) {
         private var revision: Int = Int.MIN_VALUE
 
         fun matches(sourceRevision: Int): Boolean = revision == sourceRevision
@@ -696,18 +699,15 @@ internal class AndroidGraphicsEngine(
 
         fun logUnsupportedUniform(name: String, size: Int) {
             if (unsupportedUniforms.add("$name/$size")) {
-                Log.w(
-                    SHADER_LOG_TAG,
-                    "Unsupported Android OpenGL uniform size=$size name=$name",
-                )
+                Timber.tag(SHADER_LOG_TAG).w("Unsupported Android OpenGL uniform size=$size name=$name")
             }
         }
     }
 
-    private fun KoolColorFilter?.toCachedAndroidColorFilter(): ColorFilter? {
+    private fun io.github.rwx.render.canvas.ColorFilter?.toCachedAndroidColorFilter(): android.graphics.ColorFilter? {
         val filter = this ?: return null
         return colorFilterCache[filter] ?: when (filter) {
-            is KoolMultiplyAddColorFilter ->
+            is MultiplyAddColorFilter ->
                 if (
                     rendererMode == AndroidRendererMode.CANVAS &&
                     filter.multiplyColor == OPAQUE_BLACK &&
@@ -718,7 +718,7 @@ internal class AndroidGraphicsEngine(
                     LightingColorFilter(filter.multiplyColor, filter.addColor)
                 }
 
-            is KoolBlendColorFilter -> PorterDuffColorFilter(filter.color, filter.blendMode.toPorterDuffMode())
+            is BlendColorFilter -> PorterDuffColorFilter(filter.color, filter.blendMode.toPorterDuffMode())
             else -> null
         }?.also { colorFilterCache[filter] = it }
     }
@@ -803,7 +803,7 @@ internal class AndroidGraphicsEngine(
         const val SHADER_LOG_TAG = "AndroidShader"
         const val OPAQUE_BLACK = -0x1000000
 
-        val DEFAULT_PAINT: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val DEFAULT_PAINT: android.graphics.Paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             color = -1
             isFilterBitmap = false
         }
@@ -828,16 +828,16 @@ internal class AndroidGraphicsEngine(
                 else -> teamColorsHueType.pureGreen
             }
 
-        fun KoolPaint.toAndroidOpenGlBlendMode(): Int {
+        fun io.github.rwx.render.canvas.Paint.toAndroidOpenGlBlendMode(): Int {
             when (getBlendMode()) {
-                KoolCanvasBlendMode.Source -> return BlendPaint.BLEND_SOURCE
-                KoolCanvasBlendMode.Add -> return BlendPaint.BLEND_ADD
-                KoolCanvasBlendMode.Multiply -> return BlendPaint.BLEND_MULTIPLY
-                KoolCanvasBlendMode.Screen -> return BlendPaint.BLEND_SCREEN
+                GameCanvasBlendMode.Source -> return BlendPaint.BLEND_SOURCE
+                GameCanvasBlendMode.Add -> return BlendPaint.BLEND_ADD
+                GameCanvasBlendMode.Multiply -> return BlendPaint.BLEND_MULTIPLY
+                GameCanvasBlendMode.Screen -> return BlendPaint.BLEND_SCREEN
                 else -> Unit
             }
             return when (val filter = colorFilter()) {
-                is KoolMultiplyAddColorFilter ->
+                is MultiplyAddColorFilter ->
                     if (filter.usesLegacyAdditiveBlend()) BlendPaint.BLEND_LIGHTING_ADD else BlendPaint.BLEND_NORMAL
 
                 is TeamColorFilter ->
@@ -851,44 +851,44 @@ internal class AndroidGraphicsEngine(
             }
         }
 
-        fun KoolPaint.toAndroidCanvasBlendMode(): KoolCanvasBlendMode =
+        fun io.github.rwx.render.canvas.Paint.toAndroidCanvasBlendMode(): GameCanvasBlendMode =
             getBlendMode() ?: when (val filter = colorFilter()) {
                 is TeamColorFilter ->
                     when (filter.a) {
-                        BlendMode.copy -> KoolCanvasBlendMode.Source
-                        BlendMode.additive -> KoolCanvasBlendMode.Add
-                        else -> KoolCanvasBlendMode.SourceOver
+                        BlendMode.copy -> GameCanvasBlendMode.Source
+                        BlendMode.additive -> GameCanvasBlendMode.Add
+                        else -> GameCanvasBlendMode.SourceOver
                     }
 
-                else -> KoolCanvasBlendMode.SourceOver
+                else -> GameCanvasBlendMode.SourceOver
             }
 
-        fun canvasXfermode(mode: KoolCanvasBlendMode): PorterDuffXfermode? =
-            if (mode == KoolCanvasBlendMode.SourceOver) {
+        fun canvasXfermode(mode: GameCanvasBlendMode): PorterDuffXfermode? =
+            if (mode == GameCanvasBlendMode.SourceOver) {
                 null
             } else {
                 PorterDuffXfermode(mode.toPorterDuffMode())
             }
 
-        fun KoolCanvasBlendMode.toPorterDuffMode(): PorterDuff.Mode =
+        fun GameCanvasBlendMode.toPorterDuffMode(): PorterDuff.Mode =
             when (this) {
-                KoolCanvasBlendMode.Clear,
-                KoolCanvasBlendMode.ClearAlpha -> PorterDuff.Mode.CLEAR
+                GameCanvasBlendMode.Clear,
+                GameCanvasBlendMode.ClearAlpha -> PorterDuff.Mode.CLEAR
 
-                KoolCanvasBlendMode.Source -> PorterDuff.Mode.SRC
-                KoolCanvasBlendMode.Destination -> PorterDuff.Mode.DST
-                KoolCanvasBlendMode.SourceIn -> PorterDuff.Mode.SRC_IN
-                KoolCanvasBlendMode.SourceOut -> PorterDuff.Mode.SRC_OUT
-                KoolCanvasBlendMode.SourceAtop -> PorterDuff.Mode.SRC_ATOP
-                KoolCanvasBlendMode.DestinationOver -> PorterDuff.Mode.DST_OVER
-                KoolCanvasBlendMode.DestinationIn -> PorterDuff.Mode.DST_IN
-                KoolCanvasBlendMode.DestinationOut -> PorterDuff.Mode.DST_OUT
-                KoolCanvasBlendMode.DestinationAtop -> PorterDuff.Mode.DST_ATOP
-                KoolCanvasBlendMode.Xor -> PorterDuff.Mode.XOR
-                KoolCanvasBlendMode.Add -> PorterDuff.Mode.ADD
-                KoolCanvasBlendMode.Multiply -> PorterDuff.Mode.MULTIPLY
-                KoolCanvasBlendMode.Screen -> PorterDuff.Mode.SCREEN
-                KoolCanvasBlendMode.Overlay -> PorterDuff.Mode.OVERLAY
+                GameCanvasBlendMode.Source -> PorterDuff.Mode.SRC
+                GameCanvasBlendMode.Destination -> PorterDuff.Mode.DST
+                GameCanvasBlendMode.SourceIn -> PorterDuff.Mode.SRC_IN
+                GameCanvasBlendMode.SourceOut -> PorterDuff.Mode.SRC_OUT
+                GameCanvasBlendMode.SourceAtop -> PorterDuff.Mode.SRC_ATOP
+                GameCanvasBlendMode.DestinationOver -> PorterDuff.Mode.DST_OVER
+                GameCanvasBlendMode.DestinationIn -> PorterDuff.Mode.DST_IN
+                GameCanvasBlendMode.DestinationOut -> PorterDuff.Mode.DST_OUT
+                GameCanvasBlendMode.DestinationAtop -> PorterDuff.Mode.DST_ATOP
+                GameCanvasBlendMode.Xor -> PorterDuff.Mode.XOR
+                GameCanvasBlendMode.Add -> PorterDuff.Mode.ADD
+                GameCanvasBlendMode.Multiply -> PorterDuff.Mode.MULTIPLY
+                GameCanvasBlendMode.Screen -> PorterDuff.Mode.SCREEN
+                GameCanvasBlendMode.Overlay -> PorterDuff.Mode.OVERLAY
                 else -> PorterDuff.Mode.SRC_OVER
             }
     }

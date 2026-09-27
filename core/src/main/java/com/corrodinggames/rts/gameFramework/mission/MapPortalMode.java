@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.file.FileHelper;
 import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 import io.github.rwx.ui.CoreUiEventQueue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,9 +41,9 @@ public class MapPortalMode {
     private final LinkedHashMap<String, Link> links = new LinkedHashMap<String, Link>();
     private Portal[] portals;
     private final RectF drawRect = new RectF();
-    private KoolPaint fillPaint;
-    private KoolPaint borderPaint;
-    private KoolPaint labelPaint;
+    private Paint fillPaint;
+    private Paint borderPaint;
+    private Paint labelPaint;
     private float jumpCooldownFrames;
 
     private MapPortalMode(LinkedHashMap<String, Link> links, Portal[] portals) {
@@ -298,7 +298,7 @@ public class MapPortalMode {
         return !unitType.isBuildingUnit();
     }
 
-    public void draw(KoolPaint baseTextPaint) {
+    public void draw(Paint baseTextPaint) {
         GameEngine gameEngine = GameEngine.getInstance();
         if (gameEngine == null || gameEngine.renderGraphicsEngine == null || this.portals.length == 0) {
             return;
@@ -330,19 +330,19 @@ public class MapPortalMode {
         }
     }
 
-    private void ensurePaints(KoolPaint baseTextPaint) {
+    private void ensurePaints(Paint baseTextPaint) {
         if (this.fillPaint == null) {
-            this.fillPaint = new KoolPaint();
-            this.borderPaint = new KoolPaint();
-            this.labelPaint = new KoolPaint();
+            this.fillPaint = new Paint();
+            this.borderPaint = new Paint();
+            this.labelPaint = new Paint();
         }
-        this.fillPaint.a(KoolPaint.Style.FILL);
+        this.fillPaint.a(Paint.Style.FILL);
         this.fillPaint.a(40, 88, 170, 228);
-        this.borderPaint.a(KoolPaint.Style.STROKE);
+        this.borderPaint.a(Paint.Style.STROKE);
         this.borderPaint.a(2.0f);
         this.borderPaint.a(230, 88, 170, 228);
         this.labelPaint.a(baseTextPaint);
-        this.labelPaint.a(KoolPaint.Align.CENTER);
+        this.labelPaint.a(Paint.Align.CENTER);
         this.labelPaint.a(255, 238, 247, 255);
     }
 

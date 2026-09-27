@@ -64,6 +64,9 @@ sealed interface ModsAction {
 
     /** Remove one mod from disk. */
     data class Delete(val modId: String) : ModsAction
+
+    data class ShowDescription(val modId: String) : ModsAction
+    data class ShowError(val modId: String) : ModsAction
 }
 
 sealed interface ModsOutcome {
@@ -74,6 +77,8 @@ sealed interface ModsOutcome {
     data object ApplyRequested : ModsOutcome
     data class ToggleEnable(val modId: String) : ModsOutcome
     data class Delete(val modId: String) : ModsOutcome
+    data class ShowDescription(val modId: String) : ModsOutcome
+    data class ShowError(val modId: String) : ModsOutcome
 }
 
 
@@ -110,5 +115,7 @@ object ModsNavigation {
         ModsAction.Apply -> ModsOutcome.ApplyRequested
         is ModsAction.ToggleEnable -> ModsOutcome.ToggleEnable(action.modId)
         is ModsAction.Delete -> ModsOutcome.Delete(action.modId)
+        is ModsAction.ShowDescription -> ModsOutcome.ShowDescription(action.modId)
+        is ModsAction.ShowError -> ModsOutcome.ShowError(action.modId)
     }
 }

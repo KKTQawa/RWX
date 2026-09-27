@@ -3,7 +3,7 @@ package com.corrodinggames.rts.gameFramework.ui;
 import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.TeamHistory;
 import com.corrodinggames.rts.gameFramework.graphics.GamePaint;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.aa */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/aa.class */
@@ -50,14 +50,14 @@ public class TeamHistoryChart {
             if (GameEngine.isIOSVersion) {
                 this.linePaints[i2].a(3.0f);
             }
-            this.linePaints[i2].a(KoolPaint.Cap.ROUND);
+            this.linePaints[i2].a(Paint.Cap.ROUND);
             this.linePaints[i2].b(i);
             this.linePaints[i2].c(i3);
             this.markerPaints[i2] = new GamePaint();
             this.markerPaints[i2].b(-13162713);
             this.markerPaints[i2].c(i3);
             this.markerPaints[i2].a(5.0f);
-            this.markerPaints[i2].a(KoolPaint.Cap.ROUND);
+            this.markerPaints[i2].a(Paint.Cap.ROUND);
             i2++;
         }
     }

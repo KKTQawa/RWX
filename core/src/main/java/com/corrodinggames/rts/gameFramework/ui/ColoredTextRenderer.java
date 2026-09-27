@@ -1,20 +1,20 @@
 package com.corrodinggames.rts.gameFramework.ui;
 
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.ag */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/ag.class */
 public class ColoredTextRenderer extends TextRenderer {
 
     /* JADX INFO: renamed from: a */
-    public KoolPaint paint;
+    public Paint paint;
 
     /* JADX INFO: renamed from: b */
     public int color;
     final /* synthetic */ TextRenderQueue c;
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    ColoredTextRenderer(TextRenderQueue textRenderQueue, String str, KoolPaint paint) {
+    ColoredTextRenderer(TextRenderQueue textRenderQueue, String str, Paint paint) {
         super(textRenderQueue, str);
         this.c = textRenderQueue;
         this.color = 0;
@@ -22,7 +22,7 @@ public class ColoredTextRenderer extends TextRenderer {
     }
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    ColoredTextRenderer(TextRenderQueue textRenderQueue, String str, KoolPaint paint, int i) {
+    ColoredTextRenderer(TextRenderQueue textRenderQueue, String str, Paint paint, int i) {
         super(textRenderQueue, str);
         this.c = textRenderQueue;
         this.color = 0;
@@ -31,7 +31,7 @@ public class ColoredTextRenderer extends TextRenderer {
     }
 
     @Override // com.corrodinggames.rts.gameFramework.ui.TextRenderer
-    public KoolPaint b(KoolPaint paint) {
+    public Paint b(Paint paint) {
         if (this.paint == null) {
             if (this.color != 0) {
                 TextRenderQueue.coloredTextPaint.a(paint);

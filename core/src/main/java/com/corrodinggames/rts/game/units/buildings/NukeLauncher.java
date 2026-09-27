@@ -21,7 +21,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -249,7 +249,7 @@ public class NukeLauncher extends FactoryWithQueue {
         float f = this.posX;
         float f2 = this.posY;
         gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-        Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(f, f2, this.posZ, KoolArgbColor.a(255, 255, 255, 255));
+        Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(f, f2, this.posZ, ArgbColor.a(255, 255, 255, 255));
         if (effectCreateLightEffect != null) {
             effectCreateLightEffect.G = 8.0f;
             effectCreateLightEffect.F = 5.0f;
@@ -386,7 +386,7 @@ public class NukeLauncher extends FactoryWithQueue {
         projectileA.lifeTimer = 99999.0f;
         projectileA.speed = 0.1f;
         projectileA.targetSpeed = 2.7f;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING);
         projectileA.damage = 300.0f;
         projectileA.isBallistic = true;
         projectileA.hasTrail = true;

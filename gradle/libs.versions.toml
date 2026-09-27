@@ -1,31 +1,46 @@
 [versions]
 androidGradleVersion = "9.1.0"
-#androidGradleVersion = "9.2.1"
 desugar_jdk_libsVersion = "2.1.5"
 httpclientVersion = "4.5.14"
 junitPlatformLauncherVersion = "6.1.3"
+junitVersion = "4.13.2"
+junitVintageEngineVersion = "6.1.3"
 jvmLibp2pVersion = "1.2.0-RELEASE"
-kotlinxSerializationJsonVersion = "1.11.0"
-ktorVersion = "3.5.2"
+kotlinxVersion = "1.11.0"
+ktorVersion = "3.6.0"
 kotlinVersion = "2.4.10"
 lwjgl3AwtVersion = "0.2.4"
 lwjglVersion = "3.3.6"
+robolectricVersion = "4.17"
 tomlktVersion = "0.5.0"
+uiTestVersion = "1.12.0"
 webrtcJavaVersion = "0.14.0"
 androidWebrtcVersion = "144.7559.12"
-koolVersion = "0.19.0"
+composeVersion = "1.12.0"
+composeMaterial3Version = "1.9.0"
+navigationeventVersion = "1.1.0"
 koinCoreVersion = "4.2.2"
+activityVersion = "1.13.0"
 slf4jVersion = "2.0.18"
 logbackVersion = "1.6.2"
-shadowVersion = "9.6.1"
-launch4jVersion = "4.0.0"
 timberVersion = "5.0.1"
 [libraries]
+junit = { module = "junit:junit", version.ref = "junitVersion" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngineVersion" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxVersion" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxVersion" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxVersion" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxVersion" }
+navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationeventVersion" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeVersion" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeVersion" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMaterial3Version" }
+compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeVersion" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libsVersion" }
 httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclientVersion" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatformLauncherVersion" }
 jvm-libp2p = { module = "io.libp2p:jvm-libp2p", version.ref = "jvmLibp2pVersion" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxVersion" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVersion" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorVersion" }
 lwjgl = { module = "org.lwjgl:lwjgl", version.ref = "lwjglVersion" }
@@ -33,20 +48,23 @@ lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw", version.ref = "lwjglVersion" }
 lwjgl-openal = { module = "org.lwjgl:lwjgl-openal", version.ref = "lwjglVersion" }
 lwjgl-opengl = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjglVersion" }
 lwjgl3-awt = { module = "org.lwjglx:lwjgl3-awt", version.ref = "lwjgl3AwtVersion" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectricVersion" }
 tomlkt = { module = "net.peanuuutz.tomlkt:tomlkt", version.ref = "tomlktVersion" }
+ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "uiTestVersion" }
 webrtc-java = { module = "dev.onvoid.webrtc:webrtc-java", version.ref = "webrtcJavaVersion" }
 android-webrtc = { module = "io.github.webrtc-sdk:android", version.ref = "androidWebrtcVersion" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCoreVersion" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCoreVersion" }
-kool-core = { module = "de.fabmax.kool:kool-core", version.ref = "koolVersion" }
-kool-core-desktop = { module = "de.fabmax.kool:kool-core-desktop", version.ref = "koolVersion" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jVersion" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logbackVersion" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityVersion" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradleVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
-shadow = { id = "com.gradleup.shadow", version.ref = "shadowVersion" }
-launch4j = { id = "edu.sc.seis.launch4j", version.ref = "launch4jVersion" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlinVersion" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
+compose = { id = "org.jetbrains.compose", version.ref = "composeVersion" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradleVersion" }

@@ -18,7 +18,7 @@ import com.corrodinggames.rts.gameFramework.pathfinding.PathCostMap;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,21 +26,21 @@ import java.util.Iterator;
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.utility.y */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/utility/y.class */
 public final class GameViewUtils {
-    static final KoolPaint a = new KoolPaint();
+    static final Paint a = new Paint();
     static final RectF b = new RectF();
     static ArrayList<DebugDrawItem> c = new ArrayList<>();
     static final Rect d;
     static final RectF e;
-    static KoolPaint f;
+    static Paint f;
     static PaintCache[] g;
     static boolean h;
 
     static {
         a.a(205, 255, 0, 0);
-        a.a(KoolPaint.Style.STROKE);
+        a.a(Paint.Style.STROKE);
         d = new Rect();
         e = new RectF();
-        f = new KoolPaint();
+        f = new Paint();
         g = new PaintCache[30];
         h = false;
     }
@@ -66,7 +66,7 @@ public final class GameViewUtils {
         if (a(baseUnit) || z) {
             float f3 = baseUnit.posX - gameEngine.viewpointXSnapped;
             float f4 = baseUnit.posY - gameEngine.viewpointYSnapped;
-            KoolPaint paint = BaseUnit.dg;
+            Paint paint = BaseUnit.dg;
             if (z2) {
                 paint = BaseUnit.dh;
             }
@@ -79,7 +79,7 @@ public final class GameViewUtils {
         if ((baseUnit.isSelected && gameEngine.gameUI.getSelectedUnitCount() < 10) || z) {
             float f3 = baseUnit.posX - gameEngine.viewpointXSnapped;
             float f4 = baseUnit.posY - gameEngine.viewpointYSnapped;
-            KoolPaint paint = BaseUnit.dk;
+            Paint paint = BaseUnit.dk;
             paint.b(i);
             paint.a(i2);
             gameEngine.renderGraphicsEngine.a(f3, f4, f2, paint);
@@ -90,14 +90,14 @@ public final class GameViewUtils {
         a(baseUnit, f2, z, BaseUnit.di);
     }
 
-    public static void a(BaseUnit baseUnit, float f2, boolean z, KoolPaint paint) {
+    public static void a(BaseUnit baseUnit, float f2, boolean z, Paint paint) {
         GameEngine gameEngine = GameEngine.getInstance();
         if (a(baseUnit) || z) {
             gameEngine.renderGraphicsEngine.a(baseUnit.posX - gameEngine.viewpointXSnapped, baseUnit.posY - gameEngine.viewpointYSnapped, f2, paint);
         }
     }
 
-    public static void a(Texture texture, float f2, float f3, float f4, float f5, float f6, KoolPaint paint, int i, int i2, int i3) {
+    public static void a(Texture texture, float f2, float f3, float f4, float f5, float f6, Paint paint, int i, int i2, int i3) {
         GameEngine gameEngine = GameEngine.getInstance();
         int i4 = 0 + (i3 * i);
         d.a(i4, 0, i4 + i, 0 + i2);
@@ -129,7 +129,7 @@ public final class GameViewUtils {
         return true;
     }
 
-    public static KoolPaint a() {
+    public static Paint a() {
         GamePaint gamePaint = new GamePaint();
         if (GameEngine.getInstance().settingsEngine.renderAntiAlias) {
             gamePaint.a(true);
@@ -167,7 +167,7 @@ public final class GameViewUtils {
             gameEngine.renderGraphicsEngine.k();
             gameEngine.renderGraphicsEngine.b(vector3DD.x - gameEngine.viewpointXSnapped, ((vector3DD.y - vector3DD.z) - orderableUnit.posZ) - gameEngine.viewpointYSnapped);
             gameEngine.renderGraphicsEngine.a(f2, f2);
-            gameEngine.renderGraphicsEngine.a(texture, 0.0f, 0.0f, (KoolPaint) null);
+            gameEngine.renderGraphicsEngine.a(texture, 0.0f, 0.0f, (Paint) null);
             gameEngine.renderGraphicsEngine.l();
         }
     }
@@ -178,7 +178,7 @@ public final class GameViewUtils {
             return;
         }
         float fP = orderableUnit.p(i);
-        KoolPaint renderPaint = orderableUnit.getRenderPaint();
+        Paint renderPaint = orderableUnit.getRenderPaint();
         GameEngine gameEngine = GameEngine.getInstance();
         Vector3D vector3DF = orderableUnit.F(i);
         float f2 = vector3DF.x - GameEngine.getInstance().viewpointXSnapped;
@@ -279,11 +279,11 @@ public final class GameViewUtils {
         return gameEngine.pathfindingEngine.a((int) (f2 * tileMap.tileScaleX), (int) (f3 * tileMap.tileScaleY));
     }
 
-    public static final KoolPaint a(int i, int i2, int i3, int i4, KoolPaint.Style style) {
+    public static final Paint a(int i, int i2, int i3, int i4, Paint.Style style) {
         return a(Utility.packArgb(i, i2, i3, i4), style);
     }
 
-    public static final KoolPaint a(int i, KoolPaint.Style style) {
+    public static final Paint a(int i, Paint.Style style) {
         for (int i2 = 0; i2 < g.length; i2++) {
             if (g[i2] == null) {
                 PaintCache paintCache = new PaintCache(i, style);

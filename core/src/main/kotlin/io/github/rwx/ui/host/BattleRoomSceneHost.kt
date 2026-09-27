@@ -1,68 +1,65 @@
 package io.github.rwx.ui.host
 
-import de.fabmax.kool.modules.ui2.MutableStateValue
-import de.fabmax.kool.modules.ui2.UiScene
-import de.fabmax.kool.modules.ui2.mutableStateListOf
-import de.fabmax.kool.modules.ui2.mutableStateOf
-import de.fabmax.kool.scene.Scene
-import io.github.rwx.ui.component.BattleRoom
-import io.github.rwx.ui.component.PanelStyle
-import io.github.rwx.ui.component.addPanelSurface
-import io.github.rwx.ui.component.replaceAllIncrementally
-import io.github.rwx.ui.model.*
-
+import io.github.rwx.ui.model.BattleRoomAction
+import io.github.rwx.ui.model.BattleRoomChatLine
+import io.github.rwx.ui.model.BattleRoomInfo
+import io.github.rwx.ui.model.BattleRoomModel
+import io.github.rwx.ui.model.BattleRoomPlayer
 
 class BattleRoomSceneHost(
-    private val model: SettingsModel = SettingsModel(),
     private val onAction: (BattleRoomAction) -> Unit = {},
 ) {
-    private val players = mutableStateListOf<BattleRoomPlayer>()
-    private val chatLines = mutableStateListOf<BattleRoomChatLine>()
-    private val info: MutableStateValue<BattleRoomInfo> = mutableStateOf(
-        BattleRoomInfo(
-            mapName = "No map selected",
-            mapTypeLabel = "Battle room",
-        )
+    private var players: List<BattleRoomPlayer> = emptyList()
+    private var chatLines: List<BattleRoomChatLine> = emptyList()
+    private var info: BattleRoomInfo = BattleRoomInfo(
+        mapName = "No map selected",
+        mapTypeLabel = "Battle room",
     )
-    private val isHost: MutableStateValue<Boolean> = mutableStateOf(true)
+    private var isHost: Boolean = false
+    private var isAvailable = false
+    private var revision = 0L
+    private var mapRevision = 0L
+
+    fun beginRoom() {
+        revision += 1
+        markUnavailable()
+        chatLines = emptyList()
+    }
+
+    fun markUnavailable() {
+        if (isAvailable) mapRevision += 1
+        isAvailable = false
+        isHost = false
+        players = emptyList()
+        info = BattleRoomInfo("No map selected", "Battle room")
+    }
+
+    fun snapshot(): BattleRoomModel = BattleRoomModel(
+        info = info.copy(detailLines = info.detailLines.toList()),
+        players = players.toList(),
+        chatLines = chatLines.toList(),
+        isHost = isHost,
+        revision = revision,
+        mapRevision = mapRevision,
+        isAvailable = isAvailable,
+    )
 
     fun updateRoom(model: BattleRoomModel) {
-        info.value = model.info
-        isHost.value = model.isHost
-        players.replaceAllIncrementally(model.players)
-        chatLines.replaceAllIncrementally(model.chatLines)
+        if (info.mapAssetPath != model.info.mapAssetPath || info.mapName != model.info.mapName ||
+            info.mapPreviewAssetPath != model.info.mapPreviewAssetPath || !isAvailable
+        ) mapRevision += 1
+        info = model.info.copy(detailLines = model.info.detailLines.toList())
+        isAvailable = model.isAvailable
+        isHost = model.isHost
+        players = model.players.toList()
+        chatLines = model.chatLines.toList()
     }
 
     fun appendChat(line: BattleRoomChatLine) {
-        chatLines += line
+        chatLines = chatLines + line
     }
 
-    fun dispatch(action: BattleRoomAction) = onAction(action)
-
-    fun createScene(): Scene = UiScene(BATTLE_ROOM_SCENE_NAME) {
-        addPanelSurface(PanelStyle.Menu, "rwx-battleroom-panel", model) { theme ->
-            BattleRoom(
-                model = BattleRoomModel(
-                    info = info.use(),
-                    players = players.use(),
-                    chatLines = chatLines.use(),
-                    isHost = isHost.use(),
-                ),
-                theme = theme,
-                actions = BattleRoomActions(
-                    onBack = { dispatch(BattleRoomAction.Back) },
-                    onSelectMap = { dispatch(BattleRoomAction.SelectMap) },
-                    onOpenOptions = { dispatch(BattleRoomAction.OpenOptions) },
-                    onStart = { dispatch(BattleRoomAction.Start) },
-                    onAddAI = { dispatch(BattleRoomAction.AddAI) },
-                    onSelectPlayer = { dispatch(BattleRoomAction.SelectPlayer(it)) },
-                    onSendChat = { dispatch(BattleRoomAction.SendChat(it)) },
-                ),
-            )
-        }
-    }
-
-    companion object {
-        const val BATTLE_ROOM_SCENE_NAME: String = "battleroom"
+    fun dispatch(action: BattleRoomAction, requestRevision: Long = revision) {
+        snapshot().resolveAction(requestRevision, action)?.let(onAction)
     }
 }

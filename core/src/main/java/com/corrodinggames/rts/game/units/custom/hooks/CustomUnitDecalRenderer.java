@@ -15,8 +15,8 @@ import com.corrodinggames.rts.gameFramework.utility.*;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +30,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
     FastArrayList f = new FastArrayList();
     FastArrayList g = new FastArrayList();
     boolean h;
-    static KoolPaint a = new KoolPaint();
+    static Paint a = new Paint();
     static GamePaint b = new GamePaint();
     static final PointF i = new PointF();
     static final DecalListProcessor j = new DecalListProcessor(VariableScope.nullOrMissingString);
@@ -325,7 +325,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                 decalDefinition.ah.b(decalDefinition.P);
                 if (decalDefinition.P != -1) {
                     int color = decalDefinition.ah.e();
-                    decalDefinition.ah.a(new KoolMultiplyAddColorFilter(Utility.packArgb(255, (color >> 16) & 255, (color >> 8) & 255, color & 255), 0));
+                    decalDefinition.ah.a(new MultiplyAddColorFilter(Utility.packArgb(255, (color >> 16) & 255, (color >> 8) & 255, color & 255), 0));
                 }
                 int iF = (int) (decalDefinition.ah.f() * f);
                 if (iF < 0) {
@@ -623,7 +623,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                             GraphicsEngine var54 = var39.renderGraphicsEngine;
                             float var60 = var40 - var39.viewpointXSnapped + var14.D;
                             float var64 = var42 - var39.viewpointYSnapped + var14.E;
-                            KoolPaint var70 = jx.getSelectionPaint();
+                            Paint var70 = jx.getSelectionPaint();
                             Texture var75 = var14.C;
                             var54.k();
                             var54.a(var18, var60, var64);
@@ -637,7 +637,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                             float var58 = var40 - var39.viewpointXSnapped;
                             float var62 = var42 - var39.viewpointYSnapped - var44;
                             float var66 = var18;
-                            KoolPaint var68 = var14.ah;
+                            Paint var68 = var14.ah;
                             if (var68 == null) {
                                 var68 = jx.getRenderPaint();
                             }
@@ -645,7 +645,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                             if (var14.ai != null) {
                                 float var71 = var14.ai.readNumber(jx);
                                 if (var71 != 1.0F) {
-                                    KoolPaint var76 = a;
+                                    Paint var76 = a;
                                     var76.b(var68.e());
                                     var76.a(var68.c());
                                     int var80 = (int) (var68.f() * var71);
@@ -704,11 +704,11 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                                 }
 
                                 if (!var14.I) {
-                                    var52.a(var81, var58, var62, (KoolPaint) var68);
+                                    var52.a(var81, var58, var62, (Paint) var68);
                                 } else {
                                     Rect var91 = a(var14, var77, var81, var72);
                                     RectF var31 = a(var14, var77, var81, var58, var62);
-                                    var52.a(var81, var91, var31, (KoolPaint) var68);
+                                    var52.a(var81, var91, var31, (Paint) var68);
                                 }
 
                                 var52.l();
@@ -783,7 +783,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                                     int var36 = var72 + var32 * var14.y;
                                     Rect var37 = a(var14, var33, var34, var36);
                                     RectF var38 = a(var14, var33, var34, var58, var62 - var35);
-                                    var52.a(var34, var37, var38, (KoolPaint) var68);
+                                    var52.a(var34, var37, var38, (Paint) var68);
                                     var52.l();
                                 }
                             }
@@ -799,7 +799,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                             float var63 = var42 - var39.viewpointYSnapped - var44;
                             float var67 = var53.posX - var39.viewpointXSnapped;
                             float var69 = var53.posY - var39.viewpointYSnapped - var53.posZ;
-                            KoolPaint var74 = var14.ah;
+                            Paint var74 = var14.ah;
                             if (var74 == null) {
                                 var74 = b;
                             }
@@ -807,7 +807,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                             if (var14.ai != null) {
                                 float var79 = var14.ai.readNumber(jx);
                                 if (var79 != 1.0F) {
-                                    KoolPaint var83 = a;
+                                    Paint var83 = a;
                                     var83.b(var74.e());
                                     int var87 = (int) (var74.f() * var79);
                                     if (var87 < 0) {
@@ -823,7 +823,7 @@ public class CustomUnitDecalRenderer extends CustomUnitRenderHook {
                                 }
                             }
 
-                            var39.renderGraphicsEngine.a(var59, var63, var67, var69, (KoolPaint) var74);
+                            var39.renderGraphicsEngine.a(var59, var63, var67, var69, (Paint) var74);
                         }
                     }
                 }

@@ -3,6 +3,7 @@ package io.github.rwx
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import androidx.core.net.toUri
@@ -13,11 +14,36 @@ import java.util.concurrent.ConcurrentHashMap
 internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
     private val resolver: ContentResolver = context.applicationContext.contentResolver
     private val trees = ConcurrentHashMap<String, Uri>()
+    // 两级内存缓存（TTL + LRU 有界，防止泄漏）：doc 缓存 pathKey -> SafDocument，
+    // children 缓存 treeUri+parentId -> List<SafDocument>。存储用 ConcurrentHashMap，
+    // LRU 顺序表的所有访问必须在对应 lock 下同步。
+    private val docCache = ConcurrentHashMap<String, CachedDoc>()
+    private val childrenCache = ConcurrentHashMap<String, CachedChildren>()
+    private val docLruLock = Any()
+    private val childrenLruLock = Any()
+    private val docLru = object : LinkedHashMap<String, Unit>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Unit>): Boolean {
+            if (size > MAX_DOC_ENTRIES) {
+                docCache.remove(eldest.key)
+                return true
+            }
+            return false
+        }
+    }
+    private val childrenLru = object : LinkedHashMap<String, Unit>(32, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Unit>): Boolean {
+            if (size > MAX_CHILDREN_DIRS) {
+                childrenCache.remove(eldest.key)
+                return true
+            }
+            return false
+        }
+    }
 
     override fun registerTree(uri: String): String? = runCatching {
         val treeUri = uri.toUri()
         DocumentsContract.getTreeDocumentId(treeUri)
-        val key = "saf-${uri.hashCode().toUInt().toString(16)}.[saflink]"
+        val key = "saf-${uri.hashCode().toUInt().toString(16)}${SafPlatformBridge.SAF_LINK_SUFFIX}"
         trees[key] = treeUri
         "/$key"
     }.getOrNull()
@@ -30,13 +56,16 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
 
     override fun createDirectory(path: String): Boolean {
         val parsed = parse(path) ?: return false
-        return ensureDirectory(parsed.treeUri, parsed.segments) != null
+        ensureDirectory(parsed.treeUri, parsed.segments) ?: return false
+        invalidateTree(parsed.treeUri)
+        return true
     }
 
     override fun list(path: String): Array<String>? = runCatching {
-        val directory = resolve(path)?.takeIf { it.mimeType == Document.MIME_TYPE_DIR }
+        val parsed = parse(path) ?: return@runCatching null
+        val directory = resolveParsed(parsed)?.takeIf { it.mimeType == Document.MIME_TYPE_DIR }
             ?: return@runCatching null
-        queryChildren(directory.treeUri, directory.documentId)
+        cachedChildren(directory.treeUri, directory.documentId, parsed.segments)
             .map { it.name }
             .sorted()
             .toTypedArray()
@@ -63,9 +92,11 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
             "application/octet-stream",
             parsed.segments.dropLast(1),
         ) ?: return null
-        return runCatching {
+        val stream = runCatching {
             resolver.openOutputStream(file.documentUri, if (append) "wa" else "w")
-        }.getOrNull()
+        }.getOrNull() ?: return null
+        invalidateTree(parsed.treeUri)
+        return stream
     }
 
     override fun rename(sourcePath: String, targetPath: String): Boolean {
@@ -73,25 +104,49 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
         val target = parse(targetPath) ?: return false
         val targetName = target.segments.lastOrNull() ?: return false
         val targetParentSegments = target.segments.dropLast(1)
-        return source.parentSegments == targetParentSegments && runCatching {
+        if (source.parentSegments != targetParentSegments) return false
+        val ok = runCatching {
             DocumentsContract.renameDocument(resolver, source.documentUri, targetName) != null
         }.getOrDefault(false)
+        if (ok) {
+            invalidateTree(source.treeUri)
+            invalidateTree(target.treeUri)
+        }
+        return ok
     }
 
     override fun delete(path: String): Boolean {
         val document = resolve(path) ?: return false
-        return runCatching {
+        val ok = runCatching {
             DocumentsContract.deleteDocument(resolver, document.documentUri)
         }.getOrDefault(false)
+        if (ok) invalidateTree(document.treeUri)
+        return ok
     }
 
     private fun resolve(path: String): SafDocument? {
         val parsed = parse(path) ?: return null
+        return resolveParsed(parsed)
+    }
+
+    private fun resolveParsed(parsed: ParsedSafPath): SafDocument? {
+        val treeKey = parsed.treeUri.toString()
         val rootId = DocumentsContract.getTreeDocumentId(parsed.treeUri)
-        var current = queryDocument(parsed.treeUri, rootId, emptyList()) ?: return null
-        parsed.segments.forEachIndexed { index, segment ->
-            current = findChild(parsed.treeUri, current.documentId, segment, parsed.segments.take(index))
-                ?: return null
+        val rootKey = "$treeKey|"
+        var current = getCachedDoc(rootKey)
+            ?: queryDocument(parsed.treeUri, rootId, emptyList())?.also { putCachedDoc(rootKey, it) }
+            ?: return null
+        for ((index, segment) in parsed.segments.withIndex()) {
+            val childKey = "$treeKey|" + parsed.segments.take(index + 1).joinToString("/")
+            val hit = getCachedDoc(childKey)
+            if (hit != null) {
+                current = hit
+                continue
+            }
+            val found = cachedChildren(parsed.treeUri, current.documentId, parsed.segments.take(index))
+                .firstOrNull { it.name == segment } ?: return null
+            putCachedDoc(childKey, found)
+            current = found
         }
         return current
     }
@@ -126,7 +181,9 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
             DocumentsContract.createDocument(resolver, parent.documentUri, mimeType, name)
         }.getOrNull() ?: return null
         val id = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull() ?: return null
-        return queryDocument(parent.treeUri, id, parentSegments)
+        val doc = queryDocument(parent.treeUri, id, parentSegments) ?: return null
+        invalidateTree(parent.treeUri)
+        return doc
     }
 
     private fun findChild(
@@ -134,7 +191,58 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
         parentId: String,
         name: String,
         parentSegments: List<String> = emptyList(),
-    ): SafDocument? = queryChildren(treeUri, parentId, parentSegments).firstOrNull { it.name == name }
+    ): SafDocument? = cachedChildren(treeUri, parentId, parentSegments).firstOrNull { it.name == name }
+
+    private fun getCachedDoc(key: String): SafDocument? {
+        val entry = docCache[key] ?: return null
+        if (SystemClock.uptimeMillis() - entry.cachedAt > CACHE_TTL_MS) {
+            docCache.remove(key)
+            synchronized(docLruLock) { docLru.remove(key) }
+            return null
+        }
+        synchronized(docLruLock) { docLru[key] = Unit }
+        return entry.doc
+    }
+
+    private fun putCachedDoc(key: String, doc: SafDocument) {
+        docCache[key] = CachedDoc(doc, SystemClock.uptimeMillis())
+        synchronized(docLruLock) { docLru[key] = Unit }
+    }
+
+    private fun cachedChildren(
+        treeUri: Uri,
+        parentId: String,
+        parentSegments: List<String>,
+    ): List<SafDocument> {
+        val key = treeUri.toString() + "|" + parentId
+        childrenCache[key]?.let { entry ->
+            if (SystemClock.uptimeMillis() - entry.cachedAt <= CACHE_TTL_MS) {
+                synchronized(childrenLruLock) { childrenLru[key] = Unit }
+                return entry.children
+            }
+            childrenCache.remove(key)
+            synchronized(childrenLruLock) { childrenLru.remove(key) }
+        }
+        val fresh = queryChildren(treeUri, parentId, parentSegments)
+        childrenCache[key] = CachedChildren(fresh, SystemClock.uptimeMillis())
+        synchronized(childrenLruLock) { childrenLru[key] = Unit }
+        val treeKey = treeUri.toString()
+        fresh.forEach { child ->
+            if (!child.name.contains('/')) {
+                putCachedDoc("$treeKey|" + (parentSegments + child.name).joinToString("/"), child)
+            }
+        }
+        return fresh
+    }
+
+    // 粗粒度失效：只清该 treeUri 名下缓存，不碰其他树。写操作远少于读扫描，简单正确优先。
+    private fun invalidateTree(treeUri: Uri) {
+        val prefix = treeUri.toString() + "|"
+        docCache.keys.removeIf { it.startsWith(prefix) }
+        childrenCache.keys.removeIf { it.startsWith(prefix) }
+        synchronized(docLruLock) { docLru.keys.removeIf { it.startsWith(prefix) } }
+        synchronized(childrenLruLock) { childrenLru.keys.removeIf { it.startsWith(prefix) } }
+    }
 
     private fun queryDocument(treeUri: Uri, documentId: String, parentSegments: List<String>): SafDocument? {
         val uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId)
@@ -176,11 +284,11 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
 
     private fun parse(path: String): ParsedSafPath? {
         val normalized = path.replace('\\', '/')
-        val markerIndex = normalized.indexOf(SAF_LINK_SUFFIX)
+        val markerIndex = normalized.indexOf(SafPlatformBridge.SAF_LINK_SUFFIX)
         if (markerIndex < 0) return null
-        val key = normalized.substring(0, markerIndex + SAF_LINK_SUFFIX.length).substringAfterLast('/')
+        val key = normalized.substring(0, markerIndex + SafPlatformBridge.SAF_LINK_SUFFIX.length).substringAfterLast('/')
         val treeUri = trees[key] ?: return null
-        val relative = normalized.substring(markerIndex + SAF_LINK_SUFFIX.length).trim('/')
+        val relative = normalized.substring(markerIndex + SafPlatformBridge.SAF_LINK_SUFFIX.length).trim('/')
         val segments = relative.split('/').filter { it.isNotBlank() && it != "." }
         if (segments.any { it == ".." }) return null
         return ParsedSafPath(treeUri, segments)
@@ -199,8 +307,11 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
         val parentSegments: List<String>,
     )
 
+    private data class CachedDoc(val doc: SafDocument, val cachedAt: Long)
+
+    private data class CachedChildren(val children: List<SafDocument>, val cachedAt: Long)
+
     companion object {
-        private const val SAF_LINK_SUFFIX = ".[saflink]"
         private val PROJECTION = arrayOf(
             Document.COLUMN_DOCUMENT_ID,
             Document.COLUMN_DISPLAY_NAME,
@@ -208,5 +319,8 @@ internal class AndroidSafAccess(context: Context) : SafPlatformAccess {
             Document.COLUMN_SIZE,
             Document.COLUMN_LAST_MODIFIED,
         )
+        private const val CACHE_TTL_MS = 4000L
+        private const val MAX_DOC_ENTRIES = 512
+        private const val MAX_CHILDREN_DIRS = 128
     }
 }

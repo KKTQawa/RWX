@@ -1,11 +1,10 @@
 package io.github.rwx.app
 
 import com.corrodinggames.rts.gameFramework.local.Locale
-import de.fabmax.kool.scene.Scene
 import io.github.rwx.i18n.I18n
 import io.github.rwx.logger
 import io.github.rwx.mod.registry.UiRegistry
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.CoreUiEvent
@@ -17,23 +16,22 @@ import java.time.format.DateTimeFormatter
 
 internal class InGameDialogController(
     private val gameSession: GameSession,
-    private val koolCanvasScene: Scene,
     private val dialogSceneHost: DialogSceneHost,
     private val loadingDialogSceneHost: LoadingDialogSceneHost,
     private val currentScreen: () -> AppScreen,
-    private val viewport: () -> KoolCanvasViewport,
+    private val viewport: () -> GameViewport,
     private val showUnavailableDialog: (String) -> Unit
 ) {
     fun showDialogOverGame(dialog: Dialog) {
         val screen = currentScreen()
-        val shouldOverlayGameCanvas = screen == AppScreen.InGame && !gameSession.rendersIntoKoolCanvas
+        val shouldOverlayGameCanvas = screen == AppScreen.InGame && !gameSession.usesFrameCommandRendering
 
         fun restoreGameCanvas() {
-            if (currentScreen() == AppScreen.InGame && !gameSession.rendersIntoKoolCanvas) {
+            if (currentScreen() == AppScreen.InGame && !gameSession.usesFrameCommandRendering) {
                 gameSession.setGameVisible(
                     true,
                     viewport(),
-                    koolOverlay = UiRegistry.hasActiveHudLayers(),
+                    uiOverlay = UiRegistry.hasActiveHudLayers(),
                     pausedBackground = false,
                 )
             }
@@ -76,8 +74,7 @@ internal class InGameDialogController(
         }
 
         if (shouldOverlayGameCanvas) {
-            koolCanvasScene.isVisible = true
-            gameSession.setGameVisible(true, viewport(), koolOverlay = true, pausedBackground = true)
+            gameSession.setGameVisible(true, viewport(), uiOverlay = true, pausedBackground = true)
         }
         dialogSceneHost.show(
             dialog.copy(buttons = dialog.buttons.map { it.restoreGameAfterPress() })
@@ -95,12 +92,13 @@ internal class InGameDialogController(
     }
 
     fun showLegacyPasswordDialog(event: CoreUiEvent.PasswordDialogRequested) {
-        val loadingDialogSuspended = loadingDialogSceneHost.temporarilyHide()
+        val loadingDialogSuspended = loadingDialogSceneHost.suspendCurrent()
         showDialogOverGame(
             Dialog(
                 title = event.title,
                 message = event.prompt,
                 textInput = DialogTextInput(hint = event.title),
+                dismissButtonIndex = 1,
                 buttons = listOf(
                     DialogButton(
                         label = event.confirmButtonLabel,
@@ -111,9 +109,7 @@ internal class InGameDialogController(
                                 logger.warn(error) { "Legacy password dialog submit failed" }
                                 showUnavailableDialog("Unable to submit input: ${error.message ?: error.javaClass.simpleName}")
                             }.also {
-                                if (loadingDialogSuspended) {
-                                    loadingDialogSceneHost.restoreFromTemporaryHide()
-                                }
+                                loadingDialogSuspended?.let(loadingDialogSceneHost::resume)
                             }
                         },
                     ),
@@ -125,9 +121,7 @@ internal class InGameDialogController(
                             }.onFailure { error ->
                                 logger.warn(error) { "Legacy password dialog cancel failed" }
                             }.also {
-                                if (loadingDialogSuspended) {
-                                    loadingDialogSceneHost.restoreFromTemporaryHide()
-                                }
+                                loadingDialogSuspended?.let(loadingDialogSceneHost::resume)
                             }
                         },
                     ),
@@ -173,15 +167,15 @@ internal class InGameDialogController(
     fun showSaveGameDialog() {
         showDialogOverGame(
             Dialog(
-                title = "Save Game",
-                message = "Enter a name to save the game under.",
+                title = I18n.ingame.save.title(),
+                message = I18n.ingame.save.message(),
                 textInput = DialogTextInput(
                     initialText = "rwx_save",
-                    hint = "Save name",
+                    hint = I18n.ingame.save.hint(),
                 ),
                 buttons = listOf(
                     DialogButton(
-                        label = "Save",
+                        label = I18n.common.save(),
                         onInputPress = { name ->
                             val saveName = name.trim().ifBlank { "rwx_save" }
                             gameSession.requestSaveGame(saveName)
@@ -197,11 +191,11 @@ internal class InGameDialogController(
         val initialName = defaultExportMapName()
         showDialogOverGame(
             Dialog(
-                title = "Export Map",
-                message = "Enter a name to export the map as.",
+                title = I18n.ingame.export.title(),
+                message = I18n.ingame.export.message(),
                 textInput = DialogTextInput(
                     initialText = initialName,
-                    hint = "Map name",
+                    hint = I18n.ingame.export.hint(),
                 ),
                 buttons = listOf(
                     DialogButton(
@@ -221,15 +215,15 @@ internal class InGameDialogController(
         val history = gameSession.multiplayerChatHistory()
         showDialogOverGame(
             Dialog(
-                title = if (teamOnly) "Team Chat" else "Chat",
-                message = if (history.isEmpty()) "No chat messages yet." else "",
+                title = if (teamOnly) I18n.ingame.chat.teamChat() else I18n.battleroom.chat(),
+                message = if (history.isEmpty()) I18n.ingame.chat.empty() else "",
                 listItems = history.asReversed().map { line ->
                     DialogListItem(line.text, line.teamColorIndex)
                 },
-                textInput = DialogTextInput(hint = "Message"),
+                textInput = DialogTextInput(hint = I18n.ingame.chat.hint()),
                 buttons = listOf(
                     DialogButton(
-                        label = "Send",
+                        label = I18n.battleroom.send(),
                         onInputPress = { message ->
                             val text = message.trim()
                             if (text.isNotBlank()) {
@@ -247,8 +241,8 @@ internal class InGameDialogController(
         val players = gameSession.multiplayerPlayerList()
         showDialogOverGame(
             Dialog(
-                title = "Players",
-                message = if (players.isEmpty()) "No multiplayer players found." else "",
+                title = I18n.battleroom.players(),
+                message = if (players.isEmpty()) I18n.ingame.players.empty() else "",
                 listItems = players.map { player ->
                     val ping = inGamePlayerPingSuffix(player.pingLabel)
                     DialogListItem(
@@ -266,17 +260,17 @@ internal class InGameDialogController(
         val title = when {
             multiplayer?.isHost == true -> Locale.get("menus.ingame.multiplayerClose.title")
             multiplayer != null -> Locale.get("menus.ingame.multiplayerClose.titleDisconnect")
-            else -> "Exit Game"
+            else -> I18n.pausemenu.exitGame()
         }
         val message = when {
             multiplayer?.isHost == true -> Locale.get("menus.ingame.multiplayerClose.messageEndGame")
             multiplayer != null -> Locale.get("menus.ingame.multiplayerClose.messageDisconnect")
-            else -> "Are you sure you want to exit this game?"
+            else -> I18n.ingame.exit.message()
         }
         val exitLabel = when {
             multiplayer?.isHost == true -> Locale.get("menus.ingame.exitGame")
             multiplayer != null -> Locale.get("menus.ingame.multiplayerClose.disconnectButton")
-            else -> "Exit"
+            else -> I18n.mainmenu.exit()
         }
         val buttons = buildList {
             add(
@@ -307,23 +301,20 @@ internal class InGameDialogController(
         )
     }
 
-    fun requestInGameKoolOverlay(enqueue: () -> Unit) {
+    fun requestInGameOverlay(enqueue: () -> Unit) {
 
         enqueue()
-        if (currentScreen() == AppScreen.InGame && !gameSession.rendersIntoKoolCanvas) {
+        if (currentScreen() == AppScreen.InGame && !gameSession.usesFrameCommandRendering) {
 
-            gameSession.setGameVisible(true, viewport(), koolOverlay = true, pausedBackground = true)
-        } else {
-
+            gameSession.setGameVisible(true, viewport(), uiOverlay = true, pausedBackground = true)
         }
     }
 
-    fun requestKoolOverlayForQueuedEvent(event: CoreUiEvent) {
-        if (!requiresKoolOverlay(event)) return
-        if (currentScreen() != AppScreen.InGame || gameSession.rendersIntoKoolCanvas) return
+    fun requestOverlayForQueuedEvent(event: CoreUiEvent) {
+        if (!requiresGameOverlay(event)) return
+        if (currentScreen() != AppScreen.InGame || gameSession.usesFrameCommandRendering) return
 
-        koolCanvasScene.isVisible = true
-        gameSession.setGameVisible(true, viewport(), koolOverlay = true, pausedBackground = true)
+        gameSession.setGameVisible(true, viewport(), uiOverlay = true, pausedBackground = true)
     }
 
     private fun defaultExportMapName(): String {
@@ -340,7 +331,7 @@ internal class InGameDialogController(
     }
 }
 
-internal fun requiresKoolOverlay(event: CoreUiEvent): Boolean = when (event) {
+internal fun requiresGameOverlay(event: CoreUiEvent): Boolean = when (event) {
     CoreUiEvent.InGameExitRequested,
     CoreUiEvent.InGameReturnToBattleRoomRequested,
     CoreUiEvent.InGameSettingsRequested,

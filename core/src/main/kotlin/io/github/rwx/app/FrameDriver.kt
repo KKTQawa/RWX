@@ -1,15 +1,14 @@
 package io.github.rwx.app
 
 import com.corrodinggames.rts.gameFramework.GameEngine
-import de.fabmax.kool.util.Time
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 
 internal class FrameDriver(
     private val gameSession: GameSession,
     private val currentScreen: () -> AppScreen,
-    private val canvasViewport: () -> KoolCanvasViewport,
+    private val canvasViewport: () -> GameViewport,
     private val coreEventDispatcher: CoreEventDispatcher,
     private val updateController: UpdateController,
     private val battleRoomController: BattleRoomController,
@@ -19,13 +18,12 @@ internal class FrameDriver(
     private val pendingStartController: PendingStartController,
     private val externalGameController: ExternalGameController,
     private val modsController: ModsController,
-    private val inputController: InputController,
     private val frameRenderController: FrameRenderController,
     private val gameReadyController: GameReadyController,
 ) {
     private var nextBattleRoomNetworkPollMillis: Long = 0L
 
-    fun drive(isRenderLoopFrame: Boolean = false) {
+    fun drive(deltaSeconds: Float, isRenderLoopFrame: Boolean = false) {
         if (modsController.driveReload()) {
             return
         }
@@ -47,17 +45,16 @@ internal class FrameDriver(
             isStartingMap = pendingStartController.isPending,
         )
         val isExternalBattleRoomJoinPending = battleRoomJoinController.isPending &&
-                !gameSession.rendersIntoKoolCanvas
+                !gameSession.usesFrameCommandRendering
         val canResumeForFrame = !isExternalBattleRoomJoinPending && gameSession.canResume()
-        inputController.forwardPointerForFrame()
         frameRenderController.render(
             screen = currentScreen(),
             isExternalBattleRoomJoinPending = isExternalBattleRoomJoinPending,
             canResumeForFrame = canResumeForFrame,
             canvasViewport = canvasViewport(),
-            deltaSeconds = Time.deltaT,
+            deltaSeconds = deltaSeconds,
         )
-        driveMusicOutsideRwFrame(currentScreen(), Time.deltaT)
+        driveMusicOutsideRwFrame(currentScreen(), deltaSeconds)
         val isVisibleRwGameReady = currentScreen() == AppScreen.InGame &&
                 !isExternalBattleRoomJoinPending &&
                 gameSession.isReadyForDisplay()
@@ -73,7 +70,7 @@ internal class FrameDriver(
         val shouldPoll = shouldPollConnectedBattleRoomNetwork(
             isRenderLoopFrame = isRenderLoopFrame,
             screen = currentScreen(),
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
             nowMillis = nowMillis,
             nextPollMillis = nextBattleRoomNetworkPollMillis,
         )
@@ -103,11 +100,11 @@ private const val BATTLE_ROOM_NETWORK_POLL_INTERVAL_MILLIS = 500L
 internal fun shouldPollConnectedBattleRoomNetwork(
     isRenderLoopFrame: Boolean,
     screen: AppScreen,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     nowMillis: Long,
     nextPollMillis: Long,
 ): Boolean =
     isRenderLoopFrame &&
             screen == AppScreen.BattleRoom &&
-            !rendersIntoKoolCanvas &&
+            !usesFrameCommandRendering &&
             nowMillis >= nextPollMillis

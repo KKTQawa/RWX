@@ -5,25 +5,27 @@ import io.github.rwx.i18n.I18n
 import io.github.rwx.logger
 import io.github.rwx.net.UpdateCheckResponse
 import io.github.rwx.net.UpdateRelease
-import io.github.rwx.net.UpdateRepository
 import io.github.rwx.ui.component.Icon
 import io.github.rwx.ui.host.DialogSceneHost
 import io.github.rwx.ui.host.LoadingDialogSceneHost
 import io.github.rwx.ui.model.Dialog
 import io.github.rwx.ui.model.DialogButton
+import io.github.rwx.ui.model.LoadingDialogHandle
 import io.github.rwx.ui.model.DialogInfoRow
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 internal class UpdateController(
     private val appMetadata: AppMetadata,
-    private val updateRepository: UpdateRepository,
+    private val checkLatestRelease: suspend (String) -> Result<UpdateCheckResponse>,
     private val loadingDialogSceneHost: LoadingDialogSceneHost,
     private val dialogSceneHost: DialogSceneHost,
     private val openLink: (String) -> Unit,
+    private val launchCheck: (suspend () -> Unit) -> Unit = { work -> launchOnIO("updates-check") { work() } },
 ) {
     private val result = AtomicReference<UpdateCheckResult?>(null)
     private val manualRequested = AtomicBoolean(false)
+    private var loadingHandle: LoadingDialogHandle? = null
     private var inProgress = false
     private var automaticStarted = false
 
@@ -36,7 +38,7 @@ internal class UpdateController(
     fun request(manual: Boolean) {
         if (manual) {
             manualRequested.set(true)
-            loadingDialogSceneHost.showCircular(
+            loadingHandle = loadingDialogSceneHost.showCircular(
                 title = I18n.update.checkingTitle(),
                 message = I18n.update.checkingMessage(),
             )
@@ -44,11 +46,11 @@ internal class UpdateController(
         if (inProgress) return
 
         inProgress = true
-        launchOnIO("updates-check"){
-            val response = updateRepository.checkLatestRelease(appMetadata.versionName)
+        launchCheck {
+            val response = checkLatestRelease(appMetadata.versionName)
             result.set(
                 UpdateCheckResult(
-                    manual = manual || manualRequested.getAndSet(false),
+                    manual = manual,
                     response = response.getOrNull(),
                     error = response.exceptionOrNull(),
                 )
@@ -62,13 +64,17 @@ internal class UpdateController(
 
     private fun handleResult(result: UpdateCheckResult) {
         inProgress = false
-        if (result.manual) {
-            loadingDialogSceneHost.hide()
+        // A manual request can arrive after IO has published its result but before this frame.
+        val manual = manualRequested.getAndSet(false) || result.manual
+        if (manual) {
+            val handle = loadingHandle
+            loadingHandle = null
+            handle?.let(loadingDialogSceneHost::hide)
         }
         val error = result.error
         if (error != null) {
             logger.warn(error) { "Unable to check GitHub releases" }
-            if (result.manual) {
+            if (manual) {
                 dialogSceneHost.show(
                     Dialog(
                         title = I18n.update.failedTitle(),
@@ -84,7 +90,7 @@ internal class UpdateController(
         val latestRelease = response.latestRelease
         if (response.isUpdateAvailable && latestRelease != null) {
             showAvailableDialog(latestRelease)
-        } else if (result.manual) {
+        } else if (manual) {
             dialogSceneHost.show(
                 Dialog(
                     title = I18n.update.latestTitle(),

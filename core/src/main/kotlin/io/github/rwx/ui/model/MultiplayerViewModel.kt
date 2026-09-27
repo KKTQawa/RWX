@@ -30,7 +30,25 @@ data class MultiplayerRoomListModel(
     val lobbyKind: MultiplayerLobbyKind,
     val rooms: List<MultiplayerRoomItem>,
     val statusText: String = "",
-)
+    val revision: Long = 0,
+    val isRefreshing: Boolean = false,
+    val errorText: String? = null,
+) {
+    /** Scope actions to the lobby the user actually saw, while allowing a newer tab choice. */
+    internal fun resolveAction(requestLobby: MultiplayerLobbyKind, requestRevision: Long, action: MultiplayerAction): MultiplayerAction? {
+        if (action == MultiplayerAction.Back || action == MultiplayerAction.ConfigurePlayerName || action is MultiplayerAction.SwitchLobby) {
+            return action
+        }
+        if (requestLobby != lobbyKind || requestRevision != revision) return null
+        if (action is MultiplayerAction.JoinRoom) {
+            return action.takeIf { errorText == null && it.roomId.isNotBlank() && rooms.any { room -> room.roomId == it.roomId } }
+        }
+        if (action is MultiplayerAction.JoinDirectWithAddress) {
+            return action.takeIf { it.address.isNotBlank() }
+        }
+        return action
+    }
+}
 
 /** Actions the user can take on the multiplayer room-list screen. */
 sealed interface MultiplayerAction {
@@ -49,6 +67,9 @@ sealed interface MultiplayerAction {
     /** Join by a manually-entered address / room code in the active lobby. */
     data object JoinDirect : MultiplayerAction
 
+
+    data class JoinDirectWithAddress(val address: String) : MultiplayerAction
+
     /** Configure the player name used by multiplayer sessions. */
     data object ConfigurePlayerName : MultiplayerAction
 
@@ -63,6 +84,7 @@ sealed interface MultiplayerOutcome {
     data class SwitchLobby(val lobbyKind: MultiplayerLobbyKind) : MultiplayerOutcome
     data object HostGameRequested : MultiplayerOutcome
     data object JoinDirectRequested : MultiplayerOutcome
+    data class JoinDirectWithAddressRequested(val address: String) : MultiplayerOutcome
     data object ConfigurePlayerNameRequested : MultiplayerOutcome
     data class JoinRoom(val roomId: String) : MultiplayerOutcome
 }
@@ -75,7 +97,24 @@ object MultiplayerNavigation {
         is MultiplayerAction.SwitchLobby -> MultiplayerOutcome.SwitchLobby(action.lobbyKind)
         MultiplayerAction.HostGame -> MultiplayerOutcome.HostGameRequested
         MultiplayerAction.JoinDirect -> MultiplayerOutcome.JoinDirectRequested
+        is MultiplayerAction.JoinDirectWithAddress -> MultiplayerOutcome.JoinDirectWithAddressRequested(action.address)
         MultiplayerAction.ConfigurePlayerName -> MultiplayerOutcome.ConfigurePlayerNameRequested
         is MultiplayerAction.JoinRoom -> MultiplayerOutcome.JoinRoom(action.roomId)
     }
 }
+
+/** Shared labels for both renderers; P/M are single-letter flags, not translated. */
+fun MultiplayerRoomItem.markers(): String = buildString {
+    if (requiresPassword) append("P")
+    if (hasMods) {
+        if (isNotEmpty()) append(" ")
+        append("M")
+    }
+}
+
+fun MultiplayerRoomItem.statusLabel(): String =
+    "$playersLabel | $stateLabel | $versionLabel | $transportLabel ${markers()}".trim()
+
+/** Compact rows show flags as icons; the state text stays marker-free. */
+fun MultiplayerRoomItem.statusLabelWithoutMarkers(): String =
+    "$playersLabel | $stateLabel | $versionLabel | $transportLabel".trim()

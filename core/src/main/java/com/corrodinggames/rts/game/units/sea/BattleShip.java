@@ -16,7 +16,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.h.a */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/h/a.class */
@@ -143,7 +143,7 @@ public class BattleShip extends WaterUnit {
         projectileA.renderScale = 2.0f;
         projectileA.speed = 4.0f;
         projectileA.hasExploded = true;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
         projectileA.isSmallExplosion = true;
         GameEngine gameEngine = GameEngine.getInstance();
         gameEngine.soundEngine.playSound(SoundEngine.cannonFiringSound, 0.2f, pointFE.x, pointFE.y);

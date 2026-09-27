@@ -5,7 +5,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.a.e */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/a/e.class */
@@ -81,7 +81,7 @@ public class NinePatchStyle extends UIStyle {
         return true;
     }
 
-    private void a(GraphicsEngine graphicsEngine, Texture texture, KoolPaint paint, Rect rect) {
+    private void a(GraphicsEngine graphicsEngine, Texture texture, Paint paint, Rect rect) {
         int i2 = rect.a;
         int i3 = rect.b;
         int iB = rect.b();
@@ -125,11 +125,11 @@ public class NinePatchStyle extends UIStyle {
         a(graphicsEngine, texture, paint, i2 + i4, i3 + i5, i8, i9, f2, f3, 1.0f - f2, 1.0f - f3, this.f);
     }
 
-    public void a(GraphicsEngine graphicsEngine, Texture texture, KoolPaint paint, int i2, int i3, int i4, int i5, float f, float f2, float f3, float f4) {
+    public void a(GraphicsEngine graphicsEngine, Texture texture, Paint paint, int i2, int i3, int i4, int i5, float f, float f2, float f3, float f4) {
         a(graphicsEngine, texture, paint, i2, i3, i4, i5, f, f2, f3, f4, false);
     }
 
-    public void a(GraphicsEngine graphicsEngine, Texture texture, KoolPaint paint, int i2, int i3, int i4, int i5, float f, float f2, float f3, float f4, boolean z) {
+    public void a(GraphicsEngine graphicsEngine, Texture texture, Paint paint, int i2, int i3, int i4, int i5, float f, float f2, float f3, float f4, boolean z) {
         Rect rect = h;
         Rect rect2 = i;
         rect.a((int) (f * texture.p), (int) (f2 * texture.q), (int) (f3 * texture.p), (int) (f4 * texture.q));
@@ -141,7 +141,7 @@ public class NinePatchStyle extends UIStyle {
         }
     }
 
-    private static void drawRepeatedSubRect(GraphicsEngine graphicsEngine, Texture texture, Rect source, Rect destination, KoolPaint paint, float scaleBias) {
+    private static void drawRepeatedSubRect(GraphicsEngine graphicsEngine, Texture texture, Rect source, Rect destination, Paint paint, float scaleBias) {
         int sourceWidth = source.b();
         int sourceHeight = source.c();
         int tileLeft = destination.a;

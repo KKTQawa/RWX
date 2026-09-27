@@ -7,7 +7,7 @@ import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.path.PathEngine;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.LinkedList;
 
@@ -20,7 +20,7 @@ public class DynamicUnitPath extends Path {
 
     /* JADX INFO: renamed from: b */
     FlowField flowField;
-    static KoolPaint c = new KoolPaint();
+    static Paint c = new Paint();
     static Point d = new Point();
 
     public DynamicUnitPath(PathEngine pathEngine, boolean z) {

@@ -71,7 +71,7 @@ public final class Effect {
     public float Y;
     public float Z;
     public String aa;
-    public KoolPaint ab;
+    public Paint ab;
     public float ac;
     public float ad;
     public boolean ae;
@@ -95,7 +95,7 @@ public final class Effect {
     public static int l = 5;
     public static int m = 6;
     public static int n = 7;
-    public static KoolMultiplyAddColorFilter C = null;
+    public static MultiplyAddColorFilter C = null;
     public static int D = 0;
     public static GamePaint[] ax = new GamePaint[128];
     public EffectTemplate a = EffectTemplate.defaultEffectTemplate;
@@ -104,7 +104,7 @@ public final class Effect {
     public EffectQuality q = EffectQuality.verylow;
     public float w = 1.0f;
     public float z = -1.0f;
-    public KoolMultiplyAddColorFilter B = null;
+    public MultiplyAddColorFilter B = null;
     public float X = 0.0f;
     public boolean an = false;
     public float ao = 0.0f;
@@ -226,10 +226,10 @@ public final class Effect {
         this.B = null;
         this.endColor = -1;
         this.z = -1.0f;
-        this.at.a((KoolColorFilter) null);
-        this.at.a((io.github.rwx.render.canvas.KoolCanvasBlendMode) null);
+        this.at.a((ColorFilter) null);
+        this.at.a((io.github.rwx.render.frame.GameCanvasBlendMode) null);
         this.aw = false;
-        this.at.a((KoolDisplacementEffect) null);
+        this.at.a((DisplacementEffect) null);
         this.at.a((ShaderProgram) null);
         this.as = false;
     }
@@ -496,10 +496,10 @@ public final class Effect {
         float f4 = 1.0f;
         boolean z4 = this.at.getBlendMode() != null;
         if (this.startColor != -1) {
-            fA = KoolArgbColor.a(this.startColor) * 0.003921569f;
-            int iB = KoolArgbColor.b(this.startColor);
-            int iC = KoolArgbColor.c(this.startColor);
-            int iD = KoolArgbColor.d(this.startColor);
+            fA = ArgbColor.a(this.startColor) * 0.003921569f;
+            int iB = ArgbColor.b(this.startColor);
+            int iC = ArgbColor.c(this.startColor);
+            int iD = ArgbColor.d(this.startColor);
             if (iB != 255 || iC != 255 || iD != 255) {
                 z4 = true;
                 f2 = iB * 0.003921569f;
@@ -508,10 +508,10 @@ public final class Effect {
             }
         }
         if (this.z >= 0.0f) {
-            float fA2 = KoolArgbColor.a(this.endColor) * 0.003921569f;
-            float fB = KoolArgbColor.b(this.endColor) * 0.003921569f;
-            float fC = KoolArgbColor.c(this.endColor) * 0.003921569f;
-            float fD = KoolArgbColor.d(this.endColor) * 0.003921569f;
+            float fA2 = ArgbColor.a(this.endColor) * 0.003921569f;
+            float fB = ArgbColor.b(this.endColor) * 0.003921569f;
+            float fC = ArgbColor.c(this.endColor) * 0.003921569f;
+            float fD = ArgbColor.d(this.endColor) * 0.003921569f;
             if (this.z <= f) {
                 fA = fA2;
                 z4 = true;
@@ -569,12 +569,12 @@ public final class Effect {
             if (C != null && D == iLongToIntArray) {
                 this.B = C;
             } else {
-                C = new KoolMultiplyAddColorFilter(iLongToIntArray, 0);
+                C = new MultiplyAddColorFilter(iLongToIntArray, 0);
                 D = iLongToIntArray;
                 this.B = C;
             }
         }
-        KoolMultiplyAddColorFilter multiplyAddColorFilter = this.B;
+        MultiplyAddColorFilter multiplyAddColorFilter = this.B;
         if (multiplyAddColorFilter != null) {
             if (!this.aw) {
                 this.at.a(multiplyAddColorFilter);
@@ -582,13 +582,13 @@ public final class Effect {
             }
             z4 = true;
         } else if (this.aw) {
-            this.at.a((KoolColorFilter) null);
+            this.at.a((ColorFilter) null);
             this.aw = false;
         }
         if (this.ar == 3) {
             if (EffectManager.displacementEffect == null) {
                 GameEngine.log("Loading displacement effect");
-                EffectManager.displacementEffect = new KoolDisplacementEffect();
+                EffectManager.displacementEffect = new DisplacementEffect();
             }
             if (EffectManager.shader == null) {
                 try {
@@ -598,7 +598,7 @@ public final class Effect {
                 }
             }
             if (this.ay.texture != null) {
-                KoolDisplacementEffect koolDisplacementEffect = EffectManager.displacementEffect;
+                DisplacementEffect koolDisplacementEffect = EffectManager.displacementEffect;
                 koolDisplacementEffect.configure(this.ay.texture, 0.12f * gameEngine.zoom);
                 this.at.a(koolDisplacementEffect);
                 ShaderProgram shaderProgram = EffectManager.shader;
@@ -624,7 +624,7 @@ public final class Effect {
             }
         }
         if (this.aa != null) {
-            KoolPaint paint = texture;
+            Paint paint = texture;
             if (this.ab != null) {
                 paint = this.ab;
             }

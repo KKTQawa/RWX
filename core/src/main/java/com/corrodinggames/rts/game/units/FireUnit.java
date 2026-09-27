@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -250,7 +250,7 @@ public class FireUnit extends NaturalUnit {
         float fE = du.e();
         gameEngine.renderGraphicsEngine.a(getRenderRotation(false), fD, fE);
         gameEngine.renderGraphicsEngine.a(this.growth * 2.7f, this.growth * 2.7f, fD, fE);
-        gameEngine.renderGraphicsEngine.a(textureD, dv, du, (KoolPaint) null);
+        gameEngine.renderGraphicsEngine.a(textureD, dv, du, (Paint) null);
         gameEngine.renderGraphicsEngine.l();
         return true;
     }

@@ -1,12 +1,14 @@
 package io.github.rwx.mod.registry
 
+import androidx.compose.runtime.Composable
 import com.corrodinggames.rts.gameFramework.GameEngine
-import de.fabmax.kool.modules.ui2.Dp
-import de.fabmax.kool.modules.ui2.UiScope
 import io.github.rwx.i18n.I18n
 import io.github.rwx.mod.api.*
 import io.github.rwx.mod.impl.ApiImpl
 import io.github.rwx.ui.CoreUiEventQueue
+import io.github.rwx.ui.model.ModHudLayerUiState
+import io.github.rwx.ui.model.ModHudUiState
+import io.github.rwx.ui.model.ModWindowUiState
 
 object UiRegistry : OwnedRegistry {
     private const val MENU_ID_BASE = 26000
@@ -19,14 +21,21 @@ object UiRegistry : OwnedRegistry {
      */
     private val lock = this
     private val items = RegistrationTable<Int, RegisteredMenuItem>("Mod menu item", lock)
-    private val hudLayers = RegistrationTable<String, RegisteredHudLayer>("Mod HUD", lock)
+    private val hudLayers = RegistrationTable<String, ModHudLayerUiState>("Mod HUD", lock)
     private val windows = RegistrationTable<String, RegisteredWindow>("Mod window", lock)
     private val nativeHudHiddenOwners = linkedSetOf<ApiImpl>()
     private var activeWindowId: String? = null
     private var worldPositionSelection: RegisteredWorldPositionSelection? = null
 
+    /**
+     * Published snapshots. Mods register from any thread; the frontend reads these once per frame
+     * and only republishes when the value changes, so they are rebuilt on change rather than per read.
+     */
     @Volatile
-    private var hudRevision = 0L
+    private var hudSnapshot = ModHudUiState()
+
+    @Volatile
+    private var windowRevision = 0L
 
     @JvmStatic
     fun addInGameMenuItem(owner: ApiImpl, menuId: Int?, label: LocalizedText, callback: (Int) -> Unit): Int =
@@ -42,9 +51,9 @@ object UiRegistry : OwnedRegistry {
     }
 
     @Synchronized
-    fun registerHud(owner: ApiImpl, id: HudId, order: Int, content: UiScope.() -> Unit) {
-        hudLayers.register(owner, id.value, RegisteredHudLayer(id, order, content))
-        hudRevision++
+    fun registerHud(owner: ApiImpl, id: HudId, order: Int, content: @Composable () -> Unit) {
+        hudLayers.register(owner, id.value, ModHudLayerUiState(id.value, order, content))
+        publishHud()
     }
 
     @Synchronized
@@ -52,7 +61,7 @@ object UiRegistry : OwnedRegistry {
         val registration = hudLayers.owned(id.value) ?: return
         check(registration.owner === owner) { "Mod HUD is owned by another mod: ${id.value}" }
         hudLayers.remove(id.value)
-        hudRevision++
+        publishHud()
     }
 
     @Synchronized
@@ -68,25 +77,22 @@ object UiRegistry : OwnedRegistry {
     @Synchronized
     fun isNativeHudVisible(): Boolean = nativeHudHiddenOwners.isEmpty()
 
-    @Synchronized
-    fun activeHudLayers(): List<ActiveHudLayer> = hudLayers.snapshot().values
-        .sortedWith(compareBy<RegisteredHudLayer> { it.order }.thenBy { it.id.value })
-        .map { ActiveHudLayer(it.id, it.order, it.content) }
+    /** Layers in composition order; the same value is returned until a registration changes. */
+    fun hudSnapshot(): ModHudUiState = hudSnapshot
 
     @Synchronized
     fun hasActiveHudLayers(): Boolean = !hudLayers.isEmpty()
-
-    fun hudRevision(): Long = hudRevision
 
     @JvmStatic
     @Synchronized
     fun clear() {
         items.clear()
-        if (!hudLayers.isEmpty()) hudRevision++
         hudLayers.clear()
+        publishHud()
         nativeHudHiddenOwners.clear()
         windows.clear()
         activeWindowId = null
+        windowRevision++
         worldPositionSelection = null
     }
 
@@ -110,16 +116,17 @@ object UiRegistry : OwnedRegistry {
         owner: ApiImpl,
         id: ModWindowId,
         title: LocalizedText,
-        content: UiScope.(context: ModWindowContext, contentWidth: Dp) -> Unit,
+        content: @Composable (context: ModWindowContext) -> Unit,
     ) {
-        windows.register(owner, id.value, RegisteredWindow(owner, title, content))
+        windows.register(owner, id.value, RegisteredWindow(owner, title, content, WindowContext(owner)))
     }
 
     @Synchronized
     fun openWindow(id: ModWindowId) {
         check(id.value in windows) { "Mod window is not registered: ${id.value}" }
         activeWindowId = id.value
-        GameEngine.getInstance().gameUI?.isDraggingSelection = false
+        windowRevision++
+        GameEngine.getInstance()?.gameUI?.isDraggingSelection = false
         CoreUiEventQueue.requestInGameModWindow()
     }
 
@@ -131,11 +138,26 @@ object UiRegistry : OwnedRegistry {
 
     @Synchronized
     fun deactivateWindow() {
+        if (activeWindowId == null) return
         activeWindowId = null
+        windowRevision++
     }
 
+    /** A new revision makes the renderer rebuild the active window's content from scratch. */
+    @Synchronized
     fun refreshWindow() {
-        CoreUiEventQueue.requestInGameModWindowRefresh()
+        windowRevision++
+    }
+
+    @Synchronized
+    fun windowSnapshot(): ModWindowUiState {
+        val registration = activeWindowId?.let { windows[it] } ?: return ModWindowUiState(windowRevision)
+        return ModWindowUiState(
+            revision = windowRevision,
+            title = registration.title.resolve(I18n.currentLocale.toLanguageTag()),
+            content = registration.content,
+            context = registration.context,
+        )
     }
 
     @Synchronized
@@ -173,23 +195,20 @@ object UiRegistry : OwnedRegistry {
     }
 
     @Synchronized
-    fun activeWindow(): ActiveWindow? {
-        val registration = activeWindowId?.let { windows[it] } ?: return null
-        return ActiveWindow(
-            title = registration.title,
-            content = registration.content,
-            context = WindowContext(registration.owner),
-        )
-    }
-
-    @Synchronized
     override fun unregister(owner: ApiImpl) {
         items.removeOwned(owner)
         val removedWindows = windows.removeOwned(owner)
-        if (activeWindowId in removedWindows.keys) activeWindowId = null
-        if (hudLayers.removeOwned(owner).isNotEmpty()) hudRevision++
+        if (activeWindowId in removedWindows.keys) {
+            activeWindowId = null
+            windowRevision++
+        }
+        if (hudLayers.removeOwned(owner).isNotEmpty()) publishHud()
         nativeHudHiddenOwners.remove(owner)
         if (worldPositionSelection?.owner === owner) worldPositionSelection = null
+    }
+
+    private fun publishHud() {
+        hudSnapshot = ModHudUiState.of(hudSnapshot.revision + 1, hudLayers.snapshot().values)
     }
 
     private data class RegisteredMenuItem(
@@ -198,16 +217,12 @@ object UiRegistry : OwnedRegistry {
         val callback: (Int) -> Unit,
     )
 
-    private data class RegisteredHudLayer(
-        val id: HudId,
-        val order: Int,
-        val content: UiScope.() -> Unit,
-    )
-
-    private data class RegisteredWindow(
+    private class RegisteredWindow(
         val owner: ApiImpl,
         val title: LocalizedText,
-        val content: UiScope.(context: ModWindowContext, contentWidth: Dp) -> Unit,
+        val content: @Composable (context: ModWindowContext) -> Unit,
+        /** Created once so per-frame snapshots of the same window compare equal. */
+        val context: ModWindowContext,
     )
 
     private data class RegisteredWorldPositionSelection(
@@ -233,18 +248,6 @@ object UiRegistry : OwnedRegistry {
             callback()
         }
     }
-
-    data class ActiveWindow(
-        val title: LocalizedText,
-        val content: UiScope.(context: ModWindowContext, contentWidth: Dp) -> Unit,
-        val context: ModWindowContext,
-    )
-
-    data class ActiveHudLayer(
-        val id: HudId,
-        val order: Int,
-        val content: UiScope.() -> Unit,
-    )
 
     private class WindowContext(private val owner: ApiImpl) : ModWindowContext {
         override val api = owner

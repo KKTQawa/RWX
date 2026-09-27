@@ -15,7 +15,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class ExperimentalHoverTank extends HoverLandUnit {
     Projectile chargedProjectile;
     Rect j;
     /* JADX INFO: renamed from: k */
-    KoolPaint paint;
+    Paint paint;
 
     @Override // com.corrodinggames.rts.game.units.BaseUnit
     /* JADX INFO: renamed from: b, reason: merged with bridge method [inline-methods] */

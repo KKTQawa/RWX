@@ -62,30 +62,24 @@ jobs:
           fi
           echo "RWX_VERSION=$version" >> "$GITHUB_ENV"
 
-      - name: Build platform JAR and jpackage image
+      - name: Install WiX Toolset (Windows installers)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install wixtoolset -y --no-progress
+
+      - name: Build Compose desktop distribution
         shell: bash
         run: |
           ./gradlew --no-daemon \
             -Pversion="$RWX_VERSION" \
-            -PtargetPlatform=${{ matrix.platform_id }} \
             :desktop:test \
-            :desktop:platformFatJar \
-            :desktop:packageDesktopDistribution
-
-      - name: Verify Windows launcher uses bundled runtime
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          ./.github/scripts/test-windows-bundled-runtime.ps1 `
-            -ImagePath desktop/build/jpackage/image/windows-x64/RWX `
-            -ExternalJavaHome $env:JAVA_HOME
+            :desktop:packageDistributionForCurrentOS
 
       - name: Upload desktop artifacts
         uses: actions/upload-artifact@v6
         with:
           name: RWX-${{ matrix.platform_id }}
-          path: desktop/build/distributions/RWX-*-${{ matrix.platform_id }}-desktop.zip
-#            desktop/build/libs/RWX-*-${{ matrix.platform_id }}.jar
+          path: desktop/build/compose/binaries/**
           if-no-files-found: error
           retention-days: 14
 
@@ -95,50 +89,11 @@ jobs:
         with:
           name: RWX-${{ matrix.platform_id }}-logs
           path: |
-            desktop/build/jpackage/**
+            desktop/build/compose/**
             desktop/build/reports/**
             build/reports/**
             hs_err_pid*.log
           if-no-files-found: warn
-          retention-days: 14
-
-  build-universal-jar:
-    name: Universal desktop JAR
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Java 25
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '25'
-          cache: gradle
-
-      - name: Ensure Gradle wrapper is executable
-        run: chmod +x ./gradlew
-
-      - name: Resolve release version
-        shell: bash
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            version="${GITHUB_REF_NAME#v}"
-          else
-            version="$(sed -n 's/^version=//p' gradle.properties)"
-          fi
-          echo "RWX_VERSION=$version" >> "$GITHUB_ENV"
-
-      - name: Build universal JAR
-        run: ./gradlew --no-daemon -Pversion="$RWX_VERSION" :desktop:multiPlatformFatJar
-
-      - name: Upload universal JAR
-        uses: actions/upload-artifact@v6
-        with:
-          name: RWX-universal-jar
-          path: desktop/build/libs/RWX-*-all.jar
-          if-no-files-found: error
           retention-days: 14
 
   build-android:
@@ -240,7 +195,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - build-desktop
-      - build-universal-jar
       - build-android
     runs-on: ubuntu-latest
     permissions:

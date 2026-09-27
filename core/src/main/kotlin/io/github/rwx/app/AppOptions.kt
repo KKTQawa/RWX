@@ -56,13 +56,11 @@ data class AppOptions(
         private val settingsPagesByArgument = mapOf(
             "display" to SettingsPage.Display,
             "audio" to SettingsPage.Audio,
-            "interface" to SettingsPage.Interface,
             "gameplay" to SettingsPage.Gameplay,
             "keys" to SettingsPage.KeyBindings,
             "keybindings" to SettingsPage.KeyBindings,
             "key-bindings" to SettingsPage.KeyBindings,
-            "color-scheme" to SettingsPage.ColorScheme,
-            "colors" to SettingsPage.ColorScheme,
+            "theme" to SettingsPage.Theme,
         )
 
         fun parseArgs(args: Array<String>, isDesktop: Boolean = false): AppOptions {

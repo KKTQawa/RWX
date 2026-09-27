@@ -4,11 +4,11 @@
 
 ----
 
-![GitHub Created At](https://img.shields.io/github/created-at/eam2539/RWX?color=blue&style=for-the-badge)
+![GitHub Created At](https://img.shields.io/github/created-at/yomi2539/RWX?color=blue&style=for-the-badge)
 [![Discord](https://img.shields.io/discord/1352880561215246376?style=for-the-badge&logo=discord)](https://discord.gg/q2amh4Gt3f)
-[![License](https://img.shields.io/github/license/eam2539/RWX?style=for-the-badge&color=blue)](./LICENSE)
+[![License](https://img.shields.io/github/license/yomi2539/RWX?style=for-the-badge&color=blue)](./LICENSE)
 
-[![Downloads](https://img.shields.io/github/downloads/eam2539/RWX/total?style=flat-square&color=e74c3c)](https://github.com/eam2539/RWX/releases)
+[![Downloads](https://img.shields.io/github/downloads/yomi2539/RWX/total?style=flat-square&color=e74c3c)](https://github.com/yomi2539/RWX/releases)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/5c73d6b0-e2f9-46d7-a0d2-271b8f81b6b2/deploy-status)](https://app.netlify.com/projects/rwx-docs/deploys)
 
 **R**usted **W**arfare e**X**tension
@@ -52,11 +52,12 @@ English, [简体中文](README_zh.md)
 Java 25 is required. Common release tasks:
 
 ```bash
-# Current-platform fat JAR and jpackage app image
-./gradlew :desktop:platformFatJar :desktop:packageDesktopDistribution
+# Current-platform desktop distribution via Compose Multiplatform built-in packaging
+# (app image plus OS installers under desktop/build/compose/binaries)
+./gradlew :desktop:packageDistributionForCurrentOS
 
-# One large JAR containing every supported desktop native library
-./gradlew :desktop:multiPlatformFatJar
+# Current-platform single JAR (Compose uber jar, current OS natives only)
+./gradlew :desktop:packageUberJarForCurrentOS
 
 # Android APK
 ./gradlew :android:assembleRelease
@@ -65,10 +66,15 @@ Java 25 is required. Common release tasks:
 See the [workflow](.github/workflows/ci.yml) and the
 [getting started guide](https://rwx-docs.netlify.app/tutorial/getting-started) for more details.
 
+## Thanks
+
+The UI design references [RWPP](https://github.com/RWPP-Team/RWPP)
+
 ## Disclaimer
 
 This is an unofficial extension project for Rusted Warfare, aiming to extend game functionality and gameplay through a
 modern technology stack. All related assets used in this project belong to their original authors.
 For educational and research purposes only, commercial use is prohibited.
+
 
 ---

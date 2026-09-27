@@ -2,7 +2,7 @@ package com.corrodinggames.rts.gameFramework.ui.widgets;
 
 import com.corrodinggames.rts.gameFramework.local.Locale;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.a.f */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/a/f.class */
@@ -40,7 +40,7 @@ public class MenuDialog extends PopupWindow {
         menuButton.a(str);
         menuButton.e(5.0f);
         menuButton.f(5.0f);
-        menuButton.a(KoolArgbColor.a(255, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30));
+        menuButton.a(ArgbColor.a(255, 30, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_SATELLITE_SERVICE, 30));
         return menuButton;
     }
 

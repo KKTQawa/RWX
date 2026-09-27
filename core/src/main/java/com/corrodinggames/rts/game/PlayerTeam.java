@@ -25,8 +25,8 @@ import com.corrodinggames.rts.gameFramework.network.NetworkEngine;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -185,10 +185,10 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
     int teamStatsMismatchCount;
 
     /* JADX INFO: renamed from: ae */
-    public KoolPaint teamColorPaint;
+    public Paint teamColorPaint;
 
     /* JADX INFO: renamed from: af */
-    public KoolPaint teamTextPaint;
+    public Paint teamTextPaint;
 
     /* JADX INFO: renamed from: ai */
     int defeatCheckDelayTicks;
@@ -1293,7 +1293,7 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
     public void refreshTeamColorPaints() {
         int teamColorArgb = getTeamColorArgb();
         this.teamColorPaint.b(teamColorArgb);
-        this.teamTextPaint.b(KoolArgbColor.a(KoolArgbColor.a(teamColorArgb), (int) (KoolArgbColor.b(teamColorArgb) * 0.5f), (int) (KoolArgbColor.c(teamColorArgb) * 0.5f), (int) (KoolArgbColor.d(teamColorArgb) * 0.5f)));
+        this.teamTextPaint.b(ArgbColor.a(ArgbColor.a(teamColorArgb), (int) (ArgbColor.b(teamColorArgb) * 0.5f), (int) (ArgbColor.c(teamColorArgb) * 0.5f), (int) (ArgbColor.d(teamColorArgb) * 0.5f)));
     }
 
     /* JADX INFO: renamed from: a */
@@ -1351,7 +1351,7 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
             throw new IllegalArgumentException("Expected 10 hex colors");
         }
         for (int i = 0; i < 10; i++) {
-            teamColorIds[i] = KoolArgbColor.a(strArrSplit[i]);
+            teamColorIds[i] = ArgbColor.a(strArrSplit[i]);
         }
     }
 
@@ -1385,7 +1385,7 @@ public abstract class PlayerTeam extends Serializable implements Comparable<Play
             return teamColorIds[i];
         }
         if (i == -3) {
-            return KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PROG_YELLOW, 90, 90, 90);
+            return ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PROG_YELLOW, 90, 90, 90);
         }
         return -7829368;
     }

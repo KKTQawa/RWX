@@ -47,8 +47,8 @@ import io.github.rwx.mod.api.UnitRenderLayer;
 import io.github.rwx.mod.registry.DamageRegistry;
 import io.github.rwx.mod.registry.RenderRegistry;
 import io.github.rwx.mod.registry.TurretFireCycleObserverRegistry;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -127,7 +127,7 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
     PointF[] E;
     PointF[] F;
     Projectile[] G;
-    KoolPaint J;
+    Paint J;
 
     /* JADX INFO: renamed from: dL */
     final FactoryQueueManager factoryQueueManager;
@@ -1442,12 +1442,12 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
         projectile.color = customProjectileTemplate.color;
         if (customProjectileTemplate.teamColorRatio != 0.0f) {
             float f5 = customProjectileTemplate.teamColorRatioSourceRatio;
-            int iA = KoolArgbColor.a(projectile.color);
-            int iB = (int) (KoolArgbColor.b(projectile.color) * f5);
-            int iC = (int) (KoolArgbColor.c(projectile.color) * f5);
-            int iD = (int) (KoolArgbColor.d(projectile.color) * f5);
+            int iA = ArgbColor.a(projectile.color);
+            int iB = (int) (ArgbColor.b(projectile.color) * f5);
+            int iC = (int) (ArgbColor.c(projectile.color) * f5);
+            int iD = (int) (ArgbColor.d(projectile.color) * f5);
             int teamColorArgb = baseUnit.team.getTeamColorArgb();
-            projectile.color = KoolArgbColor.a(iA, Utility.distance((int) (iB + (KoolArgbColor.b(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255), Utility.distance((int) (iC + (KoolArgbColor.c(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255), Utility.distance((int) (iD + (KoolArgbColor.d(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255));
+            projectile.color = ArgbColor.a(iA, Utility.distance((int) (iB + (ArgbColor.b(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255), Utility.distance((int) (iC + (ArgbColor.c(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255), Utility.distance((int) (iD + (ArgbColor.d(teamColorArgb) * customProjectileTemplate.teamColorRatio)), 0, 255));
         }
         projectile.textureFrame = customProjectileTemplate.x;
         projectile.textureType = customProjectileTemplate.y;
@@ -2399,7 +2399,7 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
         }
         GameEngine gameEngine = GameEngine.getInstance();
         GraphicsEngine graphicsEngine = gameEngine.renderGraphicsEngine;
-        KoolPaint renderPaint = getRenderPaint();
+        Paint renderPaint = getRenderPaint();
         float maxHealth = getRenderScale();
         PointF unitAIPosition = getRenderOffset();
         drawShadow();
@@ -2470,9 +2470,9 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
                     gameEngine.renderGraphicsEngine.b(vector3DBn.x - gameEngine.viewpointXSnapped, ((vector3DBn.y - vector3DBn.z) - gameEngine.viewpointYSnapped) - this.posZ);
                     gameEngine.renderGraphicsEngine.a(fE, fE);
                     if (zY) {
-                        gameEngine.renderGraphicsEngine.a(BuilderUnit.builderDechargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                        gameEngine.renderGraphicsEngine.a(BuilderUnit.builderDechargeTexture, 0.0f, 0.0f, (Paint) null);
                     } else {
-                        gameEngine.renderGraphicsEngine.a(BuilderUnit.builderChargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                        gameEngine.renderGraphicsEngine.a(BuilderUnit.builderChargeTexture, 0.0f, 0.0f, (Paint) null);
                     }
                     gameEngine.renderGraphicsEngine.l();
                 }
@@ -2506,7 +2506,7 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
                 if (this.J == null) {
                     this.J = GameViewUtils.a();
                 }
-                KoolPaint paint = this.J;
+                Paint paint = this.J;
                 paint.a((int) (fClamp * 255.0f), 255, 255, 255);
                 float f10 = this.posX - gameEngine.viewpointXSnapped;
                 float f11 = (this.posY - gameEngine.viewpointYSnapped) - this.posZ;
@@ -3551,7 +3551,7 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
                     if (z) {
                         i2 = 40;
                     }
-                    GameViewUtils.a((BaseUnit) this, turretConfig.interceptProjectilesAndTargetingGroundUnderDistance, KoolArgbColor.a(i2, 35, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 35), 1, true);
+                    GameViewUtils.a((BaseUnit) this, turretConfig.interceptProjectilesAndTargetingGroundUnderDistance, ArgbColor.a(i2, 35, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 35), 1, true);
                 }
             }
         }
@@ -3603,7 +3603,7 @@ public class CustomUnit extends MovableUnit implements TransportUnitInterface, U
 
     @Override // com.corrodinggames.rts.game.units.OrderableUnit
     /* JADX INFO: renamed from: aN */
-    public KoolPaint getRenderPaint() {
+    public Paint getRenderPaint() {
         return super.getRenderPaint();
     }
 

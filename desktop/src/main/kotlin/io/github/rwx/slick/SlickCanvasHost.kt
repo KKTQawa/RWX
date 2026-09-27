@@ -2,9 +2,24 @@ package io.github.rwx.slick
 
 import java.awt.Canvas
 import java.awt.Dimension
+import java.awt.event.InputEvent
 import javax.swing.SwingUtilities
 
 object SlickCanvasHost {
+    @Volatile
+    private var uiFrameProvider: (() -> SlickUiFrame?)? = null
+
+    private var uiInputDispatcher: ((InputEvent) -> Boolean)? = null
+
+    internal fun installUiOverlay(frameProvider: () -> SlickUiFrame?, inputDispatcher: (InputEvent) -> Boolean) {
+        uiFrameProvider = frameProvider
+        uiInputDispatcher = inputDispatcher
+    }
+
+    internal fun currentUiFrame(): SlickUiFrame? = uiFrameProvider?.invoke()
+
+    internal fun dispatchOverlayInput(event: InputEvent): Boolean = uiInputDispatcher?.invoke(event) == true
+
     @Volatile
     private var canvasProvider: (() -> Canvas?)? = null
 
@@ -23,6 +38,18 @@ object SlickCanvasHost {
     ) {
         this.canvasProvider = canvasProvider
         this.visibilityController = visibilityController
+    }
+
+    /** Detach only this host; a late close must not unregister a replacement window. */
+    fun uninstall(canvas: Canvas) {
+        check(SwingUtilities.isEventDispatchThread())
+        if (canvasProvider?.invoke() !== canvas) return
+        uiFrameProvider = null
+        uiInputDispatcher = null
+        canvasProvider = null
+        visibilityController = null
+        resizeController = null
+        rendererShutdown = null
     }
 
     fun setRendererShutdown(shutdown: (() -> Unit)?) {
@@ -49,8 +76,8 @@ object SlickCanvasHost {
         resizeController?.invoke(width, height)
     }
 
-    fun setGameVisible(visible: Boolean, koolOverlay: Boolean = false) {
-        visibilityController?.invoke(visible, koolOverlay)
+    fun setGameVisible(visible: Boolean, overlay: Boolean = false) {
+        visibilityController?.invoke(visible, overlay)
     }
 
     fun requestGameFocus() {

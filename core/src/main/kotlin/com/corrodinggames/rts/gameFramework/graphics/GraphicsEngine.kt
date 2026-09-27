@@ -2,8 +2,8 @@ package com.corrodinggames.rts.gameFramework.graphics
 
 import io.github.rwx.geometry.Rect
 import io.github.rwx.geometry.RectF
-import io.github.rwx.render.canvas.KoolCanvasBlendMode
-import io.github.rwx.render.canvas.KoolPaint
+import io.github.rwx.render.frame.GameCanvasBlendMode
+import io.github.rwx.render.canvas.Paint
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.locks.Lock
@@ -59,57 +59,57 @@ interface GraphicsEngine {
 
     fun b(i: Int, i2: Int, z: Boolean): Texture
 
-    fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: KoolPaint?)
+    fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: Paint?)
 
-    fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: KoolPaint?)
+    fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: Paint?)
 
-    fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?)
+    fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: Paint?)
 
-    fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: KoolPaint?)
+    fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: Paint?)
 
-    fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?)
+    fun a(texture: Texture?, f: Float, f2: Float, paint: Paint?)
 
-    fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?, f3: Float, f4: Float)
+    fun a(texture: Texture?, f: Float, f2: Float, paint: Paint?, f3: Float, f4: Float)
 
-    fun b(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?)
+    fun b(texture: Texture?, f: Float, f2: Float, paint: Paint?)
 
-    fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?)
+    fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: Paint?)
 
-    fun a(rect: Rect?, paint: KoolPaint?)
+    fun a(rect: Rect?, paint: Paint?)
 
-    fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?)
+    fun a(texture: Texture?, rect: Rect?, paint: Paint?)
 
-    fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?, i: Int, i2: Int, i3: Int, i4: Int)
+    fun a(texture: Texture?, rect: Rect?, paint: Paint?, i: Int, i2: Int, i3: Int, i4: Int)
 
-    fun a(texture: Texture?, rectF: RectF?, paint: KoolPaint?, f: Float, f2: Float, i: Int, i2: Int)
+    fun a(texture: Texture?, rectF: RectF?, paint: Paint?, f: Float, f2: Float, i: Int, i2: Int)
 
     fun b(i: Int)
 
-    fun a(i: Int, mode: KoolCanvasBlendMode?)
+    fun a(i: Int, mode: GameCanvasBlendMode?)
 
-    fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?, paint2: KoolPaint?, f3: Float)
+    fun a(str: String?, f: Float, f2: Float, paint: Paint?, paint2: Paint?, f3: Float)
 
-    fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?)
+    fun a(str: String?, f: Float, f2: Float, paint: Paint?)
 
-    fun b(rect: Rect?, paint: KoolPaint?)
+    fun b(rect: Rect?, paint: Paint?)
 
     fun a(z: Boolean)
 
     fun f()
 
-    fun a(rectF: RectF?, paint: KoolPaint?)
+    fun a(rectF: RectF?, paint: Paint?)
 
-    fun c(rect: Rect?, paint: KoolPaint?)
+    fun c(rect: Rect?, paint: Paint?)
 
     fun a(rect: Rect?)
 
     fun a(rectF: RectF?)
 
-    fun a(f: Float, f2: Float, f3: Float, paint: KoolPaint?)
+    fun a(f: Float, f2: Float, f3: Float, paint: Paint?)
 
-    fun b(f: Float, f2: Float, f3: Float, paint: KoolPaint?)
+    fun b(f: Float, f2: Float, f3: Float, paint: Paint?)
 
-    fun a(fArr: FloatArray?, i: Int, i2: Int, paint: KoolPaint?)
+    fun a(fArr: FloatArray?, i: Int, i2: Int, paint: Paint?)
 
     fun i()
 
@@ -127,7 +127,7 @@ interface GraphicsEngine {
 
     fun b(f: Float, f2: Float)
 
-    fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: KoolPaint?)
+    fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: Paint?)
 
     fun m(): Int
 
@@ -143,9 +143,9 @@ interface GraphicsEngine {
 
     fun a(shaderProgram: ShaderProgram?)
 
-    fun a(str: String?, paint: KoolPaint?): Int
+    fun a(str: String?, paint: Paint?): Int
 
-    fun b(str: String?, paint: KoolPaint?): Int
+    fun b(str: String?, paint: Paint?): Int
 
     fun r(): Texture
 

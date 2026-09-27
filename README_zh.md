@@ -4,12 +4,12 @@
 
 ----
 
-![GitHub Created At](https://img.shields.io/github/created-at/eam2539/RWX?color=blue&style=for-the-badge)
+![GitHub Created At](https://img.shields.io/github/created-at/yomi2539/RWX?color=blue&style=for-the-badge)
 [![Discord](https://img.shields.io/discord/1352880561215246376?style=for-the-badge&logo=discord)](https://discord.gg/q2amh4Gt3f)
 [![QQ](https://img.shields.io/badge/QQ-982838086-orange?style=for-the-badge&logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=kupOkNOePIjHK4sSdiJE-9YRdh3ANwum&jump_from=webapi&authKey=/fjvR18rZdV+4fe6gmVlBQkSwLZxoT0L2MYpxl8G2yph2YtqseZn2RAO556LJooZ)
-[![License](https://img.shields.io/github/license/eam2539/RWX?style=for-the-badge&color=blue)](./LICENSE)
+[![License](https://img.shields.io/github/license/yomi2539/RWX?style=for-the-badge&color=blue)](./LICENSE)
 
-[![Downloads](https://img.shields.io/github/downloads/eam2539/RWX/total?style=flat-square&color=e74c3c)](https://github.com/eam2539/RWX/releases)
+[![Downloads](https://img.shields.io/github/downloads/yomi2539/RWX/total?style=flat-square&color=e74c3c)](https://github.com/yomi2539/RWX/releases)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/5c73d6b0-e2f9-46d7-a0d2-271b8f81b6b2/deploy-status)](https://app.netlify.com/projects/rwx-docs/deploys)
 
 **R**usted **W**arfare e**X**tension
@@ -53,11 +53,12 @@
 构建需要 Java 25。常用发行任务如下：
 
 ```bash
-# 当前平台 fat JAR 与 jpackage 应用镜像
-./gradlew :desktop:platformFatJar :desktop:packageDesktopDistribution
+# 当前平台桌面发行包（Compose Multiplatform 内置打包：
+# 应用镜像 + 系统安装包，产物在 desktop/build/compose/binaries）
+./gradlew :desktop:packageDistributionForCurrentOS
 
-# 包含所有桌面平台原生库的通用 JAR
-./gradlew :desktop:multiPlatformFatJar
+# 当前平台单 JAR（Compose uber jar，仅含当前 OS 原生库）
+./gradlew :desktop:packageUberJarForCurrentOS
 
 # Android APK
 ./gradlew :android:assembleRelease
@@ -65,6 +66,10 @@
 
 更多信息请参考 [CI/CD 配置](.github/workflows/ci.yml) 以及
 [文档站快速开始](https://rwx-docs.netlify.app/zh/tutorial/getting-started)。
+
+## 感谢
+
+UI设计参考了[RWPP](https://github.com/RWPP-Team/RWPP)
 
 ## 免责声明
 

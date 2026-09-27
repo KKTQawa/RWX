@@ -43,7 +43,6 @@ sealed interface CoreUiEvent {
     data object InGameMapListRequested : CoreUiEvent
     data object InGameModWindowRequested : CoreUiEvent
     data object InGameModWindowBackRequested : CoreUiEvent
-    data object InGameModWindowRefreshRequested : CoreUiEvent
     data class InGameMapPortalTransferRequested(
         val transfer: PortalTransferMessage,
     ) : CoreUiEvent
@@ -118,7 +117,6 @@ object CoreUiEventQueue {
             CoreUiEvent.InGameMapListRequested,
             CoreUiEvent.InGameModWindowRequested,
             CoreUiEvent.InGameModWindowBackRequested,
-            CoreUiEvent.InGameModWindowRefreshRequested,
         ).forEach { it.javaClass.name }
     }
 
@@ -253,11 +251,6 @@ object CoreUiEventQueue {
     @JvmStatic
     fun requestInGameModWindowBack() {
         enqueue(CoreUiEvent.InGameModWindowBackRequested)
-    }
-
-    @JvmStatic
-    fun requestInGameModWindowRefresh() {
-        enqueue(CoreUiEvent.InGameModWindowRefreshRequested)
     }
 
     @JvmStatic

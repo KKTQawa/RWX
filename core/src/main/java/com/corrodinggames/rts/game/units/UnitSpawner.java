@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.audio.SoundEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.g */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/g.class */
@@ -23,9 +23,9 @@ public class UnitSpawner extends LandUnit implements UnitPathPoints {
     PointF[] spawnPoints;
     /* JADX INFO: renamed from: c */
     PointF[] spawnDirections;
-    static KoolPaint d;
-    static KoolPaint e;
-    static KoolPaint f;
+    static Paint d;
+    static Paint e;
+    static Paint f;
     /* JADX INFO: renamed from: g */
     int updateCount;
     /* JADX INFO: renamed from: h */
@@ -87,15 +87,15 @@ public class UnitSpawner extends LandUnit implements UnitPathPoints {
         super(z);
         this.spawnPoints = new PointF[6];
         this.spawnDirections = new PointF[this.spawnPoints.length];
-        d = new KoolPaint();
+        d = new Paint();
         d.a(40, 0, 255, 0);
         d.a(true);
         d.a(2.0f);
-        d.a(KoolPaint.Cap.ROUND);
-        e = new KoolPaint();
+        d.a(Paint.Cap.ROUND);
+        e = new Paint();
         e.a(d);
         e.a(55, 255, 60, 60);
-        f = new KoolPaint();
+        f = new Paint();
         f.a(60, 255, 255, 255);
         T(20);
         U(20);

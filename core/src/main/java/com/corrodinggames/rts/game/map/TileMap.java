@@ -28,8 +28,8 @@ import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.Paint;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -131,22 +131,22 @@ public final class TileMap {
     public int cursorStartTileY;
 
     /* JADX INFO: renamed from: ab */
-    KoolPaint debugRedStrokePaint;
+    Paint debugRedStrokePaint;
 
     /* JADX INFO: renamed from: ac */
-    KoolPaint placementValidStrokePaint;
+    Paint placementValidStrokePaint;
 
     /* JADX INFO: renamed from: ad */
-    KoolPaint placementValidHoverStrokePaint;
+    Paint placementValidHoverStrokePaint;
 
     /* JADX INFO: renamed from: ae */
-    KoolPaint placementInvalidStrokePaint;
+    Paint placementInvalidStrokePaint;
 
     /* JADX INFO: renamed from: af */
-    KoolPaint placementInvalidFillPaint;
+    Paint placementInvalidFillPaint;
 
     /* JADX INFO: renamed from: ag */
-    KoolPaint clearXferPaint;
+    Paint clearXferPaint;
 
     /* JADX INFO: renamed from: ah */
     HashMap gidToMapTileCache;
@@ -175,16 +175,16 @@ public final class TileMap {
     static ReentrantLock fogAtlasLock = new ReentrantLock();
 
     /* JADX INFO: renamed from: g */
-    static KoolPaint fogAtlasDebugWhiteStrokePaint = new KoolPaint();
+    static Paint fogAtlasDebugWhiteStrokePaint = new Paint();
 
     /* JADX INFO: renamed from: h */
-    static KoolPaint fogAtlasDebugRedStrokePaint = new KoolPaint();
+    static Paint fogAtlasDebugRedStrokePaint = new Paint();
 
     /* JADX INFO: renamed from: i */
-    static KoolPaint fogAtlasDebugGreenStrokePaint = new KoolPaint();
+    static Paint fogAtlasDebugGreenStrokePaint = new Paint();
 
     /* JADX INFO: renamed from: j */
-    static KoolPaint fogAtlasDebugRedStrokePaintAlt = new KoolPaint();
+    static Paint fogAtlasDebugRedStrokePaintAlt = new Paint();
 
     /* JADX INFO: renamed from: H */
     public static boolean softFogFadingInitialized = false;
@@ -256,7 +256,7 @@ public final class TileMap {
     int fogFadeStep = 0;
 
     /* JADX INFO: renamed from: am */
-    KoolPaint fogOverlayPaint = new KoolPaint();
+    Paint fogOverlayPaint = new Paint();
 
     /* JADX INFO: renamed from: an */
     Rect tempTileRect = new Rect();
@@ -313,14 +313,14 @@ public final class TileMap {
         releaseFogSmoothAtlas();
         fogGraphicsBackend = graphicsEngine;
         fogAtlasDebugWhiteStrokePaint.a(150, 255, 255, 255);
-        fogAtlasDebugWhiteStrokePaint.a(KoolPaint.Style.STROKE);
+        fogAtlasDebugWhiteStrokePaint.a(Paint.Style.STROKE);
         fogAtlasDebugWhiteStrokePaint.a(1.0f);
         gameEngine.updatePaintTextSize(fogAtlasDebugWhiteStrokePaint, 16.0f);
         fogAtlasDebugRedStrokePaint.a(150, 255, 0, 0);
-        fogAtlasDebugRedStrokePaint.a(KoolPaint.Style.STROKE);
+        fogAtlasDebugRedStrokePaint.a(Paint.Style.STROKE);
         fogAtlasDebugRedStrokePaint.a(1.0f);
         fogAtlasDebugGreenStrokePaint.a(150, 0, 255, 0);
-        fogAtlasDebugGreenStrokePaint.a(KoolPaint.Style.STROKE);
+        fogAtlasDebugGreenStrokePaint.a(Paint.Style.STROKE);
         fogAtlasDebugGreenStrokePaint.a(1.0f);
         fogAtlasDebugRedStrokePaintAlt.a(150, 255, 0, 0);
         long jA = PerformanceProfiler.a();
@@ -494,13 +494,13 @@ public final class TileMap {
             int i2 = iArr2[i + 0] * 20;
             int i3 = iArr2[i + 1] * 20;
             rect2.a(i2, i3, i2 + 20, i3 + 20);
-            graphicsEngine.a(texture2, rect2, rect, (KoolPaint) null);
+            graphicsEngine.a(texture2, rect2, rect, (Paint) null);
             rect4.a(rect2.c - 1, rect2.b, rect2.c, rect2.d);
             rect3.a(rect.c, rect.b, rect.c + 1, rect.d);
-            graphicsEngine.a(texture2, rect4, rect3, (KoolPaint) null);
+            graphicsEngine.a(texture2, rect4, rect3, (Paint) null);
             rect4.a(rect2.a, rect2.d - 1, rect2.c, rect2.d);
             rect3.a(rect.a, rect.d, rect.c, rect.d + 1);
-            graphicsEngine.a(texture2, rect4, rect3, (KoolPaint) null);
+            graphicsEngine.a(texture2, rect4, rect3, (Paint) null);
         }
         graphicsEngine.p();
         for (int i4 : iArr) {
@@ -514,7 +514,7 @@ public final class TileMap {
         Rect rect2 = new Rect();
         rect2.a(0, 0, 20, 20);
         computeFogAtlasTileRect(i, rect);
-        TileAtlasCache.blitPaddingEdges(fogAtlasRenderer, texture, rect2, rect, (KoolPaint) null);
+        TileAtlasCache.blitPaddingEdges(fogAtlasRenderer, texture, rect2, rect, (Paint) null);
     }
 
     /* JADX INFO: renamed from: a */
@@ -726,21 +726,21 @@ public final class TileMap {
         this.debugRedStrokePaint.a(100, 255, 0, 0);
         this.debugRedStrokePaint.b(16.0f);
         this.placementValidStrokePaint = new GamePaint();
-        this.placementValidStrokePaint.a(KoolPaint.Style.STROKE);
+        this.placementValidStrokePaint.a(Paint.Style.STROKE);
         this.placementValidStrokePaint.a(1.0f);
         this.placementValidStrokePaint.a(255, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PAIRING, 0);
         this.placementValidHoverStrokePaint = new GamePaint();
-        this.placementValidHoverStrokePaint.a(KoolPaint.Style.STROKE);
+        this.placementValidHoverStrokePaint.a(Paint.Style.STROKE);
         this.placementValidHoverStrokePaint.a(1.0f);
         this.placementValidHoverStrokePaint.a(100, 0, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_PROG_YELLOW, 0);
         this.placementInvalidStrokePaint = new GamePaint();
-        this.placementInvalidStrokePaint.a(KoolPaint.Style.STROKE);
+        this.placementInvalidStrokePaint.a(Paint.Style.STROKE);
         this.placementInvalidStrokePaint.a(1.0f);
         this.placementInvalidStrokePaint.a(255, 175, 0, 0);
         this.placementInvalidFillPaint = new GamePaint();
         this.placementInvalidFillPaint.a(155, 175, 0, 0);
         this.clearXferPaint = new GamePaint();
-        this.clearXferPaint.a(KoolCanvasBlendMode.Clear);
+        this.clearXferPaint.a(GameCanvasBlendMode.Clear);
     }
 
     /* JADX INFO: renamed from: a */

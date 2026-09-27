@@ -7,39 +7,39 @@ import com.corrodinggames.rts.gameFramework.graphics.GamePaint;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.ae */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/ae.class */
 public class TextRenderQueue {
-    static KoolPaint h;
+    static Paint h;
     static GamePaint a = new GamePaint();
     static GamePaint b = new GamePaint();
     static GamePaint c = new GamePaint();
 
     /* JADX INFO: renamed from: f */
-    static KoolPaint coloredTextPaint = new KoolPaint();
+    static Paint coloredTextPaint = new Paint();
 
     /* JADX INFO: renamed from: d */
-    public KoolPaint defaultPaint = a;
+    public Paint defaultPaint = a;
 
     /* JADX INFO: renamed from: e */
-    public KoolPaint highlightPaint = a;
+    public Paint highlightPaint = a;
 
     /* JADX INFO: renamed from: g */
-    public KoolPaint currentPaint = this.defaultPaint;
+    public Paint currentPaint = this.defaultPaint;
 
     /* JADX INFO: renamed from: i */
     FastArrayList<RenderElement> elements = new FastArrayList();
 
     static {
         c.a(true);
-        h = new KoolPaint();
+        h = new Paint();
         h.b(-65536);
-        h.a(KoolPaint.Style.STROKE);
+        h.a(Paint.Style.STROKE);
     }
 
-    public void a(KoolPaint paint) {
+    public void a(Paint paint) {
         if (paint == null) {
             this.currentPaint = this.defaultPaint;
         } else {
@@ -95,7 +95,7 @@ public class TextRenderQueue {
         }
     }
 
-    public void a(String str, KoolPaint paint) {
+    public void a(String str, Paint paint) {
         a(new ColoredTextRenderer(this, str, paint));
     }
 
@@ -108,7 +108,7 @@ public class TextRenderQueue {
     }
 
     public void a(String str, int i, boolean z) {
-        KoolPaint paint = this.defaultPaint;
+        Paint paint = this.defaultPaint;
         if (z) {
             paint = this.highlightPaint;
         }
@@ -145,7 +145,7 @@ public class TextRenderQueue {
         Rect rect = new Rect((-i) / 2, 0, i / 2, 10);
         FastArrayList<TextRenderLine> fastArrayList = new FastArrayList();
         TextRenderLine textRenderLine = new TextRenderLine();
-        KoolPaint paint = this.defaultPaint;
+        Paint paint = this.defaultPaint;
         int i2 = i - 5;
         for (RenderElement renderElement : this.elements) {
             if (textRenderLine.b >= i2 - 5) {

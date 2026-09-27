@@ -5,10 +5,10 @@ import com.corrodinggames.rts.game.units.buildings.BaseBuilding;
 import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolBlendColorFilter;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.BlendColorFilter;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e.class */
@@ -18,7 +18,7 @@ public class CrystalResource extends BaseBuilding {
     float animationTimer;
     /* JADX INFO: renamed from: a */
     static Texture texture = null;
-    static KoolBlendColorFilter c = new KoolBlendColorFilter(KoolArgbColor.a(200, 200, 200), KoolCanvasBlendMode.Multiply);
+    static BlendColorFilter c = new BlendColorFilter(ArgbColor.a(200, 200, 200), GameCanvasBlendMode.Multiply);
 
     @Override // com.corrodinggames.rts.game.units.BaseUnit
     /* JADX INFO: renamed from: b, reason: merged with bridge method [inline-methods] */
@@ -60,7 +60,7 @@ public class CrystalResource extends BaseBuilding {
 
     @Override // com.corrodinggames.rts.game.units.buildings.BaseBuilding
     /* JADX INFO: renamed from: f */
-    public KoolPaint getBuildingPaint() {
+    public Paint getBuildingPaint() {
         return super.getBuildingPaint();
     }
 

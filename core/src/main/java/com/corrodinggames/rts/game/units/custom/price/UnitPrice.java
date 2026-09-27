@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.ui.LagHidingManager;
 import com.corrodinggames.rts.gameFramework.ui.TextRenderQueue;
 import com.corrodinggames.rts.gameFramework.utility.IniFile;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 
@@ -32,7 +32,7 @@ public class UnitPrice extends PriceCondition implements Comparable<UnitPrice> {
     public StoredResources k = m;
     private static final StoredResources m = new StoredResources().a();
     public static final UnitPrice a = a(0);
-    static final int l = KoolArgbColor.a(255, 0, 100, 0);
+    static final int l = ArgbColor.a(255, 0, 100, 0);
 
     public int a() {
         return this.b;

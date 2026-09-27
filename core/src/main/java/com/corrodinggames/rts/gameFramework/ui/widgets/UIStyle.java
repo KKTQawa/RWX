@@ -8,8 +8,8 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.a.h */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/a/h.class */
@@ -33,8 +33,8 @@ public class UIStyle {
     static Rect w = new Rect();
     static Rect x = new Rect();
     static Rect y = new Rect();
-    KoolPaint o = new GamePaint();
-    KoolPaint q = new GamePaint();
+    Paint o = new GamePaint();
+    Paint q = new GamePaint();
     public int s = 3;
     public int t = 3;
 
@@ -45,12 +45,12 @@ public class UIStyle {
     public void a(UIStyle uIStyle) {
         this.backgroundTexture = uIStyle.backgroundTexture;
         if (uIStyle.o != null) {
-            this.o = new KoolPaint(uIStyle.o);
+            this.o = new Paint(uIStyle.o);
         } else {
             this.o = null;
         }
         if (uIStyle.q != null) {
-            this.q = new KoolPaint(uIStyle.q);
+            this.q = new Paint(uIStyle.q);
         } else {
             this.q = null;
         }
@@ -58,13 +58,13 @@ public class UIStyle {
 
     public static void b() {
         UIStyle uIStyle = j;
-        uIStyle.o.b(KoolArgbColor.a(140, 100, 100, 100));
+        uIStyle.o.b(ArgbColor.a(140, 100, 100, 100));
         uIStyle.q.b(-16777216);
-        uIStyle.q.a(KoolPaint.Style.STROKE);
+        uIStyle.q.a(Paint.Style.STROKE);
         UIStyle uIStyle2 = k;
-        uIStyle2.o.b(KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 100, 100, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3));
+        uIStyle2.o.b(ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 100, 100, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3));
         uIStyle2.q.b(-16777216);
-        uIStyle2.q.a(KoolPaint.Style.STROKE);
+        uIStyle2.q.a(Paint.Style.STROKE);
         UIStyle uIStyle3 = l;
         uIStyle3.o = null;
         uIStyle3.q = null;
@@ -72,13 +72,13 @@ public class UIStyle {
         uIStyle4.o = null;
         uIStyle4.q.b(-65536);
         uIStyle4.q.c(127);
-        uIStyle4.q.a(KoolPaint.Style.STROKE);
+        uIStyle4.q.a(Paint.Style.STROKE);
         UIStyle uIStyle5 = n;
         uIStyle5.o.c(255);
         uIStyle5.backgroundTexture = GameEngine.getInstance().gameUI.bl;
         uIStyle5.q.b(-7829368);
         uIStyle5.q.c(255);
-        uIStyle5.q.a(KoolPaint.Style.STROKE);
+        uIStyle5.q.a(Paint.Style.STROKE);
     }
 
     public void a(GraphicsEngine graphicsEngine, RectF rectF) {

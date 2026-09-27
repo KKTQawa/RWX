@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.a */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/a.class */
@@ -111,7 +111,7 @@ public class Artillery extends LandUnit {
         projectileA.lifeTimer = 150.0f;
         projectileA.speed = 4.0f;
         projectileA.isSmallExplosion = true;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 80);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 80);
         projectileA.textureType = (short) 2;
         projectileA.textureFrame = (short) 1;
         projectileA.renderScale = 0.9f;

@@ -1,19 +1,32 @@
 package io.github.rwx.app
 
-import de.fabmax.kool.KoolContext
-import de.fabmax.kool.util.ApplicationScope
+import io.github.rwx.ui.model.ModsAction
+import io.github.rwx.ui.model.ResourceBrowserAction
+import io.github.rwx.ui.model.ReplaySelectAction
+
 import io.github.rwx.logger
-import io.github.rwx.render.canvas.KoolCanvasFrame
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameFrame
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.ui.*
+import io.github.rwx.ui.model.BattleRoomAction
+import io.github.rwx.ui.model.DialogUiAction
+import io.github.rwx.ui.model.LevelSelectAction
 import io.github.rwx.ui.model.LevelSelectMode
+import io.github.rwx.ui.model.GameInputEvent
+import io.github.rwx.ui.model.MainMenuAction
 import io.github.rwx.ui.model.MainMenuConditions
+import io.github.rwx.ui.model.ModWindowAction
+import io.github.rwx.ui.model.MultiplayerAction
+import io.github.rwx.ui.model.MultiplayerLobbyKind
+import io.github.rwx.ui.model.PauseMenuAction
 import io.github.rwx.ui.model.PauseMenuConditions
 import io.github.rwx.ui.model.ResourceBrowserType
+import io.github.rwx.ui.model.SettingsUiAction
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.coroutines.CoroutineContext
 
-const val RWX_KOOL_GAME_FRAME_READY_MARKER: String = "RWX_GAME_FRAME_READY"
+const val RWX_GAME_FRAME_READY_MARKER: String = "RWX_GAME_FRAME_READY"
 private val ioSupervisor = SupervisorJob(ApplicationScope.job)
 
 fun launchOnIO(name: String?=null,
@@ -35,23 +48,70 @@ fun <T> asyncOnIO(
 }
 class AppSession internal constructor(
     val navigator: ScreenNavigator,
+    private val uiController: AppUiController,
     private val onQuit: () -> Unit,
     private val onBack: () -> Unit,
-) {
+    private val onClose: () -> Unit = {},
+) : AutoCloseable {
+    private var closed = false
+    override fun close() {
+        if (closed) return
+        closed = true
+        uiController.close()
+        onClose()
+    }
     fun navigateBack() = onBack()
 
     fun isFinishLoading(): Boolean =
         navigator.current != AppScreen.Loading
 
     fun quit() = onQuit()
+
+    val uiState: StateFlow<AppUiState> get() = uiController.state
+
+    fun mainMenuConditions(): MainMenuConditions = uiState.value.mainMenuConditions
+
+    fun setComposeUiEnabled(enabled: Boolean) = uiController.setComposeEnabled(enabled)
+
+    fun dispatchMenuAction(action: MainMenuAction) = uiController.dispatchMenuAction(action)
+
+    fun dispatchSettingsAction(action: SettingsUiAction) = uiController.dispatchSettingsAction(action)
+
+    fun dispatchLevelSelectAction(revision: Long, action: LevelSelectAction) = uiController.dispatchLevelSelectAction(revision, action)
+
+    fun dispatchPauseAction(action: PauseMenuAction) = uiController.dispatchPauseAction(action)
+
+    fun dispatchBattleRoomAction(revision: Long, action: BattleRoomAction) = uiController.dispatchBattleRoomAction(revision, action)
+
+    fun dispatchModsAction(revision: Long, action: ModsAction) = uiController.dispatchModsAction(revision, action)
+
+    fun dispatchResourceBrowserAction(revision: Long, action: ResourceBrowserAction) = uiController.dispatchResourceBrowserAction(revision, action)
+
+    fun dispatchReplaySelectAction(revision: Long, action: ReplaySelectAction) = uiController.dispatchReplaySelectAction(revision, action)
+
+    fun dispatchMultiplayerAction(lobbyKind: MultiplayerLobbyKind, revision: Long, action: MultiplayerAction) =
+        uiController.dispatchMultiplayerAction(lobbyKind, revision, action)
+
+    fun dispatchDialogAction(revision: Long, action: DialogUiAction) = uiController.dispatchDialogAction(revision, action)
+
+    fun dispatchLoadingCancel(revision: Long) = uiController.dispatchLoadingCancel(revision)
+
+    fun dispatchUiBack() = uiController.dispatchBack()
+
+    fun dispatchModWindowAction(revision: Long, action: ModWindowAction) = uiController.dispatchModWindowAction(revision, action)
+
+    /** Unconsumed input from an active non-modal game overlay. */
+    fun dispatchGameInput(event: GameInputEvent) = uiController.dispatchGameInput(event)
 }
 
 fun installApp(
-    context: KoolContext,
+    viewportProvider: () -> GameViewport,
+    scheduler: FrameScheduler,
+    presenter: GameFramePresenter,
     options: AppOptions = AppOptions(),
-    onQuit: () -> Unit = { context.window.close() },
+    onQuit: () -> Unit = {},
 ): AppSession {
-    val bootstrap = createAppBootstrap(context, options)
+    val bootstrap = createAppBootstrap(options)
     val platformBridge = bootstrap.platformBridge
     val appMetadata = bootstrap.appMetadata
     val gameSession = bootstrap.gameSession
@@ -62,8 +122,6 @@ fun installApp(
     val settingsRepository = bootstrap.settingsRepository
     val actions = bootstrap.actions
     val settingsModel = bootstrap.settingsModel
-    val koolCanvasSceneHost = bootstrap.koolCanvasSceneHost
-    val koolCanvasScene = bootstrap.koolCanvasScene
     val loadingSceneHost = bootstrap.loadingSceneHost
     val mainMenuSceneHost = bootstrap.mainMenuSceneHost
     val pauseSceneHost = bootstrap.pauseSceneHost
@@ -76,10 +134,9 @@ fun installApp(
     val resourceBrowserSceneHost = bootstrap.resourceBrowserSceneHost
     val loadingDialogSceneHost = bootstrap.loadingDialogSceneHost
     val battleRoomSceneHost = bootstrap.battleRoomSceneHost
-    val modWindowSceneHost = bootstrap.modWindowSceneHost
     val dialogSceneHost = bootstrap.dialogSceneHost
 
-    var lastExternalGameFrame: KoolCanvasFrame? = null
+    var lastExternalGameFrame: GameFrame? = null
     val startupTargetScreen = if (options.initialScreen == AppScreen.Loading) {
         AppScreen.MainMenu
     } else {
@@ -88,13 +145,7 @@ fun installApp(
     lateinit var navigator: ScreenNavigator
     lateinit var pendingStartController: PendingStartController
 
-    fun rwGameViewport(): KoolCanvasViewport {
-        val windowSize = context.window.size
-        return KoolCanvasViewport(
-            width = if (windowSize.x > 1) windowSize.x else 1280,
-            height = if (windowSize.y > 1) windowSize.y else 720,
-        )
-    }
+    fun rwGameViewport(): GameViewport = viewportProvider().resolved()
 
     val screenPresenter = ScreenPresenter(
         bootstrap = bootstrap,
@@ -126,13 +177,14 @@ fun installApp(
         showUnavailableDialog = dialogController::showUnavailable,
     )
 
+    fun mainMenuConditions() = MainMenuConditions(
+        canResume = gameSession.canResume(),
+        usingMods = modRepository.hasEnabledMods(),
+        isDesktop = options.isDesktop,
+    )
+
     fun refreshMainMenu() {
-        mainMenuSceneHost.updateItems(
-            MainMenuConditions(
-                canResume = gameSession.canResume(),
-                isDesktop = options.isDesktop,
-            )
-        )
+        mainMenuSceneHost.updateItems(mainMenuConditions())
     }
 
     pendingStartController = PendingStartController(
@@ -155,7 +207,7 @@ fun installApp(
 
     updateController = UpdateController(
         appMetadata = appMetadata,
-        updateRepository = updateRepository,
+        checkLatestRelease = updateRepository::checkLatestRelease,
         loadingDialogSceneHost = loadingDialogSceneHost,
         dialogSceneHost = dialogSceneHost,
         openLink = dialogController::openLink,
@@ -165,7 +217,6 @@ fun installApp(
     )
     val inGameDialogController = InGameDialogController(
         gameSession = gameSession,
-        koolCanvasScene = koolCanvasScene,
         dialogSceneHost = dialogSceneHost,
         loadingDialogSceneHost = loadingDialogSceneHost,
         currentScreen = { navigator.current },
@@ -175,7 +226,6 @@ fun installApp(
 
     val mapController = MapController(
         gameSession = gameSession,
-        koolCanvasScene = koolCanvasScene,
         storage = { platformBridge?.storage },
         viewport = ::rwGameViewport,
         pendingStartMapPath = pendingStartController::currentMapPath,
@@ -192,8 +242,7 @@ fun installApp(
         loadingDialogSceneHost = loadingDialogSceneHost,
         onStarted = battleRoomController::markJoinedRoomStarted,
         onConnected = { snapshot ->
-            battleRoomController.updateConnectedRoom(snapshot)
-            navigator.navigateTo(AppScreen.BattleRoom)
+            if (battleRoomController.updateConnectedRoom(snapshot)) navigator.navigateTo(AppScreen.BattleRoom)
         },
         onFailed = dialogController::showUnavailable,
     )
@@ -209,6 +258,7 @@ fun installApp(
         showUnavailableDialog = dialogController::showUnavailable,
     )
     val battleRoomAdminController = BattleRoomAdminController(
+        currentRoomRevision = { battleRoomSceneHost.snapshot().revision },
         gameSession = gameSession,
         dialogSceneHost = dialogSceneHost,
         updateBattleRoomFromNetwork = battleRoomController::updateFromNetwork,
@@ -236,38 +286,38 @@ fun installApp(
 
     gameSession.setInGameMenuCallbacks(object : InGameMenuCallbacks {
         override fun requestSettings() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameSettings() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameSettings() }
         }
 
         override fun requestSave() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameSave() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameSave() }
         }
 
         override fun requestExportMap() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameExportMap() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameExportMap() }
         }
 
         override fun requestMapList() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameMapList() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameMapList() }
         }
 
         override fun shouldShowMapList(): Boolean =
             mapController.canShowMapList()
 
         override fun requestChat(teamOnly: Boolean) {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameChat(teamOnly) }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameChat(teamOnly) }
         }
 
         override fun requestPlayerList() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGamePlayerList() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGamePlayerList() }
         }
 
         override fun requestSurrender() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameSurrender() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameSurrender() }
         }
 
         override fun requestExit() {
-            inGameDialogController.requestInGameKoolOverlay { CoreUiEventQueue.requestInGameExit() }
+            inGameDialogController.requestInGameOverlay { CoreUiEventQueue.requestInGameExit() }
         }
 
         override fun requestBattleRoomRefresh() {
@@ -311,7 +361,8 @@ fun installApp(
     )
 
     val resourceBrowserController = ResourceBrowserController(
-        repository = resourceBrowserRepository,
+        searchResources = resourceBrowserRepository::searchBlocking,
+        downloadResource = resourceBrowserRepository::download,
         sceneHost = resourceBrowserSceneHost,
         loadingDialogSceneHost = loadingDialogSceneHost,
         dialogSceneHost = dialogSceneHost,
@@ -341,7 +392,6 @@ fun installApp(
         multiplayerLobbyController = multiplayerLobbyController,
         modsController = modsController,
         resourceBrowserController = resourceBrowserController,
-        modWindowSceneHost = modWindowSceneHost,
         settingsRepository = settingsRepository,
         settingsModel = settingsModel,
         refreshMainMenu = ::refreshMainMenu,
@@ -352,33 +402,53 @@ fun installApp(
         initialScreen = AppScreen.Loading,
         onScreenChanged = screenLifecycleController::onScreenChanged,
     )
+    val onBack: () -> Unit = {
+        when (backActionForScreen(navigator.current, gameSession.usesFrameCommandRendering)) {
+            BackNavigationAction.Pause -> {
+                pauseSceneHost.updateItems(
+                    PauseMenuConditions(
+                        canSave = true,
+                        isMultiplayer = gameSession.isNetworkMultiplayerActive(),
+                    )
+                )
+                navigator.navigateTo(AppScreen.Paused)
+            }
+
+            BackNavigationAction.ShowExitDialog -> {
+                inGameDialogController.showExitGameDialog(sessionActions::exitRwGameToMainMenu)
+            }
+
+            BackNavigationAction.MainMenu -> {
+                sessionActions.saveCurrentScreenStateBeforeMainMenu()
+                navigator.navigateTo(AppScreen.MainMenu)
+            }
+
+            BackNavigationAction.LevelSelect -> actions.levelSelect(LevelSelectAction.Back)
+            BackNavigationAction.BattleRoom -> actions.battleRoom(BattleRoomAction.Back)
+            BackNavigationAction.InGame -> navigator.navigateTo(AppScreen.InGame)
+            BackNavigationAction.CloseModWindow -> sessionActions.closeInGameModWindow()
+        }
+    }
+    val uiController = AppUiController(
+        bootstrap = bootstrap,
+        currentScreen = { navigator.current },
+        mainMenuConditions = ::mainMenuConditions,
+        battleBackgroundVisible = { screenPresenter.battleBackgroundVisible },
+        onBack = onBack,
+        closeModWindow = sessionActions::closeInGameModWindow,
+        refreshInGameOverlay = { screenPresenter.updateInGameOverlay(it, navigator.current, lastExternalGameFrame) },
+    )
+    var frameLoop: OwnedFrameLoop? = null
     val session = AppSession(
         navigator = navigator,
-        onQuit = onQuit,
-        onBack = {
-            when (backActionForScreen(navigator.current, gameSession.rendersIntoKoolCanvas)) {
-                BackNavigationAction.Pause -> {
-                    pauseSceneHost.updateItems(
-                        PauseMenuConditions(
-                            canSave = true,
-                            isMultiplayer = gameSession.isNetworkMultiplayerActive(),
-                        )
-                    )
-                    navigator.navigateTo(AppScreen.Paused)
-                }
-
-                BackNavigationAction.ShowExitDialog -> {
-                    inGameDialogController.showExitGameDialog(sessionActions::exitRwGameToMainMenu)
-                }
-
-                BackNavigationAction.MainMenu -> {
-                    sessionActions.saveCurrentScreenStateBeforeMainMenu()
-                    navigator.navigateTo(AppScreen.MainMenu)
-                }
-
-                BackNavigationAction.InGame -> navigator.navigateTo(AppScreen.InGame)
-            }
+        uiController = uiController,
+        onClose = {
+            frameLoop?.close()
+            scheduler.stop()
+            CoreUiEventQueue.setOverlayRequestHandler(null)
         },
+        onQuit = onQuit,
+        onBack = onBack,
     )
     StartupController(
         battleRoomController = battleRoomController,
@@ -391,6 +461,7 @@ fun installApp(
         platformBridge = platformBridge,
         settingsRepository = settingsRepository,
         settingsModel = settingsModel,
+        refreshScreen = { screenPresenter.apply(navigator.current, lastExternalGameFrame) },
         levelSelectSceneHost = levelSelectSceneHost,
         battleRoomController = battleRoomController,
         multiplayerLobbyController = multiplayerLobbyController,
@@ -416,20 +487,16 @@ fun installApp(
         showUnavailableDialog = dialogController::showUnavailable,
     ).install()
 
-    val inputController = InputController(
-        gameSession = gameSession,
-        currentScreen = { navigator.current },
-        screenScale = { context.window.parentScreenScale },
-        navigateBack = session::navigateBack,
-    ).also { it.install() }
     screenPresenter.apply(navigator.current, lastExternalGameFrame)
 
-    FrameLoopInstaller(
-        context = context,
+    frameLoop = FrameLoopInstaller(
+        viewportProvider = ::rwGameViewport,
+        scheduler = scheduler,
+        onFrame = { uiController.refresh() },
         gameSession = gameSession,
         screenPresenter = screenPresenter,
         warmupController = warmupController,
-        koolCanvasSceneHost = koolCanvasSceneHost,
+        presenter = presenter,
         currentScreen = { navigator.current },
         lastExternalFrame = { lastExternalGameFrame },
         setLastExternalFrame = { frame -> lastExternalGameFrame = frame },
@@ -445,17 +512,13 @@ fun installApp(
         pendingStartController = pendingStartController,
         externalGameController = externalGameController,
         modsController = modsController,
-        inputController = inputController,
         gameReadyController = gameReadyController,
-        refreshModWindow = modWindowSceneHost::refresh,
         onBattleRoomClosed = { reason, message ->
             battleRoomJoinController.handleBattleRoomClosed()
             BattleRoomUiBridge.startGamePending = false
-            if (navigator.current == AppScreen.BattleRoom) {
-                navigator.navigateTo(battleRoomController.closeRoom())
-            } else {
-                gameSession.leaveBattleRoom()
-            }
+            val showingRoom = isBattleRoomOwnedScreen(navigator.current, battleRoomController.isSelectingMapForBattleRoom)
+            val returnScreen = battleRoomController.closeRoom()
+            if (showingRoom) navigator.navigateTo(returnScreen)
             val text = listOfNotNull(reason, message).joinToString("\n").ifBlank { null }
             text?.let { dialogController.showUnavailable(it) }
         },
@@ -463,7 +526,6 @@ fun installApp(
 
     StartupFinalizer(
         bootstrap = bootstrap,
-        inputController = inputController,
         currentScreen = { navigator.current },
         multiplayerLobbyController = multiplayerLobbyController,
         resourceBrowserController = resourceBrowserController,
@@ -471,5 +533,6 @@ fun installApp(
     options.joinServer?.let { address ->
         multiplayerConnectionController.joinOriginalServer(address, roomLabel = address)
     }
+    uiController.refresh(force = true)
     return session
 }
