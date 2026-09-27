@@ -10,7 +10,7 @@ import io.github.rwx.p2p.FeatureIds
 import io.github.rwx.p2p.MapFeatureDetector
 import io.github.rwx.p2p.MultiMapCoordinator
 import io.github.rwx.p2p.P2PLobbyService
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.BattleRoomLaunchConfig
 import io.github.rwx.session.BattleRoomSnapshot
 import io.github.rwx.session.GameSession
@@ -21,7 +21,7 @@ import io.github.rwx.ui.BattleRoomUiBridge
 internal class BattleRoomLaunchController(
     private val gameSession: GameSession,
     private val storage: () -> PlatformStorage?,
-    private val viewport: () -> KoolCanvasViewport,
+    private val viewport: () -> GameViewport,
     private val currentScreen: () -> AppScreen,
     private val showStartNewGameDialog: (() -> Unit) -> Unit,
     private val enterRwGame: (Boolean, BattleRoomLaunchConfig?) -> Unit,
@@ -32,6 +32,10 @@ internal class BattleRoomLaunchController(
     private val showUnavailableDialog: (String) -> Unit,
 ) {
     fun startBattleRoomGame() {
+        if (gameSession.currentBattleRoom(refreshNetworkStatus = false)?.isHost != true) {
+            showUnavailableDialog("Only the current room host can start the game")
+            return
+        }
         val launchConfig = gameSession.loadState.pendingRendererBattleRoomConfig
         currentOriginalMultiplayerRwxMapBlockMessage()?.let { message ->
             showUnavailableDialog(message)
@@ -68,13 +72,15 @@ internal class BattleRoomLaunchController(
             }
             runCatching {
                 check(gameSession.startBattleRoom()) { "Game session rejected start request" }
-                if (gameSession.rendersIntoKoolCanvas) {
+                if (gameSession.usesFrameCommandRendering) {
                     BattleRoomUiBridge.setupGame()
                 }
                 enterStartedBattleRoomGame()
             }.onFailure { error ->
                 logger.warn(error) { "Unable to start RW battle room game" }
-                showUnavailableDialog("Unable to start game: ${error.message ?: error.javaClass.simpleName}")
+                showUnavailableDialog(
+                    I18n.battleroom.unableToStartGame(error.message ?: error.javaClass.simpleName)
+                )
             }
             return
         }
@@ -86,7 +92,7 @@ internal class BattleRoomLaunchController(
             GameEngine.getInstance()?.networkEngine?.hasActiveStartedGameConnection() == true
         when (battleRoomGameStartedAction(
             currentScreen = currentScreen(),
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
             inProcessNetworkGameStarted = networkGameStarted,
         )) {
             BattleRoomGameStartedAction.Ignore -> {
@@ -113,7 +119,7 @@ internal class BattleRoomLaunchController(
                 enterStartedBattleRoomGame()
             }
 
-            BattleRoomGameStartedAction.LoadKoolGame -> {
+            BattleRoomGameStartedAction.PrepareFrameCommandGame -> {
                 BattleRoomUiBridge.startGamePending = false
                 runCatching {
                     BattleRoomUiBridge.setupGame()
@@ -192,7 +198,7 @@ internal class BattleRoomLaunchController(
         if (missing.isEmpty()) {
             return null
         }
-        return "Linked map missing: ${missing.joinToString(", ")}"
+        return I18n.ingame.map.missing(missing.joinToString(", "))
     }
 
     private fun prepareP2PMultiMapAssignmentsForStart(snapshot: BattleRoomSnapshot): Boolean {
@@ -216,7 +222,7 @@ internal class BattleRoomLaunchController(
         }
         val plan = MultiMapCoordinator.createAssignmentPlan(mapStorage, mapPath, snapshot.players)
         if (plan.missingTargetMapIds.isNotEmpty()) {
-            showUnavailableDialog("Linked map missing: ${plan.missingTargetMapIds.joinToString(", ")}")
+            showUnavailableDialog(I18n.ingame.map.missing(plan.missingTargetMapIds.joinToString(", ")))
             return false
         }
         if (!plan.hasEnoughPlayers) {

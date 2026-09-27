@@ -9,6 +9,7 @@ import io.github.rwx.logger
 import io.github.rwx.platform.CoreGameView
 import io.github.rwx.render.RendererMode
 import io.github.rwx.render.canvas.*
+import io.github.rwx.render.frame.*
 import io.github.rwx.session.*
 import io.github.rwx.ui.CoreUiEventQueue
 import java.awt.Canvas
@@ -47,10 +48,10 @@ class SlickGameSession(
     fun activeGame(): SlickGame? = if (running.get()) game else null
 
     @Volatile
-    private var lastSlickViewport: KoolCanvasViewport = KoolCanvasViewport(1280, 720)
+    private var lastSlickViewport: GameViewport = GameViewport(1280, 720)
 
     private val frameSnapshotState =
-        AtomicReference(SlickFrameSnapshotState.empty(KoolCanvasViewport(1280, 720)))
+        AtomicReference<SlickFrameSnapshot?>(null)
     @Volatile
     private var rendererStartupError: Throwable? = null
 
@@ -65,10 +66,9 @@ class SlickGameSession(
         SlickCanvasHost.setRendererShutdown(::stopRendererAndWait)
         configureRendererProfile(
             GameSessionRendererProfile(
-                rendersIntoKoolCanvas = false,
-                acceptsKoolInput = true,
+                usesFrameCommandRendering = false,
                 canStartNewSessionInPlace = true,
-                usesNativeSurfaceForResumeBackground = false,
+                usesNativeSurfaceForResumeBackground = true,
             )
         )
         if (registerShutdownHook) {
@@ -83,7 +83,7 @@ class SlickGameSession(
     fun start(
         canvas: Canvas,
         request: SlickSessionRequest,
-        viewport: KoolCanvasViewport,
+        viewport: GameViewport,
         visible: Boolean,
         pausedBackground: Boolean,
     ): SlickGame {
@@ -185,10 +185,9 @@ class SlickGameSession(
         val thread = renderThread
         stop()
         if (thread == null || thread === Thread.currentThread() || !thread.isAlive) return
-        runCatching { thread.join(timeoutMillis) }
-        if (thread.isAlive) {
-            logger.warn { "Slick render thread did not exit within ${timeoutMillis}ms of shutdown" }
-        }
+        require(timeoutMillis > 0) { "Renderer join timeout must be positive" }
+        thread.join(timeoutMillis)
+        check(!thread.isAlive) { "Slick render thread did not exit within ${timeoutMillis}ms; native canvas must remain alive" }
     }
     private fun createGame(request: SlickSessionRequest, width: Int, height: Int): SlickGame =
         SlickGame(
@@ -234,7 +233,7 @@ class SlickGameSession(
         }
     }
     override fun ensureRendererEngine(
-        viewport: KoolCanvasViewport,
+        viewport: GameViewport,
         graphicsEngine: GraphicsEngine,
         view: CoreGameView,
         platformCallbacks: PlatformCallbacks?,
@@ -250,7 +249,7 @@ class SlickGameSession(
             signalEngineStartup()
         }.getOrThrow()
 
-    override fun prepareMapAsync(mapPath: String?, viewport: KoolCanvasViewport) {
+    override fun prepareMapAsync(mapPath: String?, viewport: GameViewport) {
         val requestedMapPath = mapPath?.takeIf { it.isNotBlank() } ?: return
         if (isMapLoaded(requestedMapPath)) return
         beginRendererMapPreparation(requestedMapPath)
@@ -261,7 +260,7 @@ class SlickGameSession(
         startSlickGameIfNeeded()
     }
 
-    override fun prepareSavedGameAsync(saveName: String, viewport: KoolCanvasViewport) {
+    override fun prepareSavedGameAsync(saveName: String, viewport: GameViewport) {
         val requestedSaveName = saveName.takeIf { it.isNotBlank() } ?: return
         if (isMapLoaded(requestedSaveName)) return
         beginRendererMapPreparation(requestedSaveName)
@@ -272,7 +271,7 @@ class SlickGameSession(
         startSlickGameIfNeeded()
     }
 
-    override fun prepareMapSnapshotAsync(snapshot: MapSnapshot, viewport: KoolCanvasViewport) {
+    override fun prepareMapSnapshotAsync(snapshot: MapSnapshot, viewport: GameViewport) {
         if (isMapLoaded(snapshot.mapPath)) return
         beginRendererMapPreparation(
             mapPath = snapshot.mapPath,
@@ -286,7 +285,7 @@ class SlickGameSession(
         startSlickGameIfNeeded()
     }
 
-    override fun prepareBattleRoomAsync(config: BattleRoomLaunchConfig, viewport: KoolCanvasViewport) {
+    override fun prepareBattleRoomAsync(config: BattleRoomLaunchConfig, viewport: GameViewport) {
         val requestedMapPath = config.room.mapPath.takeIf { it.isNotBlank() } ?: return
         if (isMapLoaded(requestedMapPath) && activeRendererBattleRoomConfig() == config) return
         beginRendererMapPreparation(
@@ -301,10 +300,10 @@ class SlickGameSession(
     }
 
    override fun updateFrame(
-        viewport: KoolCanvasViewport,
+        viewport: GameViewport,
         deltaSeconds: Float,
         drainVisibleLayerBuffers: Boolean,
-    ): KoolCanvasFrame {
+    ): GameFrame {
        lastSlickViewport = normalizedViewport(viewport)
        lastViewport = lastSlickViewport
        syncRequestedMapFromSession()
@@ -314,28 +313,19 @@ class SlickGameSession(
         return currentFrame()
     }
 
-    override fun currentFrame(): KoolCanvasFrame {
-        val viewport = lastSlickViewport
-        val snapshotState = frameSnapshotState.get()
-        if (!snapshotState.isAvailable) {
-            return emptyFrameFor(viewport)
-        }
-        val frame = snapshotState.frame
-        return if (frame.viewport == viewport) {
-            frame
-        } else {
-            frameForSnapshotTexture(viewport, snapshotState.width, snapshotState.height)
-        }
-    }
+    // Pixels belong to Slick, not to a cross-renderer texture registry.
+    internal fun currentSnapshot(): SlickFrameSnapshot? = activeGame()?.currentFrameSnapshot() ?: frameSnapshotState.get()
 
-    override fun loadPendingMapNow(): KoolCanvasFrame {
+    override fun currentFrame(): GameFrame = emptyFrameFor(lastSlickViewport)
+
+    override fun loadPendingMapNow(): GameFrame {
         syncRequestedMapFromSession()
         startSlickGameIfNeeded()
         pollSlickFrameSnapshot()
         return currentFrame()
     }
 
-    protected override fun ensureStarted(viewport: KoolCanvasViewport): GameEngine {
+    protected override fun ensureStarted(viewport: GameViewport): GameEngine {
         synchronized(gameLock) {
             activeEngineLocked()?.let { return it }
         }
@@ -354,9 +344,9 @@ class SlickGameSession(
         }
         val exposedCanvasForStartup = !canvas.isShowing
         if (exposedCanvasForStartup) {
-            // AWTGLCanvas cannot create its GL context while hidden. Keep the Kool loading window
+            // AWTGLCanvas cannot create its GL context while hidden. Keep the in-frame loading UI
             // above it so engine preloading can initialize the native renderer without a UI flash.
-            SlickCanvasHost.setGameVisible(visible = true, koolOverlay = true)
+            SlickCanvasHost.setGameVisible(visible = true, overlay = true)
         }
 
         try {
@@ -389,7 +379,7 @@ class SlickGameSession(
         }
     }
 
-    protected override fun applyViewport(engine: GameEngine, viewport: KoolCanvasViewport) {
+    protected override fun applyViewport(engine: GameEngine, viewport: GameViewport) {
         val requestedViewport = normalizedViewport(viewport)
         lastSlickViewport = requestedViewport
         lastViewport = requestedViewport
@@ -414,12 +404,12 @@ class SlickGameSession(
         val activeCanvas = SlickCanvasHost.gameCanvas()
         val exposedCanvasForReload = activeCanvas != null && !activeCanvas.isShowing
         val activeGame = activeGame() ?: return false
-        // The render thread performs the reload; the flag keeps Kool-side UI reads off the engine
+        // The render thread performs the reload; the flag keeps Compose UI reads off the engine
         // (and off gameLock) while it runs.
         modReloadInProgress = true
         val request = activeGame.modReloadQueue.request()
         if (exposedCanvasForReload) {
-            SlickCanvasHost.setGameVisible(visible = true, koolOverlay = true)
+            SlickCanvasHost.setGameVisible(visible = true, overlay = true)
         }
         try {
             request.await()
@@ -467,7 +457,7 @@ class SlickGameSession(
         rendererStartupError = IllegalStateException("Slick renderer stopped before startup completed")
         gameVisible = false
         pausedBackground = false
-        clearFrameSnapshot(unregisterTexture = true)
+        clearFrameSnapshot()
         markRendererSurfaceStopped()
         stop()
         signalEngineStartup()
@@ -478,7 +468,7 @@ class SlickGameSession(
         rendererStartupError = IllegalStateException("Slick renderer stopped before startup completed")
         gameVisible = false
         pausedBackground = false
-        clearFrameSnapshot(unregisterTexture = true)
+        clearFrameSnapshot()
         markRendererSurfaceStopped()
         signalEngineStartup()
         stopAndWait(timeoutMillis)
@@ -486,8 +476,8 @@ class SlickGameSession(
 
     override fun setGameVisible(
         visible: Boolean,
-        viewport: KoolCanvasViewport,
-        koolOverlay: Boolean,
+        viewport: GameViewport,
+        uiOverlay: Boolean,
         pausedBackground: Boolean,
     ) {
         val shouldCaptureExitFrame = gameVisible && !visible
@@ -508,9 +498,9 @@ class SlickGameSession(
                 updateFrameSnapshot(snapshot)
             }
         }
-        SlickCanvasHost.setGameVisible(visible, koolOverlay)
+        SlickCanvasHost.setGameVisible(visible, uiOverlay)
         activeGame?.setGameVisible(visible, pausedBackground)
-        if (visible && !koolOverlay) {
+        if (visible && !uiOverlay) {
             SlickCanvasHost.requestGameFocus()
         }
         if (visible) {
@@ -535,7 +525,7 @@ class SlickGameSession(
         if (amount != 0) activeGame()?.submitOverlayMouseWheel(amount)
     }
 
-    override fun adoptStartedGameFromEngine(viewport: KoolCanvasViewport): Boolean {
+    override fun adoptStartedGameFromEngine(viewport: GameViewport): Boolean {
         val mapPath = synchronized(gameLock) {
             val engine = activeEngineLocked() ?: return@synchronized null
             val networkEngine = engine.networkEngine ?: return@synchronized null
@@ -553,14 +543,14 @@ class SlickGameSession(
         lastSlickViewport = normalizedViewport
         lastViewport = normalizedViewport
         requestState.replace(SlickSessionRequest.StartedGame(mapPath))
-        clearFrameSnapshot(unregisterTexture = true)
+        clearFrameSnapshot()
         beginRendererStartedGamePreparation(mapPath)
         logger.info { "Adopting started battle room in embedded Slick renderer: $mapPath" }
         startSlickGameIfNeeded()
         return true
     }
 
-    override fun prepareMenuBackgroundAsync(viewport: KoolCanvasViewport) {
+    override fun prepareMenuBackgroundAsync(viewport: GameViewport) {
         if (loadState.menuBackgroundActive || requestState.desired is SlickSessionRequest.MenuBackground) {
             return
         }
@@ -571,7 +561,7 @@ class SlickGameSession(
 
     override fun isMenuBackgroundActive(): Boolean = loadState.menuBackgroundActive
 
-    override fun prepareReplayAsync(replayName: String, viewport: KoolCanvasViewport) {
+    override fun prepareReplayAsync(replayName: String, viewport: GameViewport) {
         val requestedReplayName = replayName.takeIf { it.isNotBlank() } ?: return
         prepareRendererRequest(
             viewport,
@@ -582,7 +572,7 @@ class SlickGameSession(
     }
 
     private fun prepareRendererRequest(
-        viewport: KoolCanvasViewport,
+        viewport: GameViewport,
         request: SlickSessionRequest,
     ) {
         val requestedViewport = normalizedViewport(viewport)
@@ -591,7 +581,7 @@ class SlickGameSession(
         requestState.replace(request)
         rendererStartupError = null
         loadingStatusTracker.reset()
-        clearFrameSnapshot(unregisterTexture = true)
+        clearFrameSnapshot()
     }
 
     private fun signalEngineStartup() {
@@ -602,9 +592,9 @@ class SlickGameSession(
         if (width <= 0 || height <= 0) return
         val device = SlickCanvasHost.gameCanvas()?.deviceSizeFor(width, height)
         lastSlickViewport = if (device != null) {
-            KoolCanvasViewport(device.width, device.height)
+            GameViewport(device.width, device.height)
         } else {
-            KoolCanvasViewport(width, height)
+            GameViewport(width, height)
         }
         lastViewport = lastSlickViewport
         val activeGame = activeGame()
@@ -643,7 +633,7 @@ class SlickGameSession(
             else -> SlickSessionRequest.Map(sessionMapPath)
         }
         if (requestState.synchronize(request)) {
-            clearFrameSnapshot(unregisterTexture = true)
+            clearFrameSnapshot()
         }
     }
 
@@ -741,7 +731,7 @@ class SlickGameSession(
         }
     }
 
-    private fun normalizedViewport(viewport: KoolCanvasViewport): KoolCanvasViewport {
+    private fun normalizedViewport(viewport: GameViewport): GameViewport {
         if (viewport.width > 0 && viewport.height > 0) {
             return viewport
         }
@@ -749,15 +739,15 @@ class SlickGameSession(
         val canvas = SlickCanvasHost.gameCanvas()
         if (canvas != null && logical != null) {
             val device = canvas.deviceSizeFor(logical.width, logical.height)
-            return KoolCanvasViewport(device.width, device.height)
+            return GameViewport(device.width, device.height)
         }
-        return KoolCanvasViewport(
+        return GameViewport(
             width = viewport.width.takeIf { it > 0 } ?: 1280,
             height = viewport.height.takeIf { it > 0 } ?: 720,
         )
     }
 
-    private fun slickGameLogicalSize(deviceViewport: KoolCanvasViewport): Pair<Int, Int> {
+    private fun slickGameLogicalSize(deviceViewport: GameViewport): Pair<Int, Int> {
         val logical = SlickCanvasHost.gameCanvasSize()?.takeIf { it.width > 0 && it.height > 0 }
         if (logical != null) {
             return logical.width to logical.height
@@ -766,47 +756,12 @@ class SlickGameSession(
     }
 
     private fun updateFrameSnapshot(snapshot: SlickFrameSnapshot) {
-        if (snapshot.width <= 0 || snapshot.height <= 0 || snapshot.pixels.size < snapshot.width * snapshot.height) {
-            return
-        }
-        while (true) {
-            val previousState = frameSnapshotState.get()
-            val snapshotChanged = snapshot.sequence != previousState.sequence ||
-                    snapshot.width != previousState.width ||
-                    snapshot.height != previousState.height
-            val viewport = lastSlickViewport
-            if (!snapshotChanged && previousState.frame.viewport == viewport) {
-                return
-            }
-            if (snapshotChanged) {
-                // Upload before publishing so a state that references the texture never precedes
-                // its pixels. A lost CAS race just re-uploads the same constant texture id.
-                KoolCanvasTextureRegistry.registerArgb(
-                    SLICK_CURRENT_FRAME_TEXTURE_ID,
-                    snapshot.width,
-                    snapshot.height,
-                    snapshot.pixels,
-                )
-            }
-            val width = if (snapshotChanged) snapshot.width else previousState.width
-            val height = if (snapshotChanged) snapshot.height else previousState.height
-            val nextState = SlickFrameSnapshotState(
-                sequence = if (snapshotChanged) snapshot.sequence else previousState.sequence,
-                width = width,
-                height = height,
-                frame = frameForSnapshotTexture(viewport, width, height),
-            )
-            if (frameSnapshotState.compareAndSet(previousState, nextState)) {
-                return
-            }
-        }
+        if (snapshot.width <= 0 || snapshot.height <= 0 || snapshot.pixels.size < snapshot.width * snapshot.height) return
+        frameSnapshotState.set(snapshot)
     }
 
-    private fun clearFrameSnapshot(unregisterTexture: Boolean) {
-        frameSnapshotState.set(SlickFrameSnapshotState.empty(lastSlickViewport))
-        if (unregisterTexture) {
-            KoolCanvasTextureRegistry.unregister(SLICK_CURRENT_FRAME_TEXTURE_ID)
-        }
+    private fun clearFrameSnapshot() {
+        frameSnapshotState.set(null)
     }
     companion object{
         const val RENDER_THREAD_NAME = "RWX-slick-embedded"
@@ -823,63 +778,9 @@ private const val RENDER_THREAD_JOIN_TIMEOUT_MILLIS = 2_000L
 private const val SLICK_CANVAS_INSTALL_TIMEOUT_MILLIS = 15_000L
 private const val SLICK_ENGINE_INITIALIZATION_TIMEOUT_MILLIS = 60_000L
 private const val SLICK_ENGINE_START_POLL_MILLIS = 50L
-private val SLICK_CURRENT_FRAME_TEXTURE_ID = KoolCanvasTextureId("slick-current-frame")
-
-private data class SlickFrameSnapshotState(
-    val sequence: Long,
-    val width: Int,
-    val height: Int,
-    val frame: KoolCanvasFrame,
-) {
-    val isAvailable: Boolean
-        get() = sequence != Long.MIN_VALUE
-
-    companion object {
-        fun empty(viewport: KoolCanvasViewport): SlickFrameSnapshotState = SlickFrameSnapshotState(
-            sequence = Long.MIN_VALUE,
-            width = 0,
-            height = 0,
-            frame = emptyFrameFor(viewport),
-        )
-    }
-}
-
 private fun deadlineAfterMillis(timeoutMillis: Long): Long =
     System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
 
 
-private fun emptyFrameFor(viewport: KoolCanvasViewport): KoolCanvasFrame =
-    KoolCanvasFrame(viewport, emptyList())
-
-
-private fun frameForSnapshotTexture(
-    viewport: KoolCanvasViewport,
-    width: Int,
-    height: Int,
-): KoolCanvasFrame {
-    if (viewport.width <= 0 || viewport.height <= 0 || width <= 0 || height <= 0) {
-        return emptyFrameFor(viewport)
-    }
-    val texture = KoolCanvasTextureRef(
-        id = SLICK_CURRENT_FRAME_TEXTURE_ID,
-        width = width,
-        height = height,
-        hasAlpha = false,
-    )
-    return KoolCanvasFrame(
-        viewport = viewport,
-        commands = listOf(
-            KoolCanvasCommand.Clear(
-                color = KoolCanvasColor(0xff000000.toInt()),
-                blendMode = KoolCanvasBlendMode.Source,
-            ),
-            KoolCanvasCommand.DrawTexture(
-                texture = texture,
-                source = texture.fullRect,
-                destination = KoolCanvasRect.fromSize(viewport.width.toFloat(), viewport.height.toFloat()),
-                paint = KoolCanvasPaint(blendMode = KoolCanvasBlendMode.SourceOver),
-                state = KoolCanvasState(),
-            ),
-        ),
-    )
-}
+private fun emptyFrameFor(viewport: GameViewport): GameFrame =
+    GameFrame(viewport, emptyList())

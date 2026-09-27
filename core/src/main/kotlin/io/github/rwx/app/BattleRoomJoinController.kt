@@ -5,6 +5,8 @@ import io.github.rwx.logger
 import io.github.rwx.session.BattleRoomSnapshot
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.host.LoadingDialogSceneHost
+import io.github.rwx.ui.model.LoadingDialogHandle
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration.Companion.milliseconds
@@ -15,11 +17,12 @@ internal class BattleRoomJoinController(
     private val onStarted: () -> Unit,
     private val onConnected: (BattleRoomSnapshot?) -> Unit,
     private val onFailed: (String) -> Unit,
+    private val launchMonitor: (suspend () -> Unit) -> Job = { work -> launchOnIO("battleroom-join") { work() } },
 ) {
     private var pendingJoin: PendingBattleRoomJoin? = null
-    private val requestError = AtomicReference<String?>(null)
-    private val probe = AtomicReference<PendingBattleRoomJoinProbe?>(null)
-    private val token = AtomicReference<String?>(null)
+    private val observation = AtomicReference<JoinObservation?>(null)
+    private var monitorJob: Job? = null
+    private var loadingHandle: LoadingDialogHandle? = null
 
     val isPending: Boolean
         get() = pendingJoin != null
@@ -32,12 +35,12 @@ internal class BattleRoomJoinController(
     ) {
         val trimmedAddress = address.trim()
         if (trimmedAddress.isBlank()) return
+        clearPending()
+        hideLoading()
         runCatching {
             val joinToken = "$trimmedAddress:${System.nanoTime()}"
             onStarted()
-            requestError.set(null)
-            probe.set(PendingBattleRoomJoinProbe(isJoinInProgress = true))
-            token.set(joinToken)
+            observation.set(JoinObservation(joinToken))
             pendingJoin = PendingBattleRoomJoin(
                 token = joinToken,
                 address = trimmedAddress,
@@ -45,23 +48,26 @@ internal class BattleRoomJoinController(
                 failurePrefix = failurePrefix,
                 startedAtNanos = System.nanoTime(),
             )
-            val job = launchOnIO("battleroom-join") {
+            monitorJob = launchMonitor {
                 monitor(
                     token = joinToken,
                     requestJoin = requestJoin,
                     failurePrefix = failurePrefix,
                 )
             }
-            loadingDialogSceneHost.showCircular(
+            loadingHandle = loadingDialogSceneHost.showCircular(
                 title = I18n.multiplayer.joiningRoom(),
                 message = I18n.multiplayer.connectingTo(roomLabel),
             ) {
-                loadingDialogSceneHost.hide()
-                job.cancel()
+                if (pendingJoin?.token == joinToken) {
+                    clearPending()
+                    hideLoading()
+                    gameSession.cancelBattleRoomJoin()
+                }
             }
         }.onFailure { error ->
             clearPending()
-            loadingDialogSceneHost.hide()
+            hideLoading()
             logger.warn(error) { "Battle room join failed" }
             onFailed("$failurePrefix: ${error.message ?: error.javaClass.simpleName}")
         }
@@ -69,9 +75,9 @@ internal class BattleRoomJoinController(
 
     fun drive(nowNanos: Long = System.nanoTime()) {
         val pending = pendingJoin ?: return
-        val latestProbe = probe.get()
-        val joinError = requestError.get()
-            ?: latestProbe?.errorMessage
+        val latest = observation.get()?.takeIf { it.token == pending.token }
+        val latestProbe = latest?.probe
+        val joinError = latest?.errorMessage ?: latestProbe?.errorMessage
         when (
             battleRoomJoinPollResult(
                 startedAtNanos = pending.startedAtNanos,
@@ -84,7 +90,7 @@ internal class BattleRoomJoinController(
             BattleRoomJoinPollResult.Connecting -> Unit
             BattleRoomJoinPollResult.Connected -> {
                 clearPending()
-                loadingDialogSceneHost.hide()
+                hideLoading()
                 onConnected(latestProbe?.snapshot)
             }
 
@@ -102,7 +108,7 @@ internal class BattleRoomJoinController(
         if (pendingJoin == null) return
         clearPending()
         gameSession.cancelBattleRoomJoin()
-        loadingDialogSceneHost.hide()
+        hideLoading()
     }
 
     private suspend fun monitor(
@@ -110,30 +116,32 @@ internal class BattleRoomJoinController(
         requestJoin: () -> Unit,
         failurePrefix: String,
     ) {
+        if (observation.get()?.token != token) return
         runCatching {
             gameSession.cancelBattleRoomJoin()
             requestJoin()
         }.onFailure { error ->
             logger.warn(error) { "Battle room join request failed" }
-            requestError.set(
-                "$failurePrefix: ${error.message ?: error.javaClass.simpleName}"
-            )
+            observation.updateAndGet { current ->
+                if (current?.token == token) current.copy(errorMessage = "$failurePrefix: ${error.message ?: error.javaClass.simpleName}") else current
+            }
             return
         }
-        while (this.token.get() == token) {
+        while (observation.get()?.token == token) {
             val snapshot = gameSession.currentBattleRoom()
             val isJoinInProgress = gameSession.isJoiningBattleRoom
             val hasJoinedSnapshot = snapshot != null &&
                     snapshot.players.isNotEmpty()
             val errorMessage = gameSession.latestBattleRoomJoinError
-            probe.set(
-                PendingBattleRoomJoinProbe(
+            val probe = PendingBattleRoomJoinProbe(
                     snapshot = snapshot,
                     hasJoinedSnapshot = hasJoinedSnapshot,
                     isJoinInProgress = isJoinInProgress,
                     errorMessage = errorMessage,
                 )
-            )
+            observation.updateAndGet { current ->
+                if (current?.token == token) current.copy(probe = probe) else current
+            }
             if (!errorMessage.isNullOrBlank() || (hasJoinedSnapshot && !isJoinInProgress)) {
                 return
             }
@@ -144,15 +152,21 @@ internal class BattleRoomJoinController(
     private fun fail(message: String) {
         clearPending()
         gameSession.cancelBattleRoomJoin()
-        loadingDialogSceneHost.hide()
+        hideLoading()
         onFailed(message)
+    }
+
+    private fun hideLoading() {
+        val handle = loadingHandle
+        loadingHandle = null
+        handle?.let(loadingDialogSceneHost::hide)
     }
 
     private fun clearPending() {
         pendingJoin = null
-        requestError.set(null)
-        probe.set(null)
-        token.set(null)
+        observation.set(null)
+        monitorJob?.cancel()
+        monitorJob = null
     }
 }
 
@@ -168,5 +182,11 @@ private data class PendingBattleRoomJoinProbe(
     val snapshot: BattleRoomSnapshot? = null,
     val hasJoinedSnapshot: Boolean = false,
     val isJoinInProgress: Boolean = false,
+    val errorMessage: String? = null,
+)
+
+private data class JoinObservation(
+    val token: String,
+    val probe: PendingBattleRoomJoinProbe = PendingBattleRoomJoinProbe(isJoinInProgress = true),
     val errorMessage: String? = null,
 )

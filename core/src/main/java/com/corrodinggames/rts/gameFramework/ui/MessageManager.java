@@ -2,8 +2,8 @@ package com.corrodinggames.rts.gameFramework.ui;
 
 import com.corrodinggames.rts.game.units.custom.logicBooleans.VariableScope;
 import com.corrodinggames.rts.gameFramework.GameEngine;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class MessageManager {
     GameEngine gameEngine;
 
     /* JADX INFO: renamed from: d */
-    KoolPaint textPaint;
+    Paint textPaint;
 
     /* JADX INFO: renamed from: e */
     boolean hasShownMuteWarning;
@@ -39,11 +39,11 @@ public class MessageManager {
 
     /* JADX INFO: renamed from: a */
     public void initialize() {
-        this.textPaint = new KoolPaint();
+        this.textPaint = new Paint();
         this.textPaint.a(255, 255, 255, 255);
         this.textPaint.a(true);
         this.textPaint.c(true);
-        this.textPaint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.textPaint.a(Typeface.a(Typeface.c, 1));
         this.gameEngine.updatePaintTextSize(this.textPaint, 16.0f);
     }
 

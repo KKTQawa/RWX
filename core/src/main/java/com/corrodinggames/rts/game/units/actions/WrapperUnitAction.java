@@ -10,7 +10,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.ui.TextRenderQueue;
 import com.corrodinggames.rts.gameFramework.utility.UnitList;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -184,7 +184,7 @@ public class WrapperUnitAction extends AbstractUnitAction {
 
     @Override // com.corrodinggames.rts.game.units.actions.AbstractUnitAction
     /* JADX INFO: renamed from: a */
-    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, KoolPaint paint, KoolPaint paint2) {
+    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, Paint paint, Paint paint2) {
         K();
         this.wrappedAction.renderDisplayText(this.unit, textRenderQueue, paint, paint2);
         L();

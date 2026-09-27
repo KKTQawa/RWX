@@ -18,7 +18,6 @@ internal class CoreEventDispatcher(
     private val returnRwGameToBattleRoom: () -> Unit,
     private val openInGameModWindow: () -> Unit,
     private val closeInGameModWindow: () -> Unit,
-    private val refreshInGameModWindow: () -> Unit,
     private val refreshMenuBackground: () -> Unit,
     private val onBattleRoomClosed: (reason: String?, message: String?) -> Unit,
 ) {
@@ -33,7 +32,7 @@ internal class CoreEventDispatcher(
                 CoreUiEvent.ResourceBrowserDownloadProgress -> resourceBrowserController.handleDownloadProgress()
                 CoreUiEvent.ResourceBrowserDownloadCompleted -> resourceBrowserController.handleDownloadCompleted()
                 CoreUiEvent.MenuBackgroundReady -> {
-                    if (currentScreen() == AppScreen.MainMenu) refreshMenuBackground()
+                    if (supportsMenuBattleBackground(currentScreen())) refreshMenuBackground()
                 }
                 CoreUiEvent.InGameSaveRequested -> inGameDialogController.showSaveGameDialog()
                 CoreUiEvent.InGameExportMapRequested -> inGameDialogController.showExportMapDialog()
@@ -44,7 +43,7 @@ internal class CoreEventDispatcher(
 
                 CoreUiEvent.InGameReturnToBattleRoomRequested -> {
                     returnRwGameToBattleRoom()
-                    battleRoomController.updateFromNetwork()
+                    battleRoomController.returnToRoom()
                 }
 
                 is CoreUiEvent.InGameChatRequested -> inGameDialogController.showInGameChatDialog(event.teamOnly)
@@ -53,7 +52,6 @@ internal class CoreEventDispatcher(
                 CoreUiEvent.InGameMapListRequested -> mapController.showMapSwitchDialog()
                 CoreUiEvent.InGameModWindowRequested -> openInGameModWindow()
                 CoreUiEvent.InGameModWindowBackRequested -> closeInGameModWindow()
-                CoreUiEvent.InGameModWindowRefreshRequested -> refreshInGameModWindow()
                 is CoreUiEvent.InGameMapPortalTransferRequested -> mapController.handlePortalTransfer(event.transfer)
                 is CoreUiEvent.MessageDialogRequested -> inGameDialogController.showLegacyMessageDialog(event)
                 is CoreUiEvent.PasswordDialogRequested -> inGameDialogController.showLegacyPasswordDialog(event)

@@ -15,8 +15,8 @@ data class GameLoadingStatus(
 }
 
 data class GameSessionRendererProfile(
-    val rendersIntoKoolCanvas: Boolean = true,
-    val acceptsKoolInput: Boolean = true,
+    /** True for GameFrame command presentation; false when the platform owns a native surface. */
+    val usesFrameCommandRendering: Boolean = true,
     val canStartNewSessionInPlace: Boolean = false,
     val usesNativeSurfaceForResumeBackground: Boolean = false,
 )

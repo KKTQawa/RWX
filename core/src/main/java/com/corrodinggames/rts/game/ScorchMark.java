@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class ScorchMark extends GameObject {
     int frame;
     static final Rect h = new Rect();
     static final Rect i = new Rect();
-    static final KoolPaint j = GameViewUtils.b();
+    static final Paint j = GameViewUtils.b();
     static Texture k = null;
     static Texture l = null;
     static Texture m = null;

@@ -10,8 +10,8 @@ import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -36,35 +36,35 @@ public class DamageZone extends DummyUnit {
     /* JADX INFO: renamed from: i */
     public boolean isContracting;
     public float j;
-    static KoolPaint k = new KoolPaint();
-    static KoolPaint l;
-    static KoolPaint m;
-    static KoolPaint n;
-    static KoolPaint o;
-    static KoolPaint p;
+    static Paint k = new Paint();
+    static Paint l;
+    static Paint m;
+    static Paint n;
+    static Paint o;
+    static Paint p;
     /* JADX INFO: renamed from: q */
     boolean isZoneMarker;
     static final PointF r;
 
     static {
         k.a(10.0f);
-        k.b(KoolArgbColor.a(100, 160, 0, 0));
-        k.a(KoolPaint.Style.STROKE);
-        m = new KoolPaint();
+        k.b(ArgbColor.a(100, 160, 0, 0));
+        k.a(Paint.Style.STROKE);
+        m = new Paint();
         m.a(k);
-        m.b(KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 160, 0, 0));
-        l = new KoolPaint();
+        m.b(ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 160, 0, 0));
+        l = new Paint();
         l.a(2.0f);
-        l.b(KoolArgbColor.a(100, 160, 0, 0));
-        l.a(KoolPaint.Style.STROKE);
-        n = new KoolPaint();
+        l.b(ArgbColor.a(100, 160, 0, 0));
+        l.a(Paint.Style.STROKE);
+        n = new Paint();
         n.a(l);
-        n.b(KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 160, 0, 0));
-        o = new KoolPaint();
+        n.b(ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 160, 0, 0));
+        o = new Paint();
         o.a(2.0f);
-        o.b(KoolArgbColor.a(50, 255, 255, 255));
-        o.a(KoolPaint.Style.STROKE);
-        p = new KoolPaint(o);
+        o.b(ArgbColor.a(50, 255, 255, 255));
+        o.a(Paint.Style.STROKE);
+        p = new Paint(o);
         r = new PointF();
     }
 
@@ -230,7 +230,7 @@ public class DamageZone extends DummyUnit {
                         effectCreateEffectInternal.W = effectCreateEffectInternal.V;
                         effectCreateEffectInternal.G = 0.2f;
                         effectCreateEffectInternal.F = 1.2f;
-                        effectCreateEffectInternal.startColor = KoolArgbColor.a(255, 173, 12, 12);
+                        effectCreateEffectInternal.startColor = ArgbColor.a(255, 173, 12, 12);
                     }
                 }
             }
@@ -264,7 +264,7 @@ public class DamageZone extends DummyUnit {
         GameEngine gameEngine = GameEngine.getInstance();
         float f2 = this.posX - gameEngine.viewpointXSnapped;
         float f3 = this.posY - gameEngine.viewpointYSnapped;
-        KoolPaint paint = this.isContracting ? m : k;
+        Paint paint = this.isContracting ? m : k;
         if (this.isZoneMarker) {
             paint = o;
         }
@@ -281,7 +281,7 @@ public class DamageZone extends DummyUnit {
         gameEngine.renderGraphicsEngine.i();
         gameEngine.renderGraphicsEngine.a(gameEngine.minimap.minimapBoundsRect);
         float fWorldToMinimapX = gameEngine.minimap.worldToMinimapX(this.currentRadius);
-        KoolPaint paint = this.isContracting ? n : l;
+        Paint paint = this.isContracting ? n : l;
         if (this.isZoneMarker) {
             paint = p;
         }

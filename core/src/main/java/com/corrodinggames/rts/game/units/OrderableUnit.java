@@ -36,6 +36,7 @@ import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
 import io.github.rwx.render.canvas.*;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -234,7 +235,7 @@ public abstract class OrderableUnit extends UnitBase {
     private int cachedSelectedPaintColor;
 
     /* JADX INFO: renamed from: B */
-    private static final KoolPaint paralyzedOverlayPaint;
+    private static final Paint paralyzedOverlayPaint;
     private static int C;
 
     /* JADX INFO: renamed from: D */
@@ -268,25 +269,25 @@ public abstract class OrderableUnit extends UnitBase {
     public static final PositionData aW;
 
     /* JADX INFO: renamed from: aX */
-    protected static KoolBlendColorFilter overlayFilterLightGreen;
+    protected static BlendColorFilter overlayFilterLightGreen;
 
     /* JADX INFO: renamed from: aY */
-    protected static KoolBlendColorFilter overlayFilterGreen;
+    protected static BlendColorFilter overlayFilterGreen;
 
     /* JADX INFO: renamed from: aZ */
-    protected static KoolBlendColorFilter overlayFilterRed;
+    protected static BlendColorFilter overlayFilterRed;
 
     /* JADX INFO: renamed from: ba */
-    protected static KoolBlendColorFilter overlayFilterBlue;
+    protected static BlendColorFilter overlayFilterBlue;
 
     /* JADX INFO: renamed from: bb */
-    protected static KoolPaint overlayPaint1;
+    protected static Paint overlayPaint1;
 
     /* JADX INFO: renamed from: bc */
-    protected static KoolPaint overlayPaint2;
+    protected static Paint overlayPaint2;
 
     /* JADX INFO: renamed from: bd */
-    protected static KoolPaint overlayPaint3;
+    protected static Paint overlayPaint3;
 
     /* JADX INFO: renamed from: be */
     static final PointF tempPointF1;
@@ -353,7 +354,7 @@ public abstract class OrderableUnit extends UnitBase {
         selectedTeamPaint.b(true);
         selectedTeamPaint.o();
         aG = new PointF();
-        paralyzedOverlayPaint = new KoolPaint();
+        paralyzedOverlayPaint = new Paint();
         baseTeamTint = a(false);
         selectedTeamTint = a(true);
         aH = new UnitSpatialCallback() { // from class: com.corrodinggames.rts.game.units.y.1
@@ -370,10 +371,10 @@ public abstract class OrderableUnit extends UnitBase {
         aT = new MultiTurretPassiveTargetCallback(false);
         aV = new FastArrayList();
         aW = new PositionData();
-        overlayFilterLightGreen = new KoolBlendColorFilter(KoolArgbColor.a(200, 255, 200), KoolCanvasBlendMode.Multiply);
-        overlayFilterGreen = new KoolBlendColorFilter(KoolArgbColor.a(70, 255, 70), KoolCanvasBlendMode.Multiply);
-        overlayFilterRed = new KoolBlendColorFilter(KoolArgbColor.a(255, 40, 40), KoolCanvasBlendMode.Multiply);
-        overlayFilterBlue = new KoolBlendColorFilter(KoolArgbColor.a(120, 120, 255), KoolCanvasBlendMode.Multiply);
+        overlayFilterLightGreen = new BlendColorFilter(ArgbColor.a(200, 255, 200), GameCanvasBlendMode.Multiply);
+        overlayFilterGreen = new BlendColorFilter(ArgbColor.a(70, 255, 70), GameCanvasBlendMode.Multiply);
+        overlayFilterRed = new BlendColorFilter(ArgbColor.a(255, 40, 40), GameCanvasBlendMode.Multiply);
+        overlayFilterBlue = new BlendColorFilter(ArgbColor.a(120, 120, 255), GameCanvasBlendMode.Multiply);
         overlayPaint1 = GameViewUtils.b();
         overlayPaint2 = GameViewUtils.b();
         overlayPaint3 = GameViewUtils.b();
@@ -399,7 +400,7 @@ public abstract class OrderableUnit extends UnitBase {
     }
 
     /* JADX INFO: renamed from: R */
-    public KoolPaint getSelectionPaint() {
+    public Paint getSelectionPaint() {
         if (isRenderAntiAliasEnabled()) {
             return selectedTeamPaint;
         }
@@ -550,8 +551,8 @@ public abstract class OrderableUnit extends UnitBase {
         return null;
     }
 
-    public KoolPaint a(int i, KoolColorFilter colorFilter, boolean z) {
-        KoolPaint paint;
+    public Paint a(int i, ColorFilter colorFilter, boolean z) {
+        Paint paint;
         int i2;
         if (i == -1 && colorFilter == null) {
             if (z) {
@@ -4305,37 +4306,37 @@ public abstract class OrderableUnit extends UnitBase {
     }
 
     /* JADX INFO: renamed from: aN */
-    public KoolPaint getRenderPaint() {
+    public Paint getRenderPaint() {
         int iA;
-        KoolBlendColorFilter blendColorFilter = null;
+        BlendColorFilter blendColorFilter = null;
         if (this.posZ < -0.3f) {
-            iA = KoolArgbColor.a(getSubmergedRenderAlpha(this.posZ), 255, 255, 255);
+            iA = ArgbColor.a(getSubmergedRenderAlpha(this.posZ), 255, 255, 255);
         } else {
             iA = -1;
         }
         if (this.buildProgress < 1.0f && this.buildProgress < getPathStepScale()) {
-            iA = KoolArgbColor.a((int) (20.0f + ((this.buildProgress / getPathStepScale()) * 220.0f)), 140, 255, 140);
+            iA = ArgbColor.a((int) (20.0f + ((this.buildProgress / getPathStepScale()) * 220.0f)), 140, 255, 140);
             blendColorFilter = overlayFilterLightGreen;
         }
         if (this.isUnitParalyzed) {
             if (this.isUnitDisabled) {
-                iA = KoolArgbColor.a(200, 20, 255, 20);
+                iA = ArgbColor.a(200, 20, 255, 20);
                 blendColorFilter = overlayFilterGreen;
             }
             if (this.isUnitCapturable) {
-                iA = KoolArgbColor.a(200, 255, 20, 20);
+                iA = ArgbColor.a(200, 255, 20, 20);
                 blendColorFilter = overlayFilterRed;
             }
             if (this.isUnitInvulnerable) {
-                iA = KoolArgbColor.a(50, 70, 70, 245);
+                iA = ArgbColor.a(50, 70, 70, 245);
                 blendColorFilter = overlayFilterBlue;
                 if (this.isUnitCapturable) {
-                    iA = KoolArgbColor.a(50, 255, 20, 20);
+                    iA = ArgbColor.a(50, 255, 20, 20);
                     blendColorFilter = overlayFilterRed;
                 }
             }
             if (this.isUnitUntargetable) {
-                iA = KoolArgbColor.a(150, 100, 100, 100);
+                iA = ArgbColor.a(150, 100, 100, 100);
             }
         }
         return a(iA, blendColorFilter, isRenderAntiAliasEnabled());
@@ -4365,7 +4366,7 @@ public abstract class OrderableUnit extends UnitBase {
     public boolean c(float f) {
         GameEngine gameEngine = GameEngine.getInstance();
         GraphicsEngine graphicsEngine = gameEngine.renderGraphicsEngine;
-        KoolPaint renderPaint = getRenderPaint();
+        Paint renderPaint = getRenderPaint();
         float fCD = getRenderScale();
         if (this.ew) {
             PointF pointFCY = getRenderOffset();

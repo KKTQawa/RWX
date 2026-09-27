@@ -8,5 +8,5 @@ internal enum class DesktopRendererMode(
     Slick(
         "desktop-slick"
     ),
-    //KOOL
+    //Skia
 }

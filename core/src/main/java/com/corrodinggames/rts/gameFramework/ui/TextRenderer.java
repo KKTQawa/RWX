@@ -1,7 +1,7 @@
 package com.corrodinggames.rts.gameFramework.ui;
 
 import com.corrodinggames.rts.gameFramework.GameEngine;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.ai */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/ai.class */
@@ -13,7 +13,7 @@ public class TextRenderer extends RenderElement {
     final /* synthetic */ TextRenderQueue e;
 
     @Override // com.corrodinggames.rts.gameFramework.ui.RenderElement
-    public int a(KoolPaint paint) {
+    public int a(Paint paint) {
         GameEngine gameEngine = GameEngine.getInstance();
         int iB = gameEngine.renderGraphicsEngine.b(this.text, b(paint));
         if (GameEngine.isAndroidPlatform()) {
@@ -21,7 +21,7 @@ public class TextRenderer extends RenderElement {
         return iB;
     }
 
-    public KoolPaint b(KoolPaint paint) {
+    public Paint b(Paint paint) {
         return paint;
     }
 

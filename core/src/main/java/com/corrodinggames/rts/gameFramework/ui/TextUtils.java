@@ -6,7 +6,7 @@ import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -27,12 +27,12 @@ public class TextUtils {
     static final RectF textBounds = new RectF();
 
     /* JADX INFO: renamed from: a */
-    public static int getLineHeight(KoolPaint paint) {
+    public static int getLineHeight(Paint paint) {
         return GameEngine.getInstance().renderGraphicsEngine.a("abcABC123!|", paint) + 4;
     }
 
     /* JADX INFO: renamed from: b */
-    public static int getCharWidth(KoolPaint paint) {
+    public static int getCharWidth(Paint paint) {
         int iA = GameEngine.getInstance().renderGraphicsEngine.a("abcABC123!|", paint);
         if (GameEngine.isGDXVersion) {
             return iA + 2;
@@ -41,7 +41,7 @@ public class TextUtils {
     }
 
     /* JADX INFO: renamed from: a */
-    public static ArrayList wrapText(String str, Rect rect, KoolPaint paint, KoolPaint paint2, boolean z) {
+    public static ArrayList wrapText(String str, Rect rect, Paint paint, Paint paint2, boolean z) {
         int iLastIndexOf;
         lines.clear();
         String str2 = VariableScope.nullOrMissingString;
@@ -73,7 +73,7 @@ public class TextUtils {
         rect.d = rect.b + (lines.size() * getLineHeight(paint2));
         if (z) {
             float fD = rect.d();
-            KoolPaint paint3 = paint2;
+            Paint paint3 = paint2;
             if (size == 0) {
                 paint3 = paint;
             }
@@ -87,12 +87,12 @@ public class TextUtils {
     }
 
     /* JADX INFO: renamed from: a */
-    public static void drawTextWithBackground(String str, float f, float f2, KoolPaint paint, KoolPaint paint2, float f3, float f4, float f5, float f6) {
+    public static void drawTextWithBackground(String str, float f, float f2, Paint paint, Paint paint2, float f3, float f4, float f5, float f6) {
         GraphicsEngine graphicsEngine = GameEngine.getInstance().renderGraphicsEngine;
         float fB = graphicsEngine.b(str, paint);
         textBounds.a(f, f2, f + fB, f2 + graphicsEngine.a(str, paint));
         backgroundRect.a(textBounds);
-        if (paint.j() == KoolPaint.Align.CENTER) {
+        if (paint.j() == Paint.Align.CENTER) {
             backgroundRect.a(-(fB / 2.0f), 0.0f);
         }
         backgroundRect.a -= f3;

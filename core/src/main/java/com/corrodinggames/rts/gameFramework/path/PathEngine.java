@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.pathfinding.Path;
 import com.corrodinggames.rts.gameFramework.pathfinding.PathCostMap;
 import com.corrodinggames.rts.gameFramework.pathfinding.PathSolver;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,8 +60,8 @@ public final class PathEngine {
     boolean p = true;
     public ArrayList u = new ArrayList();
     public PathCostMap[] v = new PathCostMap[0];
-    public KoolPaint w = new KoolPaint();
-    KoolPaint F = new KoolPaint();
+    public Paint w = new Paint();
+    Paint F = new Paint();
     public Object G = new Object();
     LinkedList<Path> I = new LinkedList();
     LinkedList<Path> J = new LinkedList();

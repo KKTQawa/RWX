@@ -13,9 +13,9 @@ import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolBlendColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.BlendColorFilter;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -294,35 +294,35 @@ public abstract class BaseBuilding extends OrderableUnit {
     }
 
     /* JADX INFO: renamed from: f */
-    public KoolPaint getBuildingPaint() {
+    public Paint getBuildingPaint() {
         int iA;
         GameEngine gameEngine = GameEngine.getInstance();
-        KoolBlendColorFilter blendColorFilter = null;
+        BlendColorFilter blendColorFilter = null;
         if (this.buildProgress < 1.0f) {
-            iA = KoolArgbColor.a((int) (40.0f + (this.buildProgress * 200.0f)), 140, 255, 140);
+            iA = ArgbColor.a((int) (40.0f + (this.buildProgress * 200.0f)), 140, 255, 140);
             blendColorFilter = overlayFilterLightGreen;
         } else {
-            iA = KoolArgbColor.a(255, 255, 255, 255);
+            iA = ArgbColor.a(255, 255, 255, 255);
         }
         if (this.isUnitParalyzed) {
             if (this.isUnitDisabled) {
-                iA = KoolArgbColor.a(200, 20, 255, 20);
+                iA = ArgbColor.a(200, 20, 255, 20);
                 blendColorFilter = overlayFilterGreen;
             }
             if (this.isUnitCapturable) {
-                iA = KoolArgbColor.a(200, 255, 20, 20);
+                iA = ArgbColor.a(200, 255, 20, 20);
                 blendColorFilter = overlayFilterRed;
             }
             if (this.isUnitInvulnerable) {
-                iA = KoolArgbColor.a(70, 70, 70, 245);
+                iA = ArgbColor.a(70, 70, 70, 245);
                 blendColorFilter = overlayFilterBlue;
                 if (this.isUnitCapturable) {
-                    iA = KoolArgbColor.a(70, 255, 20, 20);
+                    iA = ArgbColor.a(70, 255, 20, 20);
                     blendColorFilter = overlayFilterRed;
                 }
             }
             if (this.isUnitUntargetable) {
-                iA = KoolArgbColor.a(150, 100, 100, 100);
+                iA = ArgbColor.a(150, 100, 100, 100);
             }
         }
         boolean z = gameEngine.settingsEngine.renderAntiAlias;

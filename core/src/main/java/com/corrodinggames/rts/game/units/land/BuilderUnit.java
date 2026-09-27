@@ -11,7 +11,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.Vector3D;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -26,13 +26,13 @@ public class BuilderUnit extends LandUnit implements UnitPathPoints {
     PointF[] unitRenderPoints;
 
     /* JADX INFO: renamed from: k */
-    static KoolPaint linePaint;
+    static Paint linePaint;
 
     /* JADX INFO: renamed from: l */
-    static KoolPaint linePaintOver;
+    static Paint linePaintOver;
 
     /* JADX INFO: renamed from: m */
-    static KoolPaint chargePaint;
+    static Paint chargePaint;
 
     /* JADX INFO: renamed from: a */
     static Texture builderTexture = null;
@@ -129,15 +129,15 @@ public class BuilderUnit extends LandUnit implements UnitPathPoints {
         super(z);
         this.targetPriorityPoints = new PointF[6];
         this.unitRenderPoints = new PointF[this.targetPriorityPoints.length];
-        linePaint = new KoolPaint();
+        linePaint = new Paint();
         linePaint.a(40, 0, 255, 0);
         linePaint.a(true);
         linePaint.a(2.0f);
-        linePaint.a(KoolPaint.Cap.ROUND);
-        linePaintOver = new KoolPaint();
+        linePaint.a(Paint.Cap.ROUND);
+        linePaintOver = new Paint();
         linePaintOver.a(linePaint);
         linePaintOver.a(55, 255, 60, 60);
-        chargePaint = new KoolPaint();
+        chargePaint = new Paint();
         chargePaint.a(60, 255, 255, 255);
         T(20);
         U(20);
@@ -213,7 +213,7 @@ public class BuilderUnit extends LandUnit implements UnitPathPoints {
             }
             GameEngine gameEngine = GameEngine.getInstance();
             PointF[] pointFArrB = unitPathPoints.b();
-            KoolPaint paint = linePaint;
+            Paint paint = linePaint;
             if (zIsCurrentCommandReclaim) {
                 paint = linePaintOver;
             }
@@ -278,9 +278,9 @@ public class BuilderUnit extends LandUnit implements UnitPathPoints {
                 gameEngine.renderGraphicsEngine.b(vector3DBn.x - gameEngine.viewpointXSnapped, (vector3DBn.y - vector3DBn.z) - gameEngine.viewpointYSnapped);
                 gameEngine.renderGraphicsEngine.a(fE, fE);
                 if (isCurrentCommandReclaim()) {
-                    gameEngine.renderGraphicsEngine.a(builderDechargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                    gameEngine.renderGraphicsEngine.a(builderDechargeTexture, 0.0f, 0.0f, (Paint) null);
                 } else {
-                    gameEngine.renderGraphicsEngine.a(builderChargeTexture, 0.0f, 0.0f, (KoolPaint) null);
+                    gameEngine.renderGraphicsEngine.a(builderChargeTexture, 0.0f, 0.0f, (Paint) null);
                 }
                 gameEngine.renderGraphicsEngine.j();
                 return true;

@@ -1,19 +1,16 @@
 package io.github.rwx.app
 
 import io.github.rwx.PlatformBridge
-import io.github.rwx.PlatformFileSelection
 import io.github.rwx.i18n.I18n
 import io.github.rwx.logger
 import io.github.rwx.mod.ModRepository
 import io.github.rwx.session.GameSession
-import io.github.rwx.ui.component.Icon
-import io.github.rwx.ui.component.invalidateModThumbnailTextureCache
 import io.github.rwx.ui.host.DialogSceneHost
 import io.github.rwx.ui.host.LoadingDialogSceneHost
 import io.github.rwx.ui.host.ModsSceneHost
 import io.github.rwx.ui.model.Dialog
+import io.github.rwx.ui.model.LoadingDialogHandle
 import io.github.rwx.ui.model.DialogButton
-import io.github.rwx.ui.model.DialogTextInput
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,6 +28,7 @@ internal class ModsController(
 ) {
     private var reloadLoading = false
     private var reloadDialogVisible = false
+    private var loadingHandle: LoadingDialogHandle? = null
     private var reloadJob: Job? = null
     private val reloadResult = AtomicReference<ModsReloadResult?>(null)
 
@@ -45,7 +43,6 @@ internal class ModsController(
 
     fun reloadAvailableAndRefresh() {
         modRepository.reloadAvailableMods()
-        invalidateModThumbnailTextureCache()
         refresh()
     }
 
@@ -61,63 +58,27 @@ internal class ModsController(
 
     fun deleteAndRefresh(modId: String) {
         val deleted = modRepository.delete(modId)
-        refresh(if (deleted) "" else "Unable to delete mod")
+        refresh(if (deleted) "" else I18n.mods.delete.failed())
     }
 
     fun showImportDialog() {
-        var selectedFile: PlatformFileSelection? = null
-        dialogSceneHost.show(
-            Dialog(
-                title = "Import Mod",
-                message = "Enter a mod, asset key, author trust certificate, or license path.",
-                textInput = DialogTextInput(
-                    hint = "/path/to/mod.rwmod",
-                    trailingIcon = Icon.Import,
-                    trailingIconTooltip = "Choose file",
-                    onTrailingIconPress = { setInputValue ->
-                        val host=getKoin().get<PlatformBridge>().filePickerHost?:return@DialogTextInput
-                        host.openFilePicker(
-                            title = "Choose a mod file or directory",
-                            allowedExtensions = setOf(
-                                "rwmod", "zip", "jar", "ini", "rwxkey", "rwxpub", "rwxlicense"
-                            ),
-                            allowDirectories = true
-                        ) { selection ->
-                            if (selection != null) {
-                                selectedFile?.release()
-                                selectedFile = selection
-                                setInputValue(selection.displayPath)
-                            }
-                        }
-                    },
-                ),
-                buttons = listOf(
-                    DialogButton(
-                        "Import",
-                        onInputPress = { inputPath ->
-                            val path = selectedFile
-                                ?.takeIf { inputPath == it.displayPath }
-                                ?.path
-                                ?: inputPath
-                            try {
-                                val result = modRepository.importMod(path)
-                                refresh(result.message)
-                            } finally {
-                                selectedFile?.release()
-                                selectedFile = null
-                            }
-                        },
-                    ),
-                    DialogButton(
-                        I18n.common.cancel(),
-                        onPress = {
-                            selectedFile?.release()
-                            selectedFile = null
-                        },
-                    ),
-                ),
-            ),
-        )
+        dialogSceneHost.show(modImportDialog(getKoin().get<PlatformBridge>().filePickerHost) { path ->
+            val result = modRepository.importMod(path)
+            refresh(result.message)
+        })
+    }
+
+    fun showDetails(modId: String, error: Boolean) {
+        val mod = sceneHost.snapshot().mods.singleOrNull { it.id == modId } ?: return
+        val text = if (error) mod.errorMessage else mod.description
+        if (text.isNullOrBlank()) return
+        dialogSceneHost.show(Dialog(
+            title = mod.name,
+            message = text,
+            messageLabel = if (error) I18n.mods.error() else I18n.mods.description(),
+            scrollableMessage = true,
+            buttons = listOf(DialogButton(I18n.common.close())),
+        ))
     }
 
     fun reloadWithDialog() {
@@ -151,9 +112,9 @@ internal class ModsController(
             }
         }
         reloadDialogVisible = true
-        loadingDialogSceneHost.showProgress(
-            title = "Reloading Mods",
-            message = "Loading custom unit data",
+        loadingHandle = loadingDialogSceneHost.showProgress(
+            title = I18n.mods.reload.title(),
+            message = I18n.mods.reload.message(),
             progress = 0.05f,
         ) {
             cancelReload(job)
@@ -163,10 +124,13 @@ internal class ModsController(
     fun driveReload(): Boolean {
         if (reloadLoading && reloadDialogVisible) {
             val status = gameSession.loadingStatus()
-            loadingDialogSceneHost.updateProgress(
-                message = status.text.ifBlank { "Loading custom unit data" },
-                progress = status.progress ?: 0.05f,
-            )
+            loadingHandle?.let { handle ->
+                loadingDialogSceneHost.updateProgress(
+                    message = status.text.ifBlank { I18n.mods.reload.message() },
+                    progress = status.progress ?: 0.05f,
+                    handle = handle,
+                )
+            }
         }
         reloadResult.getAndSet(null)?.let { result ->
             if (reloadLoading) {
@@ -176,12 +140,18 @@ internal class ModsController(
         return reloadLoading
     }
 
+    private fun hideLoading() {
+        val handle = loadingHandle
+        loadingHandle = null
+        handle?.let(loadingDialogSceneHost::hide)
+    }
+
     private fun cancelReload(job: Job) {
         if (!reloadLoading || reloadJob !== job) {
             return
         }
         reloadDialogVisible = false
-        loadingDialogSceneHost.hide()
+        hideLoading()
         job.cancel()
     }
 
@@ -202,19 +172,19 @@ internal class ModsController(
         reloadJob = null
         if (reloadDialogVisible) {
             reloadDialogVisible = false
-            loadingDialogSceneHost.hide()
+            hideLoading()
         }
         when (result) {
             ModsReloadResult.Success -> {
                 onModsReloaded()
-                refresh("Mods reloaded")
+                refresh(I18n.mods.reload.done())
             }
 
             ModsReloadResult.Cancelled -> Unit
             is ModsReloadResult.Failed -> {
                 val error = result.error
                 logger.warn(error) { "Unable to reload mods" }
-                refresh("Unable to reload mods: ${error.message ?: error.javaClass.simpleName}")
+                refresh(I18n.mods.reload.failed(error.message ?: error.javaClass.simpleName))
             }
         }
     }

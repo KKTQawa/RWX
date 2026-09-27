@@ -1,77 +1,79 @@
 package io.github.rwx.app
 
 import io.github.rwx.mod.registry.UiRegistry
-import io.github.rwx.render.canvas.KoolCanvasFrame
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameFrame
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.AppScreenLayout
+import io.github.rwx.ui.InGameOverlayState
 
 internal class ScreenPresenter(
     private val bootstrap: AppBootstrap,
-    private val viewport: () -> KoolCanvasViewport,
+    private val viewport: () -> GameViewport,
 ) {
+    var battleBackgroundVisible: Boolean = false
+        private set
+    private var inGameOverlay: InGameOverlayState? = null
+
+    fun updateInGameOverlay(state: InGameOverlayState?, screen: AppScreen, lastExternalGameFrame: GameFrame?) {
+        inGameOverlay = state
+        if (screen == AppScreen.InGame) apply(screen, lastExternalGameFrame)
+    }
+
     fun shouldShowRwMenuBackground(screen: AppScreen): Boolean =
-        screen == AppScreen.MainMenu &&
+        supportsMenuBattleBackground(screen) &&
                 bootstrap.settingsModel.showMainMenuBackgroundDemo.value &&
                 bootstrap.menuBackgroundSession.isMenuBackgroundActive() &&
                 !bootstrap.gameSession.canResume()
 
     fun apply(
         screen: AppScreen,
-        lastExternalGameFrame: KoolCanvasFrame?,
+        lastExternalGameFrame: GameFrame?,
     ) {
         val isMenuBackgroundPreparing = ensureMenuBackground(screen)
         val gameSession = bootstrap.gameSession
         val visibility = AppScreenLayout.visibilityFor(screen)
+        val gameOverlay = inGameOverlay.takeIf { screen == AppScreen.InGame }
         val isRwMenuBackgroundVisible = shouldShowRwMenuBackground(screen)
-        val isExternalModWindowOverlayVisible = screen == AppScreen.ModWindow && !gameSession.rendersIntoKoolCanvas
-        val isExternalModHudOverlayVisible = shouldShowExternalModHudOverlay(
+        val isExternalModWindowOverlayVisible = screen == AppScreen.ModWindow && !gameSession.usesFrameCommandRendering
+        val isExternalModHudOverlayVisible = gameOverlay?.let {
+            it.visible && !gameSession.usesFrameCommandRendering
+        } ?: shouldShowExternalModHudOverlay(
             hudVisible = visibility.hud,
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
             hasActiveHudLayers = UiRegistry.hasActiveHudLayers(),
         )
         val isResumeBackgroundVisible = shouldShowResumeMenuBackground(screen, gameSession.canResume())
         val isExternalRwBackgroundVisible = shouldShowExternalRwBackgroundSurface(
             isRwMenuBackgroundVisible = isRwMenuBackgroundVisible,
             isResumeBackgroundVisible = isResumeBackgroundVisible,
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
             usesNativeSurfaceForResumeBackground = gameSession.usesNativeSurfaceForResumeBackground,
-        ) || (isMenuBackgroundPreparing && !gameSession.rendersIntoKoolCanvas)
-        val isLastExternalFrameBackgroundVisible = screen == AppScreen.MainMenu &&
-                !gameSession.rendersIntoKoolCanvas &&
+        ) || (isMenuBackgroundPreparing && !gameSession.usesFrameCommandRendering)
+        val isLastExternalFrameBackgroundVisible = supportsMenuBattleBackground(screen) &&
+                !gameSession.usesFrameCommandRendering &&
                 lastExternalGameFrame != null
         val isBattleBackgroundVisible = isRwMenuBackgroundVisible ||
                 isResumeBackgroundVisible ||
                 isLastExternalFrameBackgroundVisible
 
+        battleBackgroundVisible = isBattleBackgroundVisible
         bootstrap.mainMenuSceneHost.setBattleBackgroundVisible(isBattleBackgroundVisible)
-        bootstrap.koolCanvasScene.isVisible = visibility.world
-        bootstrap.modHudScene.isVisible = visibility.hud
-        bootstrap.loadingScene.isVisible = visibility.loading
 
-        bootstrap.mainMenuScene.isVisible = visibility.mainMenu
-        bootstrap.levelSelectScene.isVisible = visibility.levelSelect
-        bootstrap.replaySelectScene.isVisible = visibility.replaySelect
-        bootstrap.settingsScene.isVisible = visibility.settings
-        bootstrap.pauseScene.isVisible = visibility.paused
-        bootstrap.multiplayerScene.isVisible = visibility.multiplayer
-        bootstrap.modsScene.isVisible = visibility.mods
-        bootstrap.resourceBrowserScene.isVisible = visibility.resourceBrowser
-        bootstrap.battleRoomScene.isVisible = visibility.battleRoom
-        bootstrap.modWindowScene.isVisible = visibility.modWindow
+        bootstrap.settingsSceneHost.setActive(visibility.settings)
         gameSession.setGameVisible(
             shouldSetRwGameVisibleForScreen(screen) || isExternalRwBackgroundVisible,
             viewport(),
-            koolOverlay = isExternalRwBackgroundVisible ||
+            uiOverlay = isExternalRwBackgroundVisible ||
                     isExternalModWindowOverlayVisible ||
                     isExternalModHudOverlayVisible,
-            pausedBackground = shouldPauseRwGameForScreen(screen, isResumeBackgroundVisible),
+            pausedBackground = shouldPauseRwGameForScreen(screen, isResumeBackgroundVisible) || gameOverlay?.pausesGame == true,
         )
     }
 
     private fun ensureMenuBackground(screen: AppScreen): Boolean {
         if (!bootstrap.settingsModel.showMainMenuBackgroundDemo.value) return false
-        if (screen != AppScreen.MainMenu) return false
+        if (!supportsMenuBattleBackground(screen)) return false
         if (bootstrap.gameSession.canResume() || bootstrap.menuBackgroundSession.isMenuBackgroundActive()) return false
         bootstrap.menuBackgroundSession.prepareMenuBackgroundAsync(viewport())
         return true
@@ -80,6 +82,6 @@ internal class ScreenPresenter(
 
 internal fun shouldShowExternalModHudOverlay(
     hudVisible: Boolean,
-    rendersIntoKoolCanvas: Boolean,
+    usesFrameCommandRendering: Boolean,
     hasActiveHudLayers: Boolean,
-): Boolean = hudVisible && !rendersIntoKoolCanvas && hasActiveHudLayers
+): Boolean = hudVisible && !usesFrameCommandRendering && hasActiveHudLayers

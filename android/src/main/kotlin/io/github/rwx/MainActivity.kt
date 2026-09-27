@@ -1,12 +1,15 @@
 package io.github.rwx
 
-import android.app.Activity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.PixelFormat
 import android.net.Uri
-import android.opengl.GLES20
-import android.opengl.GLSurfaceView
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
@@ -14,44 +17,30 @@ import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.view.*
 import android.widget.FrameLayout
-import de.fabmax.kool.KoolConfigAndroid
-import de.fabmax.kool.KoolSystem
-import de.fabmax.kool.createKoolContext
-import de.fabmax.kool.modules.ui2.UiScale
-import de.fabmax.kool.platform.KoolContextAndroid
-import de.fabmax.kool.platform.KoolSurfaceView
-import de.fabmax.kool.util.FrontendScope
 import io.github.rwx.app.*
 import io.github.rwx.di.AndroidGameRenderBackend
 import io.github.rwx.di.selectedAndroidGameRenderBackend
 import io.github.rwx.p2p.P2PLobbyService
-import io.github.rwx.render.canvas.KoolCanvasContextResourceInvalidator
-import io.github.rwx.session.GameLoadingStatus
 import io.github.rwx.session.GameSession
 import io.github.rwx.settings.KEY_ANDROID_OPENGL_RENDERER
-import io.github.rwx.ui.UiTheme
+import io.github.rwx.ui.AndroidComposeOverlay
+import io.github.rwx.ui.AppUiState
 import io.github.rwx.ui.component.*
-import io.github.rwx.ui.host.LoadingSceneHost
-import io.github.rwx.ui.host.invalidateResourceBrowserPreviewTextureCache
-import io.github.rwx.ui.model.LevelSelectMode
-import io.github.rwx.ui.model.LevelSelectViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import io.github.rwx.ui.model.LoadingUiState
+import io.github.rwx.ui.platform.createAndroidComposeHost
 import org.koin.android.ext.android.get
 import org.koin.core.component.KoinComponent
 import java.io.File
 import java.util.*
-import kotlin.time.Duration.Companion.milliseconds
 
-class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
+class MainActivity : ComponentActivity(), PlatformFilePickerHost, KoinComponent {
 
-    private var koolContext: KoolContextAndroid? = null
+    private var frameScheduler: AndroidFrameScheduler? = null
     private var appSession: AppSession? = null
+    private var composeView: ComposeView? = null
+    private var composeOverlay: AndroidComposeOverlay? = null
     private var nativeGameSession: AndroidGameSession? = null
     private var rendererPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
-    private var textInputController: AndroidTextInputController? = null
     private var pendingStoragePickerResult: ((ExternalStorageSelection?) -> Unit)? = null
     private var pendingFilePickerResult: ((PlatformFileSelection?) -> Unit)? = null
     private var applicationExitRequested: Boolean = false
@@ -60,91 +49,42 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
         super.onCreate(savedInstanceState)
         val bridge = get<PlatformBridge>()
         bridge.filePickerHost = this
-        UiScale.uiScale.value = ANDROID_UI_SCALE
         val selectedGameSession = get<GameSession>()
-        nativeGameSession = selectedGameSession as? AndroidGameSession
-        observeNativeRendererPreference()
-        val koolSurface = createKoolSurface(transparentOverlay = nativeGameSession != null)
-        val ctx = createKoolContext(
-            KoolConfigAndroid(
-                appContext = applicationContext,
-                surfaceView = koolSurface,
-            )
-        )
-        ctx.surfaceView.preserveEGLContextOnPause = true
-        requestFrameRate(ctx.surfaceView)
-        koolContext = ctx
-        val root = FrameLayout(this)
-        nativeGameSession?.attach(this, root, ctx.surfaceView)
-        root.addView(
-            ctx.surfaceView,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        textInputController = AndroidTextInputController(this, root, ctx.surfaceView).also {
-            PlatformTextInputBridge.install(it)
+        val gameSession = requireNotNull(selectedGameSession as? AndroidGameSession) {
+            "Android requires a native game session"
         }
+        nativeGameSession = gameSession
+        observeNativeRendererPreference()
+        val root = FrameLayout(this)
+        val composeView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            visibility = View.GONE
+        }
+        composeOverlay = AndroidComposeOverlay(
+            initialState = AppUiState(composeEnabled = true, loading = LoadingUiState()),
+            hostFactory = { onDispose -> createAndroidComposeHost(composeView, onDispose) },
+        )
+        gameSession.attach(this, root, composeView)
+        this.composeView = composeView
         setContentView(root)
         enterImmersiveMode()
 
-        val loadingHost = LoadingSceneHost()
-        val loadingScene = loadingHost.createScene()
-        ctx.addScene(loadingScene)
-        FrontendScope.launch {
-            loadingHost.update(GameLoadingStatus("Loading fonts", 0.05f))
-            installMsdfFonts()
-            loadingHost.update(GameLoadingStatus("Preparing UI icons", UI_ICON_PROGRESS_START))
-            preloadUiIconTextures { completed, total ->
-                loadingHost.update(
-                    GameLoadingStatus(
-                        "Preparing UI icons ($completed/$total)",
-                        progressInRange(completed, total, UI_ICON_PROGRESS_START, UI_ICON_PROGRESS_END),
-                    )
-                )
-            }
-            loadingHost.update(GameLoadingStatus("Preparing map catalog", MAP_CATALOG_PROGRESS_START))
-            val previewPaths = initialMapPreviewPaths(get()) { completed, total ->
-                loadingHost.update(
-                    GameLoadingStatus(
-                        "Preparing map catalog ($completed/$total)",
-                        progressInRange(
-                            completed,
-                            total,
-                            MAP_CATALOG_PROGRESS_START,
-                            MAP_CATALOG_PROGRESS_END,
-                        ),
-                    )
-                )
-            }
-            loadingHost.update(GameLoadingStatus("Preparing map previews", MAP_PREVIEW_PROGRESS_START))
-            preloadMapPreviewTextures(previewPaths) { completed, total ->
-                loadingHost.update(
-                    GameLoadingStatus(
-                        "Preparing map previews ($completed/$total)",
-                        progressInRange(completed, total, MAP_PREVIEW_PROGRESS_START, MAP_PREVIEW_PROGRESS_END),
-                    )
-                )
-            }
-            loadingHost.update(GameLoadingStatus("Preparing multiplayer", MULTIPLAYER_PROGRESS))
-            launchOnIO(exceptionHandler = { _, error ->
-                logger.warn(error) { "Unable to prewarm RWX P2P during startup" }
-            }) {
-                P2PLobbyService.getInstance().startIfNeeded()
-            }
-            loadingHost.update(GameLoadingStatus("Preparing UI renderer", UI_RENDERER_PROGRESS))
-            loadingHost.showUiTextureWarmup()
-            delay(UI_RENDERER_WARMUP_MILLIS.milliseconds)
-            loadingHost.hideUiTextureWarmup()
-            loadingHost.update(GameLoadingStatus("Preparing game session", 0.95f))
-            delay(STARTING_GAME_STATUS_FRAME_MILLIS.milliseconds)
-            appSession = installApp(
-                context = ctx,
-                options = AppOptions(isDesktop = false),
-                onQuit = ::exitApplication,
-            )
-            ctx.removeScene(loadingScene)
+        val scheduler = AndroidFrameScheduler(lifecycle)
+        frameScheduler = scheduler
+        val session = installApp(
+            viewportProvider = gameSession::viewport,
+            scheduler = scheduler,
+            // updateFrame records and submits directly to the native Canvas/OpenGL presenter.
+            presenter = GameFramePresenter { },
+            options = AppOptions(isDesktop = false),
+            onQuit = ::exitApplication,
+        )
+        appSession = session
+        composeOverlay?.attach(session)
+        launchOnIO(exceptionHandler = { _, error ->
+            logger.warn(error) { "Unable to prewarm RWX P2P during startup" }
+        }) {
+            P2PLobbyService.getInstance().startIfNeeded()
         }
     }
 
@@ -164,17 +104,9 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
         return super.onKeyDown(keyCode, event)
     }
 
-    override fun onPause() {
-        nativeGameSession?.onPause()
-        super.onPause()
-        koolContext?.onPause()
-    }
-
     override fun onResume() {
         super.onResume()
         enterImmersiveMode()
-        koolContext?.onResume()
-        nativeGameSession?.onResume()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -186,30 +118,25 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
 
     override fun onDestroy() {
         val terminateProcess = applicationExitRequested
+        frameScheduler?.close()
+        frameScheduler = null
         val bridge = get<PlatformBridge>()
-        bridge.filePickerHost = null
+        if (bridge.filePickerHost === this) bridge.filePickerHost = null
         pendingStoragePickerResult?.invoke(null)
         pendingStoragePickerResult = null
         pendingFilePickerResult?.invoke(null)
         pendingFilePickerResult = null
-        textInputController?.let {
-            PlatformTextInputBridge.uninstall(it)
-            it.dispose()
-        }
-        textInputController = null
+        composeOverlay?.dispose()
+        composeOverlay = null
+        composeView = null
+        appSession?.close()
+        appSession = null
         nativeGameSession?.detach()
         rendererPreferenceListener?.let { listener ->
             getSharedPreferences(PREFERENCE_NAME, MODE_PRIVATE)
                 .unregisterOnSharedPreferenceChangeListener(listener)
         }
         rendererPreferenceListener = null
-        invalidateUiIconTextureCache()
-        invalidateMapPreviewTextureCache()
-        invalidateResourceBrowserPreviewTextureCache()
-        get<KoolCanvasContextResourceInvalidator>().invalidateContextResources()
-        koolContext?.releaseFromKoolSystem()
-        koolContext = null
-        appSession = null
         nativeGameSession = null
         super.onDestroy()
         if (terminateProcess) {
@@ -282,19 +209,16 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
                 pendingStoragePickerResult = null
                 val uri = data?.data?.takeIf { resultCode == RESULT_OK }
                 val selection = uri?.let(::persistExternalStorageSelection)
-                FrontendScope.launch { callback(selection) }
+                callback(selection)
             }
 
             FILE_PICKER_REQUEST_CODE -> {
                 val callback = pendingFilePickerResult ?: return
                 pendingFilePickerResult = null
                 val uri = data?.data?.takeIf { resultCode == RESULT_OK }
-                FrontendScope.launch {
+                lifecycleScope.launch {
                     val selection = uri?.let {
-                        asyncOnIO {
-                            stageSelectedFile(it)
-                        }
-                            .await()
+                        withContext(Dispatchers.IO) { stageSelectedFile(it) }
                     }
                     callback(selection)
                 }
@@ -348,34 +272,6 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
             if (displayNameColumn >= 0 && cursor.moveToFirst()) cursor.getString(displayNameColumn) else null
         }
 
-    private suspend fun installMsdfFonts() {
-        UiTheme.Fonts.install(maxTextureSize = glMaxTextureSize())
-    }
-
-    private fun glMaxTextureSize(): Int {
-        val query = IntArray(1)
-        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, query, 0)
-        val reported = query[0]
-        logger.info { "GL_MAX_TEXTURE_SIZE: $reported" }
-        return reported.takeIf { it > 0 } ?: UiTheme.Fonts.PORTABLE_MAX_ATLAS_DIMENSION
-    }
-
-    private fun createKoolSurface(transparentOverlay: Boolean): KoolSurfaceView =
-        KoolSurfaceView(this).apply {
-            if (transparentOverlay) {
-                // Native Canvas/OpenGL is below this view, so only that backend needs an alpha
-                // surface and media-overlay composition.
-                setEGLConfigChooser(8, 8, 8, 8, 16, 0)
-                holder.setFormat(PixelFormat.TRANSLUCENT)
-                setZOrderMediaOverlay(true)
-            } else {
-                // Kool owns the only game surface. An opaque buffer avoids transparent-surface
-                // composition and the stale/black buffer flashes it can introduce on Android.
-                setEGLConfigChooser(8, 8, 8, 0, 16, 0)
-                holder.setFormat(PixelFormat.OPAQUE)
-            }
-        }
-
     private fun enterImmersiveMode() {
         window.attributes = window.attributes.apply {
             layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -399,73 +295,6 @@ class MainActivity : Activity(), PlatformFilePickerHost, KoinComponent {
     }
 }
 
-private const val ANDROID_UI_SCALE: Float = 0.8f
-private const val ANDROID_TARGET_FRAME_RATE: Float = 60f
-private const val UI_ICON_PROGRESS_START: Float = 0.1f
-private const val UI_ICON_PROGRESS_END: Float = 0.42f
-private const val MAP_CATALOG_PROGRESS_START: Float = 0.44f
-private const val MAP_CATALOG_PROGRESS_END: Float = 0.54f
-private const val MAP_PREVIEW_PROGRESS_START: Float = 0.56f
-private const val MAP_PREVIEW_PROGRESS_END: Float = 0.84f
-private const val MULTIPLAYER_PROGRESS: Float = 0.88f
-private const val UI_RENDERER_PROGRESS: Float = 0.93f
-private const val UI_RENDERER_WARMUP_MILLIS: Long = 100L
-private const val STARTING_GAME_STATUS_FRAME_MILLIS: Long = 50L
-private const val PREWARM_MAP_PREVIEWS_PER_MODE: Int = 12
 private const val EXTERNAL_STORAGE_TREE_REQUEST_CODE: Int = 9124
 private const val FILE_PICKER_REQUEST_CODE: Int = 9125
 private const val FILE_PICKER_CACHE_DIRECTORY: String = "file-picker"
-
-private suspend fun initialMapPreviewPaths(
-    viewModelFactory: LevelSelectViewModelFactory,
-    onProgress: (Int, Int) -> Unit,
-): List<String> {
-    val modes = LevelSelectMode.entries.filter { it.assetSubdir != null }
-    val paths = mutableListOf<String>()
-    modes.forEachIndexed { index, mode ->
-        val entries = withContext(Dispatchers.Default) {
-            viewModelFactory.create(mode).items()
-        }
-        paths += entries.asSequence()
-            .mapNotNull { it.previewAssetPath }
-            .take(PREWARM_MAP_PREVIEWS_PER_MODE)
-        onProgress(index + 1, modes.size)
-    }
-    return paths.distinct()
-}
-
-private fun progressInRange(
-    completed: Int,
-    total: Int,
-    start: Float,
-    end: Float,
-): Float {
-    if (total <= 0) return end
-    return start + (end - start) * (completed.toFloat() / total.toFloat()).coerceIn(0f, 1f)
-}
-
-private fun requestFrameRate(surfaceView: GLSurfaceView) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
-    surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-        override fun surfaceCreated(holder: SurfaceHolder) {
-            holder.surface.setFrameRate(
-                ANDROID_TARGET_FRAME_RATE,
-                Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
-            )
-        }
-
-        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) = Unit
-
-        override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
-    })
-}
-
-private fun KoolContextAndroid.releaseFromKoolSystem() {
-    onDestroy()
-    val contextField = KoolSystem::class.java.getDeclaredField("defaultContext").apply {
-        isAccessible = true
-    }
-    if (contextField.get(null) === this) {
-        contextField.set(null, null)
-    }
-}

@@ -10,8 +10,8 @@ import com.corrodinggames.rts.game.units.custom.logicBooleans.VariableScope;
 import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.mission.conditions.TeamTagDetectCondition;
 import com.corrodinggames.rts.gameFramework.mission.conditions.UnitCountCondition;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.util.Iterator;
 
@@ -76,10 +76,10 @@ public class TriggerFactory {
                 }
                 if (mapTrigger.triggerType == TriggerType.mapText) {
                     missionEngine.hasMapText = true;
-                    mapTrigger.B = new KoolPaint();
+                    mapTrigger.B = new Paint();
                     mapTrigger.B.a(true);
-                    mapTrigger.B.a(KoolPaint.Align.CENTER);
-                    mapTrigger.B.a(KoolTypeface.a(KoolTypeface.c, 1));
+                    mapTrigger.B.a(Paint.Align.CENTER);
+                    mapTrigger.B.a(Typeface.a(Typeface.c, 1));
                     mapTrigger.B.b(mapTrigger.c("textColor", -1));
                     gameEngine.setScaledTextSize(mapTrigger.B, mapTrigger.a("textSize", 20));
                     if (mapTrigger.B.f() == 0) {

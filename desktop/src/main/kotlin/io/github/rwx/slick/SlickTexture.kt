@@ -9,6 +9,15 @@ class SlickTexture(
     private var image: Image?,
     private val sourceKey: String? = null,
 ) : Texture() {
+    private var reloadContext: SlickGlContext? = null
+
+    internal fun confineTo(context: SlickGlContext): SlickTexture = apply { reloadContext = context }
+
+    private fun <T> inContext(action: () -> T): T {
+        val context = reloadContext
+        return if (context == null) action() else context.execute(action)
+    }
+
     private var uploadedPixelRevision = getPixelRevision()
 
     init {
@@ -23,7 +32,7 @@ class SlickTexture(
 
     override fun a(): String? = sourceKey ?: super.a()
 
-    override fun a(width: Int, height: Int, copyPixels: Boolean): Texture {
+    override fun a(width: Int, height: Int, copyPixels: Boolean): Texture = inContext {
         val texture = try {
             SlickTexture(Image(width.coerceAtLeast(1), height.coerceAtLeast(1)), sourceKey = null)
         } catch (error: SlickException) {
@@ -40,23 +49,24 @@ class SlickTexture(
             }
             texture.p()
         }
-        return texture
+        reloadContext?.let(texture::confineTo)
+        texture
     }
 
-    override fun p() {
+    override fun p() = inContext {
         super.p()
         val pixelRevision = getPixelRevision()
         if (pixelRevision == uploadedPixelRevision) {
-            return
+            return@inContext
         }
-        val pixels = argbPixelsCopy ?: return
+        val pixels = argbPixelsCopy ?: return@inContext
         val replacement = imageFromArgbPixels(p, q, pixels, image?.filter ?: Image.FILTER_LINEAR)
         runCatching { image?.destroy() }
         image = replacement
         uploadedPixelRevision = pixelRevision
     }
 
-    override fun o() {
+    override fun o() = inContext {
         runCatching { image?.destroy() }
         image = null
         super.o()
@@ -65,9 +75,9 @@ class SlickTexture(
     override fun clone(): Texture = a(p, q, true).also(::copyTextureSettingsTo)
 
     // The core team-coloring path needs an ARGB snapshot, while Slick stores the image on the GPU.
-    private fun readImagePixels(): IntArray? {
-        val sourceImage = image ?: return null
-        val sourceTexture = sourceImage.texture ?: return null
+    private fun readImagePixels(): IntArray? = inContext {
+        val sourceImage = image ?: return@inContext null
+        val sourceTexture = sourceImage.texture ?: return@inContext null
         val bytesPerPixel = if (sourceTexture.hasAlpha()) 4 else 3
         val textureWidth = sourceTexture.textureWidth
         val offsetX = (sourceImage.textureOffsetX * textureWidth).toInt()
@@ -88,7 +98,7 @@ class SlickTexture(
                 pixels[x + y * p] = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
             }
         }
-        return pixels
+        pixels
     }
 
     private fun imageFromArgbPixels(width: Int, height: Int, pixels: IntArray, filter: Int): Image {

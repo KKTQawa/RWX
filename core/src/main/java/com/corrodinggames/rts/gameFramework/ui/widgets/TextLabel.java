@@ -6,7 +6,7 @@ import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine;
 import com.corrodinggames.rts.gameFramework.ui.TextUtils;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -16,13 +16,13 @@ public class TextLabel extends UIElement {
 
     /* JADX INFO: renamed from: a */
     String text;
-    KoolPaint b = new GamePaint();
+    Paint b = new GamePaint();
     UIStyle c = UIStyle.l;
     /* JADX INFO: renamed from: d */
     ArrayList<String> lines;
 
     public TextLabel() {
-        this.b.a(KoolPaint.Align.CENTER);
+        this.b.a(Paint.Align.CENTER);
         this.b.b(-16777216);
         a(18.0f);
     }
@@ -55,7 +55,7 @@ public class TextLabel extends UIElement {
         } else {
             int n = 0;
             for (final String string : this.lines) {
-                final KoolPaint b = this.b;
+                final Paint b = this.b;
                 final int lineHeight = TextUtils.getLineHeight(b);
                 d.a(string, a.d(), a.b + this.k + lineHeight + n * lineHeight, b);
                 ++n;

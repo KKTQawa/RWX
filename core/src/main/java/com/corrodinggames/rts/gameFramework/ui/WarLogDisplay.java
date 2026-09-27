@@ -2,8 +2,8 @@ package com.corrodinggames.rts.gameFramework.ui;
 
 import com.corrodinggames.rts.game.units.BaseUnit;
 import com.corrodinggames.rts.gameFramework.GameEngine;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class WarLogDisplay {
     private GameEngine gameEngine;
 
     /* JADX INFO: renamed from: b */
-    private KoolPaint paint;
+    private Paint paint;
 
     /* JADX INFO: renamed from: c */
     private ArrayList<WarLogEntry> entries = new ArrayList();
@@ -27,11 +27,11 @@ public class WarLogDisplay {
     }
 
     public void a() {
-        this.paint = new KoolPaint();
+        this.paint = new Paint();
         this.paint.a(255, 255, 255, 255);
         this.paint.a(true);
         this.paint.c(true);
-        this.paint.a(KoolTypeface.a(KoolTypeface.c, 1));
+        this.paint.a(Typeface.a(Typeface.c, 1));
         this.gameEngine.updatePaintTextSize(this.paint, 14.0f);
     }
 

@@ -9,7 +9,7 @@ import com.corrodinggames.rts.gameFramework.effects.Effect;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.d.a.d */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/d/a/d.class */
@@ -70,7 +70,7 @@ class ArtilleryTurret extends TurretImplementation {
         projectileA.lifeTimer = 150.0f;
         projectileA.speed = 4.0f;
         projectileA.isSmallExplosion = true;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 80);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_BUTTON_3, 80);
         projectileA.textureType = (short) 2;
         projectileA.textureFrame = (short) 0;
         projectileA.renderScale = 0.9f;

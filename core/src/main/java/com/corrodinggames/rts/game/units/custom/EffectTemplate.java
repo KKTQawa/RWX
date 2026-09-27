@@ -10,9 +10,9 @@ import com.corrodinggames.rts.gameFramework.effects.*;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.IniFile;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
 
 import java.util.ArrayList;
 
@@ -68,10 +68,10 @@ public class EffectTemplate {
     public float scaleYFrom;
     public float alpha;
     public int color;
-    public KoolMultiplyAddColorFilter cachedMultiplyAddColorFilter;
+    public MultiplyAddColorFilter cachedMultiplyAddColorFilter;
     public float teamColorRatio;
     public boolean shadow;
-    public KoolCanvasBlendMode blendMode;
+    public GameCanvasBlendMode blendMode;
     public float imageAnchorY;
     public short drawLayer;
     public float fadeInTime;
@@ -294,14 +294,14 @@ public class EffectTemplate {
             }
             if (playerTeam != null) {
                 float f5 = 1.0f - this.teamColorRatio;
-                int iA = KoolArgbColor.a(effectCreateEffectInternal.startColor);
-                int iB = (int) (KoolArgbColor.b(effectCreateEffectInternal.startColor) * f5);
-                int iC = (int) (KoolArgbColor.c(effectCreateEffectInternal.startColor) * f5);
-                int iD = (int) (KoolArgbColor.d(effectCreateEffectInternal.startColor) * f5);
+                int iA = ArgbColor.a(effectCreateEffectInternal.startColor);
+                int iB = (int) (ArgbColor.b(effectCreateEffectInternal.startColor) * f5);
+                int iC = (int) (ArgbColor.c(effectCreateEffectInternal.startColor) * f5);
+                int iD = (int) (ArgbColor.d(effectCreateEffectInternal.startColor) * f5);
                 int teamColorArgb = playerTeam.getTeamColorArgb();
-                effectCreateEffectInternal.startColor = KoolArgbColor.a(iA, Utility.distance((int) (iB + (KoolArgbColor.b(teamColorArgb) * this.teamColorRatio)), 0, 255), Utility.distance((int) (iC + (KoolArgbColor.c(teamColorArgb) * this.teamColorRatio)), 0, 255), Utility.distance((int) (iD + (KoolArgbColor.d(teamColorArgb) * this.teamColorRatio)), 0, 255));
+                effectCreateEffectInternal.startColor = ArgbColor.a(iA, Utility.distance((int) (iB + (ArgbColor.b(teamColorArgb) * this.teamColorRatio)), 0, 255), Utility.distance((int) (iC + (ArgbColor.c(teamColorArgb) * this.teamColorRatio)), 0, 255), Utility.distance((int) (iD + (ArgbColor.d(teamColorArgb) * this.teamColorRatio)), 0, 255));
                 if (gameEngine.renderGraphicsEngine.backendCapabilities().getRequiresImageTintColorFilter()) {
-                    effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(effectCreateEffectInternal.startColor, 0);
+                    effectCreateEffectInternal.B = new MultiplyAddColorFilter(effectCreateEffectInternal.startColor, 0);
                 }
             }
         }
@@ -418,7 +418,7 @@ public class EffectTemplate {
         this.color = iniFile.getColorAsInt(str, "color", Integer.valueOf(this.color)).intValue();
         if (gameEngine.renderGraphicsEngine.backendCapabilities().getRequiresImageTintColorFilter()
                 && this.color != 0 && this.color != -1) {
-            this.cachedMultiplyAddColorFilter = new KoolMultiplyAddColorFilter(this.color, 0);
+            this.cachedMultiplyAddColorFilter = new MultiplyAddColorFilter(this.color, 0);
         }
         this.teamColorRatio = iniFile.getFloat(str, "teamColorRatio", Float.valueOf(this.teamColorRatio)).floatValue();
         if (this.teamColorRatio < 0.0f || this.teamColorRatio > 1.0f) {
@@ -429,7 +429,7 @@ public class EffectTemplate {
         if (blendModeName.equalsIgnoreCase("alpha")) {
             this.blendMode = null;
         } else if (blendModeName.equalsIgnoreCase("additive")) {
-            this.blendMode = KoolCanvasBlendMode.Add;
+            this.blendMode = GameCanvasBlendMode.Add;
         } else {
             throw new ConfigParseException("Unknown blendMode: " + blendModeName);
         }

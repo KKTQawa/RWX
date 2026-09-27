@@ -15,7 +15,7 @@ import com.corrodinggames.rts.gameFramework.audio.SoundEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.util.ArrayList;
 
@@ -181,11 +181,11 @@ public class AntiAirTurret extends TurretFactory {
         projectileA.speed = 0.3f;
         projectileA.targetSpeed = 6.0f;
         if (!this.isUpgraded) {
-            projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+            projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
             projectileA.damage = 60.0f;
             projectileA.lifeTimer = 220.0f;
         } else {
-            projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50, 50);
+            projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50, 50);
             projectileA.damage = 60.0f;
             projectileA.lifeTimer = 250.0f;
             projectileA.speed = 0.5f;

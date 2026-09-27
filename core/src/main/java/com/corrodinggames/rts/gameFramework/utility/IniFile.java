@@ -11,7 +11,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.local.Locale;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -612,7 +612,7 @@ public class IniFile {
             throw new RuntimeException("[" + str + "]" + str2 + ": Unknown color: ''");
         }
         try {
-            return Integer.valueOf(KoolArgbColor.a(string));
+            return Integer.valueOf(ArgbColor.a(string));
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("[" + str + "]" + str2 + ": Unknown color:" + string);
         }

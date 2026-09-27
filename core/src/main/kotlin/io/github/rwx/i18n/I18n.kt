@@ -1,6 +1,6 @@
 package io.github.rwx.i18n
 
-import java.util.*
+import java.util.Locale
 
 // Auto-generated file - Do not modify
 object I18n {
@@ -40,6 +40,137 @@ object I18n {
             ),
         )
 
+        object admin {
+            val addAiFailed = entry(
+                key = "battleroom.admin.addAiFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to add AI: {0}",
+                    "zh-CN" to "无法添加AI：{0}",
+                ),
+            )
+
+            val addAiRequires = entry(
+                key = "battleroom.admin.addAiRequires",
+                translations = linkedMapOf(
+                    "en" to "Add AI requires a hosted RW room",
+                    "zh-CN" to "添加AI需要已创建的RW房间",
+                ),
+            )
+
+            val applyOptionsFailed = entry(
+                key = "battleroom.admin.applyOptionsFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to apply options: {0}",
+                    "zh-CN" to "无法应用选项：{0}",
+                ),
+            )
+
+            val applyPlayerFailed = entry(
+                key = "battleroom.admin.applyPlayerFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to apply player config: {0}",
+                    "zh-CN" to "无法应用玩家设置：{0}",
+                ),
+            )
+
+            val chatFailed = entry(
+                key = "battleroom.admin.chatFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to send chat: {0}",
+                    "zh-CN" to "无法发送聊天：{0}",
+                ),
+            )
+
+            val chatRequires = entry(
+                key = "battleroom.admin.chatRequires",
+                translations = linkedMapOf(
+                    "en" to "Chat requires a hosted RW room",
+                    "zh-CN" to "聊天需要已创建的RW房间",
+                ),
+            )
+
+            val kick = entry(
+                key = "battleroom.admin.kick",
+                translations = linkedMapOf(
+                    "en" to "Kick",
+                    "zh-CN" to "踢出",
+                ),
+            )
+
+            val kickFailed = entry(
+                key = "battleroom.admin.kickFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to kick player: {0}",
+                    "zh-CN" to "无法踢出玩家：{0}",
+                ),
+            )
+
+            val optionsHint = entry(
+                key = "battleroom.admin.optionsHint",
+                translations = linkedMapOf(
+                    "en" to "Configure this battle room before starting.",
+                    "zh-CN" to "在开始前配置此战役室。",
+                ),
+            )
+
+            val optionsRequires = entry(
+                key = "battleroom.admin.optionsRequires",
+                translations = linkedMapOf(
+                    "en" to "Game options require a hosted RW room",
+                    "zh-CN" to "游戏选项需要已创建的RW房间",
+                ),
+            )
+
+            val playerHint = entry(
+                key = "battleroom.admin.playerHint",
+                translations = linkedMapOf(
+                    "en" to "Set spawn point and ally team.",
+                    "zh-CN" to "设置出生点和盟友队伍。",
+                ),
+            )
+
+            val playerRequires = entry(
+                key = "battleroom.admin.playerRequires",
+                translations = linkedMapOf(
+                    "en" to "Player config requires a hosted RW room",
+                    "zh-CN" to "玩家设置需要已创建的RW房间",
+                ),
+            )
+
+            val playerTitle = entry(
+                key = "battleroom.admin.playerTitle",
+                translations = linkedMapOf(
+                    "en" to "Player Config",
+                    "zh-CN" to "玩家设置",
+                ),
+            )
+
+            val removeAi = entry(
+                key = "battleroom.admin.removeAi",
+                translations = linkedMapOf(
+                    "en" to "Remove AI",
+                    "zh-CN" to "移除AI",
+                ),
+            )
+
+            val setTeamsFailed = entry(
+                key = "battleroom.admin.setTeamsFailed",
+                translations = linkedMapOf(
+                    "en" to "Unable to set teams: {0}",
+                    "zh-CN" to "无法设置队伍：{0}",
+                ),
+            )
+
+            val setTeamsRequires = entry(
+                key = "battleroom.admin.setTeamsRequires",
+                translations = linkedMapOf(
+                    "en" to "Set Teams requires a hosted RW room",
+                    "zh-CN" to "设置队伍需要已创建的RW房间",
+                ),
+            )
+
+        }
+
         val changeTeam = entry(
             key = "battleroom.changeTeam",
             translations = linkedMapOf(
@@ -71,6 +202,25 @@ object I18n {
                 "zh-CN" to "暂无消息",
             ),
         )
+
+        object flag {
+            val mods = entry(
+                key = "battleroom.flag.mods",
+                translations = linkedMapOf(
+                    "en" to "Mods enabled",
+                    "zh-CN" to "已启用模组",
+                ),
+            )
+
+            val password = entry(
+                key = "battleroom.flag.password",
+                translations = linkedMapOf(
+                    "en" to "Password required",
+                    "zh-CN" to "需要密码",
+                ),
+            )
+
+        }
 
         object heading {
             val name = entry(
@@ -115,13 +265,477 @@ object I18n {
             ),
         )
 
-        val options = entry(
-            key = "battleroom.options",
+        val noPlayers = entry(
+            key = "battleroom.noPlayers",
             translations = linkedMapOf(
-                "en" to "Game Options",
-                "zh-CN" to "游戏选项",
+                "en" to "No players",
+                "zh-CN" to "暂无玩家",
             ),
         )
+
+        object options : I18nNode(
+            entry(
+                key = "battleroom.options",
+                translations = linkedMapOf(
+                    "en" to "Game Options",
+                    "zh-CN" to "游戏选项",
+                ),
+            )
+        ) {
+            object ai {
+                val easy = entry(
+                    key = "battleroom.options.ai.easy",
+                    translations = linkedMapOf(
+                        "en" to "Easy",
+                        "zh-CN" to "简单",
+                    ),
+                )
+
+                val hard = entry(
+                    key = "battleroom.options.ai.hard",
+                    translations = linkedMapOf(
+                        "en" to "Hard",
+                        "zh-CN" to "困难",
+                    ),
+                )
+
+                val impossible = entry(
+                    key = "battleroom.options.ai.impossible",
+                    translations = linkedMapOf(
+                        "en" to "Impossible",
+                        "zh-CN" to "不可能",
+                    ),
+                )
+
+                val medium = entry(
+                    key = "battleroom.options.ai.medium",
+                    translations = linkedMapOf(
+                        "en" to "Medium",
+                        "zh-CN" to "中等",
+                    ),
+                )
+
+                val veryEasy = entry(
+                    key = "battleroom.options.ai.veryEasy",
+                    translations = linkedMapOf(
+                        "en" to "Very Easy",
+                        "zh-CN" to "非常简单",
+                    ),
+                )
+
+                val veryHard = entry(
+                    key = "battleroom.options.ai.veryHard",
+                    translations = linkedMapOf(
+                        "en" to "Very Hard",
+                        "zh-CN" to "非常困难",
+                    ),
+                )
+
+            }
+
+            val aiDifficulty = entry(
+                key = "battleroom.options.aiDifficulty",
+                translations = linkedMapOf(
+                    "en" to "AI difficulty",
+                    "zh-CN" to "AI难度",
+                ),
+            )
+
+            val auto = entry(
+                key = "battleroom.options.auto",
+                translations = linkedMapOf(
+                    "en" to "Auto",
+                    "zh-CN" to "自动",
+                ),
+            )
+
+            object compat {
+                val originalBlocked = entry(
+                    key = "battleroom.options.compat.originalBlocked",
+                    translations = linkedMapOf(
+                        "en" to "Original multiplayer blocked",
+                        "zh-CN" to "原版多人游戏已禁用",
+                    ),
+                )
+
+                val p2pEnabled = entry(
+                    key = "battleroom.options.compat.p2pEnabled",
+                    translations = linkedMapOf(
+                        "en" to "RWX P2P enabled",
+                        "zh-CN" to "RWX P2P已启用",
+                    ),
+                )
+
+                val singlePlayer = entry(
+                    key = "battleroom.options.compat.singlePlayer",
+                    translations = linkedMapOf(
+                        "en" to "Single-player",
+                        "zh-CN" to "单人游戏",
+                    ),
+                )
+
+            }
+
+            object detail {
+                val fixedAlly = entry(
+                    key = "battleroom.options.detail.fixedAlly",
+                    translations = linkedMapOf(
+                        "en" to "Fixed ally teams",
+                        "zh-CN" to "固定盟友队伍",
+                    ),
+                )
+
+                val fog = entry(
+                    key = "battleroom.options.detail.fog",
+                    translations = linkedMapOf(
+                        "en" to "Fog: {0}",
+                        "zh-CN" to "雾效：{0}",
+                    ),
+                )
+
+                val income = entry(
+                    key = "battleroom.options.detail.income",
+                    translations = linkedMapOf(
+                        "en" to "{0}X income",
+                        "zh-CN" to "{0}倍收入",
+                    ),
+                )
+
+                val noNukes = entry(
+                    key = "battleroom.options.detail.noNukes",
+                    translations = linkedMapOf(
+                        "en" to "No nukes",
+                        "zh-CN" to "禁用核武器",
+                    ),
+                )
+
+                val requiredMods = entry(
+                    key = "battleroom.options.detail.requiredMods",
+                    translations = linkedMapOf(
+                        "en" to "Required mods: {0}",
+                        "zh-CN" to "需要模组：{0}",
+                    ),
+                )
+
+                val roomLocked = entry(
+                    key = "battleroom.options.detail.roomLocked",
+                    translations = linkedMapOf(
+                        "en" to "Room locked",
+                        "zh-CN" to "房间已锁定",
+                    ),
+                )
+
+                val sharedControl = entry(
+                    key = "battleroom.options.detail.sharedControl",
+                    translations = linkedMapOf(
+                        "en" to "Shared control: On",
+                        "zh-CN" to "共享控制：开",
+                    ),
+                )
+
+                val startingCredits = entry(
+                    key = "battleroom.options.detail.startingCredits",
+                    translations = linkedMapOf(
+                        "en" to "Starting Credits: {0}",
+                        "zh-CN" to "初始资金：{0}",
+                    ),
+                )
+
+                val startingUnits = entry(
+                    key = "battleroom.options.detail.startingUnits",
+                    translations = linkedMapOf(
+                        "en" to "Starting Units: {0}",
+                        "zh-CN" to "初始单位：{0}",
+                    ),
+                )
+
+            }
+
+            object fog : I18nNode(
+                entry(
+                    key = "battleroom.options.fog",
+                    translations = linkedMapOf(
+                        "en" to "Fog",
+                        "zh-CN" to "雾效",
+                    ),
+                )
+            ) {
+                val basic = entry(
+                    key = "battleroom.options.fog.basic",
+                    translations = linkedMapOf(
+                        "en" to "Basic",
+                        "zh-CN" to "基础",
+                    ),
+                )
+
+                val los = entry(
+                    key = "battleroom.options.fog.los",
+                    translations = linkedMapOf(
+                        "en" to "Line of Sight",
+                        "zh-CN" to "视线",
+                    ),
+                )
+
+                val none = entry(
+                    key = "battleroom.options.fog.none",
+                    translations = linkedMapOf(
+                        "en" to "No fog",
+                        "zh-CN" to "无",
+                    ),
+                )
+
+            }
+
+            val income = entry(
+                key = "battleroom.options.income",
+                translations = linkedMapOf(
+                    "en" to "Income",
+                    "zh-CN" to "收入",
+                ),
+            )
+
+            val maxPlayers = entry(
+                key = "battleroom.options.maxPlayers",
+                translations = linkedMapOf(
+                    "en" to "Max players",
+                    "zh-CN" to "最大玩家数",
+                ),
+            )
+
+            val overrideAiDifficulty = entry(
+                key = "battleroom.options.overrideAiDifficulty",
+                translations = linkedMapOf(
+                    "en" to "AI difficulty override",
+                    "zh-CN" to "AI难度覆盖",
+                ),
+            )
+
+            val overrideStartingUnits = entry(
+                key = "battleroom.options.overrideStartingUnits",
+                translations = linkedMapOf(
+                    "en" to "Starting units override",
+                    "zh-CN" to "初始单位覆盖",
+                ),
+            )
+
+            val revealedMap = entry(
+                key = "battleroom.options.revealedMap",
+                translations = linkedMapOf(
+                    "en" to "Revealed Map",
+                    "zh-CN" to "显示全图",
+                ),
+            )
+
+            val serverFallback = entry(
+                key = "battleroom.options.serverFallback",
+                translations = linkedMapOf(
+                    "en" to "server",
+                    "zh-CN" to "服务器",
+                ),
+            )
+
+            val spawnPoint = entry(
+                key = "battleroom.options.spawnPoint",
+                translations = linkedMapOf(
+                    "en" to "Spawn point",
+                    "zh-CN" to "出生点",
+                ),
+            )
+
+            val startingCredits = entry(
+                key = "battleroom.options.startingCredits",
+                translations = linkedMapOf(
+                    "en" to "Starting credits",
+                    "zh-CN" to "初始资金",
+                ),
+            )
+
+            val startingUnits = entry(
+                key = "battleroom.options.startingUnits",
+                translations = linkedMapOf(
+                    "en" to "Starting units",
+                    "zh-CN" to "初始单位",
+                ),
+            )
+
+            object team {
+                val allVs2 = entry(
+                    key = "battleroom.options.team.allVs2",
+                    translations = linkedMapOf(
+                        "en" to "All vs 2 (survival)",
+                        "zh-CN" to "全体对2（生存）",
+                    ),
+                )
+
+                val allVsAI = entry(
+                    key = "battleroom.options.team.allVsAI",
+                    translations = linkedMapOf(
+                        "en" to "All vs AI",
+                        "zh-CN" to "全体对AI",
+                    ),
+                )
+
+                val ffa = entry(
+                    key = "battleroom.options.team.ffa",
+                    translations = linkedMapOf(
+                        "en" to "FFA",
+                        "zh-CN" to "自由混战",
+                    ),
+                )
+
+                val noChange = entry(
+                    key = "battleroom.options.team.noChange",
+                    translations = linkedMapOf(
+                        "en" to "No change",
+                        "zh-CN" to "不变",
+                    ),
+                )
+
+                val random = entry(
+                    key = "battleroom.options.team.random",
+                    translations = linkedMapOf(
+                        "en" to "Random Team",
+                        "zh-CN" to "随机队伍",
+                    ),
+                )
+
+                val sides2 = entry(
+                    key = "battleroom.options.team.sides2",
+                    translations = linkedMapOf(
+                        "en" to "2 Sides",
+                        "zh-CN" to "2方",
+                    ),
+                )
+
+                val sides3 = entry(
+                    key = "battleroom.options.team.sides3",
+                    translations = linkedMapOf(
+                        "en" to "3 Sides",
+                        "zh-CN" to "3方",
+                    ),
+                )
+
+                val spectators = entry(
+                    key = "battleroom.options.team.spectators",
+                    translations = linkedMapOf(
+                        "en" to "Spectators",
+                        "zh-CN" to "旁观",
+                    ),
+                )
+
+            }
+
+            val teamLayout = entry(
+                key = "battleroom.options.teamLayout",
+                translations = linkedMapOf(
+                    "en" to "Team layout",
+                    "zh-CN" to "队伍布局",
+                ),
+            )
+
+            object toggle {
+                val allowSpectators = entry(
+                    key = "battleroom.options.toggle.allowSpectators",
+                    translations = linkedMapOf(
+                        "en" to "Allow spectators",
+                        "zh-CN" to "允许旁观",
+                    ),
+                )
+
+                val fixedAlly = entry(
+                    key = "battleroom.options.toggle.fixedAlly",
+                    translations = linkedMapOf(
+                        "en" to "Fixed ally teams",
+                        "zh-CN" to "固定盟友队伍",
+                    ),
+                )
+
+                val lockRoom = entry(
+                    key = "battleroom.options.toggle.lockRoom",
+                    translations = linkedMapOf(
+                        "en" to "Lock room (no new players)",
+                        "zh-CN" to "锁定房间（禁止新玩家）",
+                    ),
+                )
+
+                val noNukes = entry(
+                    key = "battleroom.options.toggle.noNukes",
+                    translations = linkedMapOf(
+                        "en" to "No nukes",
+                        "zh-CN" to "禁用核武器",
+                    ),
+                )
+
+                val sharedControl = entry(
+                    key = "battleroom.options.toggle.sharedControl",
+                    translations = linkedMapOf(
+                        "en" to "Shared control",
+                        "zh-CN" to "共享控制",
+                    ),
+                )
+
+                val teamLock = entry(
+                    key = "battleroom.options.toggle.teamLock",
+                    translations = linkedMapOf(
+                        "en" to "Team lock",
+                        "zh-CN" to "锁定队伍",
+                    ),
+                )
+
+            }
+
+            object units {
+                val custom = entry(
+                    key = "battleroom.options.units.custom",
+                    translations = linkedMapOf(
+                        "en" to "Custom",
+                        "zh-CN" to "自定义",
+                    ),
+                )
+
+                val engineers3 = entry(
+                    key = "battleroom.options.units.engineers3",
+                    translations = linkedMapOf(
+                        "en" to "3 Engineers",
+                        "zh-CN" to "3个工程师",
+                    ),
+                )
+
+                val engineersNoCC = entry(
+                    key = "battleroom.options.units.engineersNoCC",
+                    translations = linkedMapOf(
+                        "en" to "3 Engineers (No Command Center)",
+                        "zh-CN" to "3个工程师（无指挥中心）",
+                    ),
+                )
+
+                val normal = entry(
+                    key = "battleroom.options.units.normal",
+                    translations = linkedMapOf(
+                        "en" to "Normal (1 builder)",
+                        "zh-CN" to "标准（1个建造者）",
+                    ),
+                )
+
+                val smallArmy = entry(
+                    key = "battleroom.options.units.smallArmy",
+                    translations = linkedMapOf(
+                        "en" to "Small Army",
+                        "zh-CN" to "小型军队",
+                    ),
+                )
+
+                val spider = entry(
+                    key = "battleroom.options.units.spider",
+                    translations = linkedMapOf(
+                        "en" to "Experimental Spider",
+                        "zh-CN" to "实验型蜘蛛",
+                    ),
+                )
+
+            }
+
+        }
 
         val players = entry(
             key = "battleroom.players",
@@ -136,14 +750,6 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Ready",
                 "zh-CN" to "已准备",
-            ),
-        )
-
-        val selectMap = entry(
-            key = "battleroom.selectMap",
-            translations = linkedMapOf(
-                "en" to "Select Map",
-                "zh-CN" to "选择地图",
             ),
         )
 
@@ -179,6 +785,49 @@ object I18n {
             ),
         )
 
+        object status {
+            val ai = entry(
+                key = "battleroom.status.ai",
+                translations = linkedMapOf(
+                    "en" to "AI",
+                    "zh-CN" to "AI",
+                ),
+            )
+
+            val notReady = entry(
+                key = "battleroom.status.notReady",
+                translations = linkedMapOf(
+                    "en" to "Not ready",
+                    "zh-CN" to "未准备",
+                ),
+            )
+
+            val ready = entry(
+                key = "battleroom.status.ready",
+                translations = linkedMapOf(
+                    "en" to "Ready",
+                    "zh-CN" to "已准备",
+                ),
+            )
+
+            val spectator = entry(
+                key = "battleroom.status.spectator",
+                translations = linkedMapOf(
+                    "en" to "Spectator",
+                    "zh-CN" to "旁观",
+                ),
+            )
+
+            val you = entry(
+                key = "battleroom.status.you",
+                translations = linkedMapOf(
+                    "en" to "You",
+                    "zh-CN" to "你",
+                ),
+            )
+
+        }
+
         val title = entry(
             key = "battleroom.title",
             translations = linkedMapOf(
@@ -192,6 +841,14 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Unable to start game: {0}",
                 "zh-CN" to "无法开始游戏：{0}",
+            ),
+        )
+
+        val unavailable = entry(
+            key = "battleroom.unavailable",
+            translations = linkedMapOf(
+                "en" to "Room unavailable",
+                "zh-CN" to "房间不可用",
             ),
         )
 
@@ -254,6 +911,14 @@ object I18n {
             ),
         )
 
+        val noPreview = entry(
+            key = "common.noPreview",
+            translations = linkedMapOf(
+                "en" to "No preview",
+                "zh-CN" to "无预览",
+            ),
+        )
+
         val ok = entry(
             key = "common.ok",
             translations = linkedMapOf(
@@ -270,11 +935,424 @@ object I18n {
             ),
         )
 
+        val retry = entry(
+            key = "common.retry",
+            translations = linkedMapOf(
+                "en" to "Retry",
+                "zh-CN" to "重试",
+            ),
+        )
+
         val save = entry(
             key = "common.save",
             translations = linkedMapOf(
                 "en" to "Save",
                 "zh-CN" to "保存",
+            ),
+        )
+
+        val unknown = entry(
+            key = "common.unknown",
+            translations = linkedMapOf(
+                "en" to "Unknown",
+                "zh-CN" to "未知",
+            ),
+        )
+
+    }
+
+    object gamestart {
+        val message = entry(
+            key = "gamestart.message",
+            translations = linkedMapOf(
+                "en" to "A game is already running. Start a new game or continue the current game?",
+                "zh-CN" to "已有游戏正在运行。开始新游戏或继续当前游戏？",
+            ),
+        )
+
+        val startNew = entry(
+            key = "gamestart.startNew",
+            translations = linkedMapOf(
+                "en" to "Start New",
+                "zh-CN" to "开始新游戏",
+            ),
+        )
+
+        val title = entry(
+            key = "gamestart.title",
+            translations = linkedMapOf(
+                "en" to "Game in progress",
+                "zh-CN" to "游戏正在进行",
+            ),
+        )
+
+    }
+
+    object ingame {
+        object chat {
+            val empty = entry(
+                key = "ingame.chat.empty",
+                translations = linkedMapOf(
+                    "en" to "No chat messages yet.",
+                    "zh-CN" to "暂无聊天消息。",
+                ),
+            )
+
+            val hint = entry(
+                key = "ingame.chat.hint",
+                translations = linkedMapOf(
+                    "en" to "Message",
+                    "zh-CN" to "消息",
+                ),
+            )
+
+            val teamChat = entry(
+                key = "ingame.chat.teamChat",
+                translations = linkedMapOf(
+                    "en" to "Team Chat",
+                    "zh-CN" to "队伍聊天",
+                ),
+            )
+
+        }
+
+        object exit {
+            val message = entry(
+                key = "ingame.exit.message",
+                translations = linkedMapOf(
+                    "en" to "Are you sure you want to exit this game?",
+                    "zh-CN" to "确定要退出本局游戏吗？",
+                ),
+            )
+
+        }
+
+        object export {
+            val hint = entry(
+                key = "ingame.export.hint",
+                translations = linkedMapOf(
+                    "en" to "Map name",
+                    "zh-CN" to "地图名",
+                ),
+            )
+
+            val message = entry(
+                key = "ingame.export.message",
+                translations = linkedMapOf(
+                    "en" to "Enter a name to export the map as.",
+                    "zh-CN" to "输入导出地图名称。",
+                ),
+            )
+
+            val title = entry(
+                key = "ingame.export.title",
+                translations = linkedMapOf(
+                    "en" to "Export Map",
+                    "zh-CN" to "导出地图",
+                ),
+            )
+
+        }
+
+        object map {
+            val current = entry(
+                key = "ingame.map.current",
+                translations = linkedMapOf(
+                    "en" to "Current",
+                    "zh-CN" to "当前",
+                ),
+            )
+
+            val message = entry(
+                key = "ingame.map.message",
+                translations = linkedMapOf(
+                    "en" to "Select a linked map.",
+                    "zh-CN" to "选择要切换的关联地图。",
+                ),
+            )
+
+            val missing = entry(
+                key = "ingame.map.missing",
+                translations = linkedMapOf(
+                    "en" to "Linked map missing: {0}",
+                    "zh-CN" to "关联地图缺失：{0}",
+                ),
+            )
+
+            val noActive = entry(
+                key = "ingame.map.noActive",
+                translations = linkedMapOf(
+                    "en" to "No active map",
+                    "zh-CN" to "当前没有地图",
+                ),
+            )
+
+            val noLinked = entry(
+                key = "ingame.map.noLinked",
+                translations = linkedMapOf(
+                    "en" to "No linked maps",
+                    "zh-CN" to "没有关联地图",
+                ),
+            )
+
+            val notFound = entry(
+                key = "ingame.map.notFound",
+                translations = linkedMapOf(
+                    "en" to "Map not found: {0}",
+                    "zh-CN" to "未找到地图：{0}",
+                ),
+            )
+
+            val select = entry(
+                key = "ingame.map.select",
+                translations = linkedMapOf(
+                    "en" to "Select",
+                    "zh-CN" to "选择",
+                ),
+            )
+
+            val sim = entry(
+                key = "ingame.map.sim",
+                translations = linkedMapOf(
+                    "en" to "Sim: {0}",
+                    "zh-CN" to "模拟：{0}",
+                ),
+            )
+
+            val title = entry(
+                key = "ingame.map.title",
+                translations = linkedMapOf(
+                    "en" to "RWX Maps",
+                    "zh-CN" to "RWX地图",
+                ),
+            )
+
+            val unavailable = entry(
+                key = "ingame.map.unavailable",
+                translations = linkedMapOf(
+                    "en" to "This map is simulated by {0}.",
+                    "zh-CN" to "此地图正由{0}模拟。",
+                ),
+            )
+
+        }
+
+        object players {
+            val empty = entry(
+                key = "ingame.players.empty",
+                translations = linkedMapOf(
+                    "en" to "No multiplayer players found.",
+                    "zh-CN" to "未找到多人玩家。",
+                ),
+            )
+
+        }
+
+        object save {
+            val hint = entry(
+                key = "ingame.save.hint",
+                translations = linkedMapOf(
+                    "en" to "Save name",
+                    "zh-CN" to "存档名",
+                ),
+            )
+
+            val message = entry(
+                key = "ingame.save.message",
+                translations = linkedMapOf(
+                    "en" to "Enter a name to save the game under.",
+                    "zh-CN" to "输入存档名称。",
+                ),
+            )
+
+            val title = entry(
+                key = "ingame.save.title",
+                translations = linkedMapOf(
+                    "en" to "Save Game",
+                    "zh-CN" to "保存游戏",
+                ),
+            )
+
+        }
+
+        object toast {
+            val portalSent = entry(
+                key = "ingame.toast.portalSent",
+                translations = linkedMapOf(
+                    "en" to "RWX portal transfer sent",
+                    "zh-CN" to "RWX传送门传送已发送",
+                ),
+            )
+
+            val transferred = entry(
+                key = "ingame.toast.transferred",
+                translations = linkedMapOf(
+                    "en" to "Unit transferred to {0}",
+                    "zh-CN" to "单位已传送至{0}",
+                ),
+            )
+
+        }
+
+    }
+
+    object levelselect {
+        object compatibility {
+            val p2p = entry(
+                key = "levelselect.compatibility.p2p",
+                translations = linkedMapOf(
+                    "en" to "RWX P2P",
+                    "zh-CN" to "RWX联机",
+                ),
+            )
+
+            val singlePlayer = entry(
+                key = "levelselect.compatibility.singlePlayer",
+                translations = linkedMapOf(
+                    "en" to "Single-player",
+                    "zh-CN" to "单人",
+                ),
+            )
+
+        }
+
+        val emptyNoMatch = entry(
+            key = "levelselect.emptyNoMatch",
+            translations = linkedMapOf(
+                "en" to "No maps match the current filter",
+                "zh-CN" to "没有符合筛选条件的地图",
+            ),
+        )
+
+        val emptySavedGames = entry(
+            key = "levelselect.emptySavedGames",
+            translations = linkedMapOf(
+                "en" to "No saved games found",
+                "zh-CN" to "未找到存档",
+            ),
+        )
+
+        object filter {
+            val all = entry(
+                key = "levelselect.filter.all",
+                translations = linkedMapOf(
+                    "en" to "All maps",
+                    "zh-CN" to "全部地图",
+                ),
+            )
+
+            val mapType = entry(
+                key = "levelselect.filter.mapType",
+                translations = linkedMapOf(
+                    "en" to "Map Type",
+                    "zh-CN" to "地图类型",
+                ),
+            )
+
+            val rwxModes = entry(
+                key = "levelselect.filter.rwxModes",
+                translations = linkedMapOf(
+                    "en" to "RWX modes",
+                    "zh-CN" to "RWX模式",
+                ),
+            )
+
+        }
+
+        val loadError = entry(
+            key = "levelselect.loadError",
+            translations = linkedMapOf(
+                "en" to "Unable to load maps",
+                "zh-CN" to "无法加载地图",
+            ),
+        )
+
+        object mode {
+            val areaControl = entry(
+                key = "levelselect.mode.areaControl",
+                translations = linkedMapOf(
+                    "en" to "Area Control",
+                    "zh-CN" to "区域控制",
+                ),
+            )
+
+            val mapLinks = entry(
+                key = "levelselect.mode.mapLinks",
+                translations = linkedMapOf(
+                    "en" to "Linked Maps",
+                    "zh-CN" to "关联地图",
+                ),
+            )
+
+        }
+
+        val players = entry(
+            key = "levelselect.players",
+            translations = linkedMapOf(
+                "en" to "Players",
+                "zh-CN" to "玩家数",
+            ),
+        )
+
+        val scenario = entry(
+            key = "levelselect.scenario",
+            translations = linkedMapOf(
+                "en" to "Scenario",
+                "zh-CN" to "战役关",
+            ),
+        )
+
+        val searchHint = entry(
+            key = "levelselect.searchHint",
+            translations = linkedMapOf(
+                "en" to "Map name",
+                "zh-CN" to "地图名",
+            ),
+        )
+
+        object sort {
+            val default = entry(
+                key = "levelselect.sort.default",
+                translations = linkedMapOf(
+                    "en" to "Default",
+                    "zh-CN" to "默认",
+                ),
+            )
+
+            val name = entry(
+                key = "levelselect.sort.name",
+                translations = linkedMapOf(
+                    "en" to "Name",
+                    "zh-CN" to "名称",
+                ),
+            )
+
+            val players = entry(
+                key = "levelselect.sort.players",
+                translations = linkedMapOf(
+                    "en" to "Players",
+                    "zh-CN" to "玩家数",
+                ),
+            )
+
+            val title = entry(
+                key = "levelselect.sort.title",
+                translations = linkedMapOf(
+                    "en" to "Sort",
+                    "zh-CN" to "排序",
+                ),
+            )
+
+        }
+
+    }
+
+    object loading {
+        val loading = entry(
+            key = "loading.loading",
+            translations = linkedMapOf(
+                "en" to "Loading...",
+                "zh-CN" to "正在加载...",
             ),
         )
 
@@ -454,6 +1532,25 @@ object I18n {
 
     }
 
+    object mapload {
+        val message = entry(
+            key = "mapload.message",
+            translations = linkedMapOf(
+                "en" to "Unable to load the selected map.",
+                "zh-CN" to "无法加载所选地图。",
+            ),
+        )
+
+        val title = entry(
+            key = "mapload.title",
+            translations = linkedMapOf(
+                "en" to "Map Load Error",
+                "zh-CN" to "地图加载错误",
+            ),
+        )
+
+    }
+
     object modWindow {
         val back = entry(
             key = "modWindow.back",
@@ -481,6 +1578,41 @@ object I18n {
 
     }
 
+    object modimport {
+        val chooseFile = entry(
+            key = "modimport.chooseFile",
+            translations = linkedMapOf(
+                "en" to "Choose file",
+                "zh-CN" to "选择文件",
+            ),
+        )
+
+        val chooseTitle = entry(
+            key = "modimport.chooseTitle",
+            translations = linkedMapOf(
+                "en" to "Choose a mod file or directory",
+                "zh-CN" to "选择模组文件或目录",
+            ),
+        )
+
+        val message = entry(
+            key = "modimport.message",
+            translations = linkedMapOf(
+                "en" to "Enter a mod, asset key, author trust certificate, or license path.",
+                "zh-CN" to "输入模组、资产密钥、作者信任证书或许可证路径。",
+            ),
+        )
+
+        val title = entry(
+            key = "modimport.title",
+            translations = linkedMapOf(
+                "en" to "Import Mod",
+                "zh-CN" to "导入模组",
+            ),
+        )
+
+    }
+
     object mods {
         val apply = entry(
             key = "mods.apply",
@@ -498,13 +1630,24 @@ object I18n {
             ),
         )
 
-        val delete = entry(
-            key = "mods.delete",
-            translations = linkedMapOf(
-                "en" to "Delete",
-                "zh-CN" to "删除",
-            ),
-        )
+        object delete : I18nNode(
+            entry(
+                key = "mods.delete",
+                translations = linkedMapOf(
+                    "en" to "Delete",
+                    "zh-CN" to "删除",
+                ),
+            )
+        ) {
+            val failed = entry(
+                key = "mods.delete.failed",
+                translations = linkedMapOf(
+                    "en" to "Unable to delete mod",
+                    "zh-CN" to "无法删除模组",
+                ),
+            )
+
+        }
 
         val description = entry(
             key = "mods.description",
@@ -594,21 +1737,48 @@ object I18n {
             ),
         )
 
-        val ramUsed = entry(
-            key = "mods.ramUsed",
-            translations = linkedMapOf(
-                "en" to "RAM: {0}",
-                "zh-CN" to "RAM: {0}",
-            ),
-        )
+        object reload : I18nNode(
+            entry(
+                key = "mods.reload",
+                translations = linkedMapOf(
+                    "en" to "Reload",
+                    "zh-CN" to "重新加载",
+                ),
+            )
+        ) {
+            val done = entry(
+                key = "mods.reload.done",
+                translations = linkedMapOf(
+                    "en" to "Mods reloaded",
+                    "zh-CN" to "模组已重载",
+                ),
+            )
 
-        val reload = entry(
-            key = "mods.reload",
-            translations = linkedMapOf(
-                "en" to "Reload",
-                "zh-CN" to "重新加载",
-            ),
-        )
+            val failed = entry(
+                key = "mods.reload.failed",
+                translations = linkedMapOf(
+                    "en" to "Unable to reload mods: {0}",
+                    "zh-CN" to "无法重载模组：{0}",
+                ),
+            )
+
+            val message = entry(
+                key = "mods.reload.message",
+                translations = linkedMapOf(
+                    "en" to "Loading custom unit data",
+                    "zh-CN" to "正在加载自定义单位数据",
+                ),
+            )
+
+            val title = entry(
+                key = "mods.reload.title",
+                translations = linkedMapOf(
+                    "en" to "Reloading Mods",
+                    "zh-CN" to "正在重载模组",
+                ),
+            )
+
+        }
 
         val title = entry(
             key = "mods.title",
@@ -634,6 +1804,65 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Connecting to {0}...",
                 "zh-CN" to "正在连接到 {0}...",
+            ),
+        )
+
+        object heading {
+            val host = entry(
+                key = "multiplayer.heading.host",
+                translations = linkedMapOf(
+                    "en" to "Host",
+                    "zh-CN" to "房主",
+                ),
+            )
+
+            val map = entry(
+                key = "multiplayer.heading.map",
+                translations = linkedMapOf(
+                    "en" to "Map",
+                    "zh-CN" to "地图",
+                ),
+            )
+
+            val players = entry(
+                key = "multiplayer.heading.players",
+                translations = linkedMapOf(
+                    "en" to "Players",
+                    "zh-CN" to "人数",
+                ),
+            )
+
+            val state = entry(
+                key = "multiplayer.heading.state",
+                translations = linkedMapOf(
+                    "en" to "State",
+                    "zh-CN" to "状态",
+                ),
+            )
+
+            val transport = entry(
+                key = "multiplayer.heading.transport",
+                translations = linkedMapOf(
+                    "en" to "Transport",
+                    "zh-CN" to "传输",
+                ),
+            )
+
+            val version = entry(
+                key = "multiplayer.heading.version",
+                translations = linkedMapOf(
+                    "en" to "Version",
+                    "zh-CN" to "版本",
+                ),
+            )
+
+        }
+
+        val hostFailed = entry(
+            key = "multiplayer.hostFailed",
+            translations = linkedMapOf(
+                "en" to "Unable to host game: {0}",
+                "zh-CN" to "无法创建游戏：{0}",
             ),
         )
 
@@ -765,6 +1994,14 @@ object I18n {
             ),
         )
 
+        val lobbySettings = entry(
+            key = "multiplayer.lobbySettings",
+            translations = linkedMapOf(
+                "en" to "Multiplayer lobby settings",
+                "zh-CN" to "多人房间大厅设置",
+            ),
+        )
+
         val missingJoinInput = entry(
             key = "multiplayer.missingJoinInput",
             translations = linkedMapOf(
@@ -778,6 +2015,14 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Player name cannot be empty",
                 "zh-CN" to "玩家名称不能为空",
+            ),
+        )
+
+        val noRooms = entry(
+            key = "multiplayer.noRooms",
+            translations = linkedMapOf(
+                "en" to "No rooms found",
+                "zh-CN" to "未找到房间",
             ),
         )
 
@@ -880,6 +2125,25 @@ object I18n {
             ),
         )
 
+        val searching = entry(
+            key = "multiplayer.searching",
+            translations = linkedMapOf(
+                "en" to "Searching for rooms...",
+                "zh-CN" to "正在搜索房间...",
+            ),
+        )
+
+        object state {
+            val unknown = entry(
+                key = "multiplayer.state.unknown",
+                translations = linkedMapOf(
+                    "en" to "Unknown",
+                    "zh-CN" to "未知",
+                ),
+            )
+
+        }
+
         val unableToJoinP2pRoom = entry(
             key = "multiplayer.unableToJoinP2pRoom",
             translations = linkedMapOf(
@@ -893,6 +2157,14 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Unable to join server",
                 "zh-CN" to "无法加入服务器",
+            ),
+        )
+
+        val unknown = entry(
+            key = "multiplayer.unknown",
+            translations = linkedMapOf(
+                "en" to "Unknown",
+                "zh-CN" to "未知",
             ),
         )
 
@@ -1129,11 +2401,11 @@ object I18n {
             ),
         )
 
-        val resourceType = entry(
-            key = "resourcebrowser.resourceType",
+        val refresh = entry(
+            key = "resourcebrowser.refresh",
             translations = linkedMapOf(
-                "en" to "Resource Type",
-                "zh-CN" to "资源类型",
+                "en" to "Refresh",
+                "zh-CN" to "刷新",
             ),
         )
 
@@ -1608,6 +2880,73 @@ object I18n {
 
         }
 
+        object keybindings {
+            val clear = entry(
+                key = "settings.keybindings.clear",
+                translations = linkedMapOf(
+                    "en" to "Clear",
+                    "zh-CN" to "清除",
+                ),
+            )
+
+            val conflict = entry(
+                key = "settings.keybindings.conflict",
+                translations = linkedMapOf(
+                    "en" to "Conflicts with another binding",
+                    "zh-CN" to "与其他绑定冲突",
+                ),
+            )
+
+            val hint = entry(
+                key = "settings.keybindings.hint",
+                translations = linkedMapOf(
+                    "en" to "Select a binding, then press a key. Ctrl / Shift / Alt are supported; Escape cancels.",
+                    "zh-CN" to "选择绑定后按键，支持 Ctrl / Shift / Alt，按 Esc 取消。",
+                ),
+            )
+
+            val none = entry(
+                key = "settings.keybindings.none",
+                translations = linkedMapOf(
+                    "en" to "None",
+                    "zh-CN" to "无",
+                ),
+            )
+
+            val pressKey = entry(
+                key = "settings.keybindings.pressKey",
+                translations = linkedMapOf(
+                    "en" to "Press a key…",
+                    "zh-CN" to "按键",
+                ),
+            )
+
+            val pressKeyFor = entry(
+                key = "settings.keybindings.pressKeyFor",
+                translations = linkedMapOf(
+                    "en" to "Press a key for {0}",
+                    "zh-CN" to "为{0}按键",
+                ),
+            )
+
+            val primary = entry(
+                key = "settings.keybindings.primary",
+                translations = linkedMapOf(
+                    "en" to "Primary",
+                    "zh-CN" to "主要",
+                ),
+            )
+
+            val secondary = entry(
+                key = "settings.keybindings.secondary",
+                translations = linkedMapOf(
+                    "en" to "Secondary",
+                    "zh-CN" to "次要",
+                ),
+            )
+
+        }
+
         object language {
             val label = entry(
                 key = "settings.language.label",
@@ -1619,20 +2958,63 @@ object I18n {
 
         }
 
+        object pages {
+            val audio = entry(
+                key = "settings.pages.audio",
+                translations = linkedMapOf(
+                    "en" to "Audio",
+                    "zh-CN" to "音频",
+                ),
+            )
+
+            val display = entry(
+                key = "settings.pages.display",
+                translations = linkedMapOf(
+                    "en" to "Display & Input",
+                    "zh-CN" to "显示与输入",
+                ),
+            )
+
+            val gameplay = entry(
+                key = "settings.pages.gameplay",
+                translations = linkedMapOf(
+                    "en" to "Gameplay",
+                    "zh-CN" to "玩法",
+                ),
+            )
+
+            val keybindings = entry(
+                key = "settings.pages.keybindings",
+                translations = linkedMapOf(
+                    "en" to "Key Bindings",
+                    "zh-CN" to "按键绑定",
+                ),
+            )
+
+            val theme = entry(
+                key = "settings.pages.theme",
+                translations = linkedMapOf(
+                    "en" to "Theme",
+                    "zh-CN" to "主题",
+                ),
+            )
+
+        }
+
+        val saved = entry(
+            key = "settings.saved",
+            translations = linkedMapOf(
+                "en" to "Settings saved",
+                "zh-CN" to "设置已保存",
+            ),
+        )
+
         object storage {
             val `external` = entry(
                 key = "settings.storage.external",
                 translations = linkedMapOf(
                     "en" to "External storage",
                     "zh-CN" to "外部存储",
-                ),
-            )
-
-            val externalShort = entry(
-                key = "settings.storage.externalShort",
-                translations = linkedMapOf(
-                    "en" to "External",
-                    "zh-CN" to "外部",
                 ),
             )
 
@@ -1644,19 +3026,38 @@ object I18n {
                 ),
             )
 
-            val internalShort = entry(
-                key = "settings.storage.internalShort",
-                translations = linkedMapOf(
-                    "en" to "Internal",
-                    "zh-CN" to "内部",
-                ),
-            )
-
             val location = entry(
                 key = "settings.storage.location",
                 translations = linkedMapOf(
                     "en" to "Storage location",
                     "zh-CN" to "存储位置",
+                ),
+            )
+
+            val restartRequired = entry(
+                key = "settings.storage.restartRequired",
+                translations = linkedMapOf(
+                    "en" to "Changing storage takes effect after restart.",
+                    "zh-CN" to "切换存储位置后需重启生效。",
+                ),
+            )
+
+        }
+
+        object theme {
+            val enableAnimations = entry(
+                key = "settings.theme.enableAnimations",
+                translations = linkedMapOf(
+                    "en" to "Enable animations",
+                    "zh-CN" to "启用动画",
+                ),
+            )
+
+            val overlayOpacity = entry(
+                key = "settings.theme.overlayOpacity",
+                translations = linkedMapOf(
+                    "en" to "UI background opacity",
+                    "zh-CN" to "界面背景不透明度",
                 ),
             )
 
@@ -1726,97 +3127,6 @@ object I18n {
             translations = linkedMapOf(
                 "en" to "Survival",
                 "zh-CN" to "生存",
-            ),
-        )
-
-    }
-
-    object techtree {
-        val available = entry(
-            key = "techtree.available",
-            translations = linkedMapOf(
-                "en" to "Available",
-                "zh-CN" to "可解锁",
-            ),
-        )
-
-        val back = entry(
-            key = "techtree.back",
-            translations = linkedMapOf(
-                "en" to "Back to Game",
-                "zh-CN" to "返回游戏",
-            ),
-        )
-
-        val costAndPrerequisites = entry(
-            key = "techtree.costAndPrerequisites",
-            translations = linkedMapOf(
-                "en" to "Cost: {0}  Prerequisites: {1}",
-                "zh-CN" to "费用：{0}  前置：{1}",
-            ),
-        )
-
-        val empty = entry(
-            key = "techtree.empty",
-            translations = linkedMapOf(
-                "en" to "No technology trees are registered",
-                "zh-CN" to "暂无已注册科技树",
-            ),
-        )
-
-        val locked = entry(
-            key = "techtree.locked",
-            translations = linkedMapOf(
-                "en" to "Locked",
-                "zh-CN" to "未解锁",
-            ),
-        )
-
-        val requirementsMissing = entry(
-            key = "techtree.requirementsMissing",
-            translations = linkedMapOf(
-                "en" to "Requirements Missing",
-                "zh-CN" to "条件不足",
-            ),
-        )
-
-        val syncHint = entry(
-            key = "techtree.syncHint",
-            translations = linkedMapOf(
-                "en" to "Unlock status is synchronized for the team and saved with the game.",
-                "zh-CN" to "解锁状态与队伍同步，并会写入存档。",
-            ),
-        )
-
-        val title = entry(
-            key = "techtree.title",
-            translations = linkedMapOf(
-                "en" to "Technology Tree",
-                "zh-CN" to "科技树",
-            ),
-        )
-
-        val unlock = entry(
-            key = "techtree.unlock",
-            translations = linkedMapOf(
-                "en" to "Unlock",
-                "zh-CN" to "解锁",
-            ),
-        )
-
-        val unlockRequested = entry(
-            key = "techtree.unlockRequested",
-            translations = linkedMapOf(
-                "en" to "Unlock requested: {0}",
-                "zh-CN" to "已发送解锁请求：{0}",
-            ),
-        )
-
-        val unlocked = entry(
-            key = "techtree.unlocked",
-            translations = linkedMapOf(
-                "en" to "Unlocked",
-                "zh-CN" to "已解锁",
             ),
         )
 

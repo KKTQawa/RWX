@@ -6,7 +6,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.file.FileHelper;
 import com.corrodinggames.rts.gameFramework.utility.AssetInputStream;
 import io.github.rwx.mod.asset.JvmModAssetBridge;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -126,7 +126,7 @@ public class ShaderProgram {
         return false;
     }
 
-    public boolean a(KoolPaint paint, Texture texture) {
+    public boolean a(Paint paint, Texture texture) {
         return false;
     }
 

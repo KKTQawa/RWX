@@ -6,7 +6,7 @@ import com.corrodinggames.rts.game.units.UnitTypeEnum;
 import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.d.a.e */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/d/a/e.class */
@@ -65,7 +65,7 @@ class FlamethrowerTurret extends TurretImplementation {
         projectileA.speed = 3.0f + ((this.turretFactory.turretType * 13) % 2.0f);
         projectileA.playsHitSound = false;
         projectileA.spawnEmitterOnHit = true;
-        projectileA.color = KoolArgbColor.a(105, 255, 255, 255);
+        projectileA.color = ArgbColor.a(105, 255, 255, 255);
         projectileA.textureFrame = (short) 3;
         projectileA.renderScale = 1.3f;
         PointF pointFA = baseUnit.a(pointFC.x, pointFC.y, projectileA.speed, projectileA.lifeTimer, getAttackRange());

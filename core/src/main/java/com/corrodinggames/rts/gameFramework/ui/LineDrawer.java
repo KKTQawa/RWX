@@ -3,7 +3,7 @@ package com.corrodinggames.rts.gameFramework.ui;
 import com.corrodinggames.rts.gameFramework.graphics.DrawTimeOperation;
 import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.s */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/s.class */
@@ -13,7 +13,7 @@ public class LineDrawer implements DrawTimeOperation {
     float[] vertices;
 
     /* JADX INFO: renamed from: c */
-    KoolPaint paint;
+    Paint paint;
 
     /* JADX INFO: renamed from: d */
     int capacity;
@@ -27,7 +27,7 @@ public class LineDrawer implements DrawTimeOperation {
     /* JADX INFO: renamed from: f */
     private final RectF pointRect = new RectF();
 
-    LineDrawer(int i, KoolPaint paint) {
+    LineDrawer(int i, Paint paint) {
         this.capacity = i;
         this.vertices = new float[i * 2];
         this.paint = paint;

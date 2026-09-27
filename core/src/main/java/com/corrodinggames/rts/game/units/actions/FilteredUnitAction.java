@@ -7,8 +7,8 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.ui.TextRenderQueue;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.a.h */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/a/h.class */
@@ -165,7 +165,7 @@ public class FilteredUnitAction extends AbstractUnitAction {
 
     @Override // com.corrodinggames.rts.game.units.actions.AbstractUnitAction
     /* JADX INFO: renamed from: a */
-    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, KoolPaint paint, KoolPaint paint2) {
+    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, Paint paint, Paint paint2) {
         this.a.renderDisplayText(baseUnit, textRenderQueue, paint, paint2);
     }
 
@@ -222,7 +222,7 @@ public class FilteredUnitAction extends AbstractUnitAction {
         super(abstractUnitAction.getActionId());
         this.b = ActionFilter.emptyActionFilter;
         this.d = 0;
-        this.f = KoolArgbColor.a(255, 50, 50, 50);
+        this.f = ArgbColor.a(255, 50, 50, 50);
         this.a = abstractUnitAction;
         this.b = actionFilter;
         setActionId(this.a.getActionId());

@@ -18,6 +18,7 @@ internal class ActionRouter(
     private val platformBridge: PlatformBridge?,
     private val settingsRepository: GameSettingsRepository,
     private val settingsModel: SettingsModel,
+    private val refreshScreen: () -> Unit,
     private val levelSelectSceneHost: LevelSelectSceneHost,
     private val battleRoomController: BattleRoomController,
     private val multiplayerLobbyController: MultiplayerLobbyController,
@@ -123,6 +124,7 @@ internal class ActionRouter(
     }
 
     private fun handleReplaySelectAction(action: ReplaySelectAction) {
+        if (navigator.current != AppScreen.ReplaySelect) return
         when (val outcome = ReplaySelectNavigation.outcomeFor(action)) {
             is ReplaySelectOutcome.Navigate -> navigator.navigateTo(outcome.screen)
             is ReplaySelectOutcome.WatchReplay -> enterReplay(outcome.replay)
@@ -132,9 +134,12 @@ internal class ActionRouter(
     private fun handleSettingsAction(action: SettingsAction) {
         when (val outcome = SettingsNavigation.outcomeFor(action)) {
             SettingsOutcome.PreviewChanges -> settingsRepository.applyLive(settingsModel)
-            SettingsOutcome.ApplyChanges -> settingsRepository.saveFrom(settingsModel)
-            is SettingsOutcome.Navigate -> {
+            SettingsOutcome.ApplyChanges -> {
                 settingsRepository.saveFrom(settingsModel)
+                refreshScreen()
+            }
+            is SettingsOutcome.Navigate -> {
+                settingsRepository.discardChanges(settingsModel)
                 navigator.navigateTo(outcome.screen)
             }
         }
@@ -144,7 +149,8 @@ internal class ActionRouter(
         if (!shouldHandleBattleRoomAction(navigator.current)) {
             return
         }
-        when (val outcome = BattleRoomNavigation.outcomeFor(action)) {
+        val allowedAction = battleRoomController.resolveCurrentAction(action) ?: return
+        when (val outcome = BattleRoomNavigation.outcomeFor(allowedAction)) {
             BattleRoomOutcome.Close -> {
                 clearPendingStartState()
                 navigator.navigateTo(battleRoomController.closeRoom())
@@ -191,12 +197,15 @@ internal class ActionRouter(
             is MultiplayerOutcome.SwitchLobby -> multiplayerLobbyController.switchLobby(outcome.lobbyKind)
             MultiplayerOutcome.HostGameRequested -> multiplayerConnectionController.hostMultiplayerGame()
             MultiplayerOutcome.JoinDirectRequested -> multiplayerConnectionController.showJoinDirectDialog()
+            is MultiplayerOutcome.JoinDirectWithAddressRequested ->
+                multiplayerConnectionController.joinDirectWithAddress(outcome.address)
             MultiplayerOutcome.ConfigurePlayerNameRequested -> multiplayerConnectionController.showPlayerNameDialog()
             is MultiplayerOutcome.JoinRoom -> multiplayerConnectionController.showJoinRoomDialog(outcome.roomId)
         }
     }
 
     private fun handleModsAction(action: ModsAction) {
+        if (navigator.current != AppScreen.Mods) return
         when (val outcome = ModsNavigation.outcomeFor(action)) {
             is ModsOutcome.Navigate -> {
                 modsController.applyChangesAndRefresh()
@@ -213,13 +222,17 @@ internal class ActionRouter(
 
             is ModsOutcome.ToggleEnable -> modsController.toggleEnabledAndRefresh(outcome.modId)
             is ModsOutcome.Delete -> modsController.deleteAndRefresh(outcome.modId)
+            is ModsOutcome.ShowDescription -> modsController.showDetails(outcome.modId, error = false)
+            is ModsOutcome.ShowError -> modsController.showDetails(outcome.modId, error = true)
         }
     }
 
     private fun handleResourceBrowserAction(action: ResourceBrowserAction) {
+        if (navigator.current != AppScreen.ResourceBrowser) return
         when (val outcome = ResourceBrowserNavigation.outcomeFor(action)) {
             is ResourceBrowserOutcome.Navigate -> navigator.navigateTo(outcome.screen)
             ResourceBrowserOutcome.SearchRequested -> resourceBrowserController.requestSearch(append = false)
+            is ResourceBrowserOutcome.SearchSubmitted -> resourceBrowserController.submitSearch(outcome.keyword)
             ResourceBrowserOutcome.LoadMoreRequested -> resourceBrowserController.requestSearch(append = true)
             is ResourceBrowserOutcome.TypeSelected -> resourceBrowserController.selectType(outcome.type)
             is ResourceBrowserOutcome.OpenLink -> {

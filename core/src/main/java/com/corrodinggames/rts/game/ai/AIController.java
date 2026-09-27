@@ -25,8 +25,8 @@ import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import com.corrodinggames.rts.gameFramework.utility.UnitList;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -186,7 +186,7 @@ public final class AIController extends PlayerTeam {
     PointF debugPoint;
 
     /* JADX INFO: renamed from: bp */
-    KoolPaint debugPaint;
+    Paint debugPaint;
 
     /* JADX INFO: renamed from: bq */
     ArrayList debugMessages;
@@ -810,9 +810,9 @@ public final class AIController extends PlayerTeam {
         this.attackRangeMultiplier = 4200 + (this.teamId * 5);
         this.globalTimer = 3500 + (this.teamId * 5);
         this.attackTimersUpdateCounter = 7500 + (this.teamId * 5);
-        this.debugPaint = new KoolPaint();
-        this.debugPaint.b(KoolArgbColor.a(0, 255, 0));
-        this.debugPaint.a(KoolPaint.Style.STROKE);
+        this.debugPaint = new Paint();
+        this.debugPaint.b(ArgbColor.a(0, 255, 0));
+        this.debugPaint.a(Paint.Style.STROKE);
         this.debugPaint.a(true);
         gameEngine.setScaledTextSize(this.debugPaint, 14.0f);
         initializeBuildStrategies();
@@ -1106,14 +1106,14 @@ public final class AIController extends PlayerTeam {
                 }
                 String str = VariableScope.nullOrMissingString;
                 float f2 = (baseUnit.posY - gameEngine.viewpointYSnapped) - 60.0f;
-                this.debugPaint.b(KoolArgbColor.a(0, 255, 0));
+                this.debugPaint.b(ArgbColor.a(0, 255, 0));
                 if (baseUnit instanceof CommandCenter) {
                     f2 -= 80.0f;
                     str = ((((((str + "Base ( Team:" + this.teamId + " )") + "\nuseTransportsOnThisMap: " + isAttackBlockedByConditions()) + "\nuseHoverTransportsOnThisMap: " + shouldLaunchAttack()) + "\nattackingCount: " + this.unitProductionTimer) + "\ndefendingCount: " + this.unitCount) + "\nnumOfUnitsNeedingTransport: " + countUnitsInGroups()) + "\ntransport: " + this.activeTransporterGroupCount;
                     if (isAggressiveFlagEnabled()) {
                         str = str + "\nTurtling: true";
                     }
-                    this.debugPaint.b(KoolArgbColor.a(255, 255, 255));
+                    this.debugPaint.b(ArgbColor.a(255, 255, 255));
                 }
                 if (str.length() != 0) {
                     for (String str2 : str.split("\n")) {
@@ -1138,7 +1138,7 @@ public final class AIController extends PlayerTeam {
             if (gameEngine.bufferedVisibleWorldRect.b((int) (aIStrategyNode.posX - aIStrategyNode.radius), (int) (aIStrategyNode.posY - aIStrategyNode.radius), (int) (aIStrategyNode.posX + aIStrategyNode.radius), (int) (aIStrategyNode.posY + aIStrategyNode.radius))) {
                 this.debugPaint.b(getTeamColorArgb());
                 gameEngine.renderGraphicsEngine.a(aIStrategyNode.posX - gameEngine.viewpointXSnapped, aIStrategyNode.posY - gameEngine.viewpointYSnapped, aIStrategyNode.radius + 2.0f, this.debugPaint);
-                int iA = KoolArgbColor.a(0, 255, 0);
+                int iA = ArgbColor.a(0, 255, 0);
                 String str3 = VariableScope.nullOrMissingString + "\n" + aIStrategyNode.getClass().getSimpleName() + " ( Team:" + this.teamId + " )";
                 float f5 = aIStrategyNode.posY - gameEngine.viewpointYSnapped;
                 if (aIStrategyNode instanceof BaseZone) {

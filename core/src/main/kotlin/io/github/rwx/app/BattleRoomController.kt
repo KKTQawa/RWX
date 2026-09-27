@@ -10,6 +10,7 @@ import io.github.rwx.session.BattleRoomSnapshot
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
 import io.github.rwx.ui.host.BattleRoomSceneHost
+import io.github.rwx.ui.model.BattleRoomAction
 import io.github.rwx.ui.model.BattleRoomChatLine
 import io.github.rwx.ui.model.LevelSelectMode
 import io.github.rwx.ui.model.LevelSelectViewModelFactory
@@ -21,6 +22,9 @@ internal class BattleRoomController(
     private val sceneHost: BattleRoomSceneHost,
     initialMode: LevelSelectMode,
     private val showUnavailableDialog: (String) -> Unit,
+    private val previewForMap: (String, LevelSelectMode) -> String? = { path, mode ->
+        levelSelectViewModelFactory.create(mode).mapEntry(path).previewAssetPath
+    },
 ) {
     var selectedMode: LevelSelectMode = initialMode
     var selectedMap: MapEntry? = null
@@ -28,6 +32,26 @@ internal class BattleRoomController(
     var isSelectingMapForBattleRoom: Boolean = false
     private var returnScreen: AppScreen = AppScreen.LevelSelect
     private val chatLines = mutableListOf<BattleRoomChatLine>()
+    private var roomOpen = false
+    private var previewMapPath: String? = null
+    private var cachedPreview: String? = null
+
+    private fun beginRoom() {
+        roomOpen = true
+        isSelectingMapForBattleRoom = false
+        chatLines.clear()
+        previewMapPath = null
+        cachedPreview = null
+        sceneHost.beginRoom()
+    }
+
+    /** Recheck authority against the live session before the router executes a UI action. */
+    fun resolveCurrentAction(action: BattleRoomAction): BattleRoomAction? {
+        if (action == BattleRoomAction.Back) return action
+        updateFromNetwork(refreshNetworkStatus = false)
+        val state = sceneHost.snapshot()
+        return state.resolveAction(state.revision, action)
+    }
 
     fun selectedOrDefaultMap(): MapEntry? =
         selectedMap ?: selectDefaultMap()
@@ -52,6 +76,7 @@ internal class BattleRoomController(
         sandbox: Boolean = false,
         returnScreen: AppScreen = AppScreen.LevelSelect,
     ) {
+        beginRoom()
         selectedMap = map
         this.returnScreen = returnScreen
         val newConfig = BattleRoomLaunchConfig(
@@ -70,10 +95,10 @@ internal class BattleRoomController(
                 revealedMap = true
             }
         }
-        chatLines.clear()
         if (prepareLocalSinglePlayerRoom(newConfig)) {
             return
         }
+        roomOpen = false
         showUnavailableDialog("Unable to prepare battle room")
     }
 
@@ -94,6 +119,11 @@ internal class BattleRoomController(
 
     fun closeRoom(): AppScreen {
         isSelectingMapForBattleRoom = false
+        roomOpen = false
+        chatLines.clear()
+        previewMapPath = null
+        cachedPreview = null
+        sceneHost.beginRoom()
         gameSession.leaveBattleRoom()
         return returnScreen
     }
@@ -128,37 +158,61 @@ internal class BattleRoomController(
     }
 
     fun prepareHostRoom(map: MapEntry) {
-        chatLines.clear()
+        beginRoom()
         returnScreen = AppScreen.Multiplayer
         selectedMap = map
     }
 
     fun markJoinedRoomStarted() {
-        chatLines.clear()
+        beginRoom()
         returnScreen = AppScreen.Multiplayer
     }
 
-    fun updateConnectedRoom(snapshot: BattleRoomSnapshot?) {
-        snapshot
-            ?.let { sceneHost.updateRoom(it.toBattleRoomModel(previewFor(it), chatLines)) }
-            ?: updateFromNetwork()
+    fun updateConnectedRoom(snapshot: BattleRoomSnapshot?): Boolean {
+        if (!roomOpen) return false
+        if (snapshot != null) publishRoom(snapshot) else updateFromNetwork()
+        return sceneHost.snapshot().isAvailable
+    }
+
+    fun returnToRoom() {
+        val snapshot = currentSnapshot()
+        if (!roomOpen) {
+            beginRoom()
+            returnScreen = if (snapshot?.isNetworkMultiplayer == true) AppScreen.Multiplayer else AppScreen.LevelSelect
+        }
+        if (snapshot == null) sceneHost.markUnavailable() else publishRoom(snapshot)
     }
 
     fun updateFromNetwork(refreshNetworkStatus: Boolean = true) {
-        val snapshot = currentSnapshot(refreshNetworkStatus) ?: return
+        if (!roomOpen) return
+        val snapshot = currentSnapshot(refreshNetworkStatus)
+        if (snapshot == null) {
+            sceneHost.markUnavailable()
+        } else {
+            publishRoom(snapshot)
+        }
+    }
+
+    private fun publishRoom(snapshot: BattleRoomSnapshot) {
+        if (!roomOpen) return
         sceneHost.updateRoom(snapshot.toBattleRoomModel(previewFor(snapshot), chatLines))
     }
 
-    private fun previewFor(snapshot: BattleRoomSnapshot): String? =
-        selectedMap?.previewAssetPath
-            ?: snapshot.room.mapPath.takeIf { it.isNotBlank() }
-                ?.let { path ->
-                    runCatching {
-                        levelSelectViewModelFactory.create(selectedMode).mapEntry(path).previewAssetPath
-                    }.getOrNull()
-                }
+    private fun previewFor(snapshot: BattleRoomSnapshot): String? {
+        val path = snapshot.room.mapPath
+        if (snapshot.room.isSavedGame || path.isBlank()) return null
+        selectedMap?.takeIf { it.mapAssetPath == path }?.previewAssetPath?.let { return it }
+        // A remote map/preview may arrive after the first room snapshot. Cache successful
+        // lookups, but keep retrying a missing preview on the existing network refresh cadence.
+        if (previewMapPath != path || cachedPreview == null) {
+            previewMapPath = path
+            cachedPreview = runCatching { previewForMap(path, selectedMode) }.getOrNull()
+        }
+        return cachedPreview
+    }
 
     fun appendChat(text: String, teamColorIndex: Int = -1) {
+        if (!roomOpen) return
         val line = BattleRoomChatLine(text, teamColorIndex)
         chatLines += line
         sceneHost.appendChat(line)
@@ -168,11 +222,7 @@ internal class BattleRoomController(
         if (!gameSession.enterLocalBattleRoomLive(config)) {
             return false
         }
-        gameSession.currentBattleRoom()?.let { snapshot ->
-            sceneHost.updateRoom(
-                snapshot.toBattleRoomModel(previewFor(snapshot), chatLines),
-            )
-        }
+        gameSession.currentBattleRoom()?.let(::publishRoom)
         return true
     }
 

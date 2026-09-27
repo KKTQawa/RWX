@@ -9,7 +9,7 @@ import com.corrodinggames.rts.gameFramework.audio.SoundEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.d.a.g */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/d/a/g.class */
@@ -83,7 +83,7 @@ class GunTurretT3 extends TurretImplementation {
         projectileA.targetUnit = baseUnit;
         projectileA.lifeTimer = 60.0f;
         projectileA.speed = 9.0f;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 30, 30);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 30, 30);
         projectileA.damage = getAttackDamage(i);
         projectileA.textureFrame = (short) 5;
         projectileA.renderScale = 1.0f;

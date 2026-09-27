@@ -1,81 +1,85 @@
 package io.github.rwx.ui.host
 
 import com.corrodinggames.rts.gameFramework.GameEngine
-import de.fabmax.kool.modules.ui2.UiScene
-import de.fabmax.kool.modules.ui2.mutableStateListOf
-import de.fabmax.kool.modules.ui2.mutableStateOf
-import de.fabmax.kool.scene.Scene
-import de.fabmax.kool.util.FrontendScope
-import io.github.rwx.ui.component.*
+import io.github.rwx.i18n.I18n
 import io.github.rwx.ui.model.*
 import kotlinx.coroutines.*
 
 /**
- * Renders the Level Select screen in pure Kool DSL: a map-button list headed by the mode title,
- * with a Back button at the bottom. Cross-platform — uses only kool-core common APIs.
+ * Frontend-owned Level Select state. Compose renders this screen from [snapshot];
+ * map loading runs off the UI thread with a revision guard so stale results are dropped.
  */
 class LevelSelectSceneHost(
     private val model: SettingsModel = SettingsModel(),
     private val viewModelFactory: LevelSelectViewModelFactory,
     private val onAction: LevelSelectActionHandler = LevelSelectActionHandler {},
 ) {
-    private val maps = mutableStateListOf<MapEntry>()
-    private val modeTitle = mutableStateOf("")
-    private val currentMode = mutableStateOf(LevelSelectMode.Skirmish)
-    private val isLoading = mutableStateOf(false)
+    private val loadScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var closed = false
+    private val maps = mutableListOf<MapEntry>()
+    private var modeTitle: String = ""
+    private var currentMode: LevelSelectMode = LevelSelectMode.Skirmish
+    private var isLoading: Boolean = false
+    private var loadError: String? = null
     private var mapLoadJob: Job? = null
     private var mapLoadRevision: Long = 0L
 
     fun updateMaps(mode: LevelSelectMode) {
+        if (closed) return
         val revision = ++mapLoadRevision
         mapLoadJob?.cancel()
-        currentMode.value = mode
-        modeTitle.value = mode.label
-        isLoading.value = true
-        maps.clear()
+        currentMode = mode
+        modeTitle = mode.label
+        isLoading = true
+        loadError = null
+        synchronized(maps) { maps.clear() }
 
-        val viewModel = viewModelFactory.create(mode)
-        mapLoadJob = FrontendScope.launch {
+        mapLoadJob = loadScope.launch {
             try {
+                val viewModel = viewModelFactory.create(mode)
                 val entries = withContext(Dispatchers.IO) { viewModel.items() }
-                if (revision != mapLoadRevision) return@launch
-                maps.clear()
-                maps.addAll(entries)
+                if (closed || revision != mapLoadRevision) return@launch
+                synchronized(maps) {
+                    maps.clear()
+                    maps.addAll(entries)
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                GameEngine.log("Failed to load maps for ${mode.name}: ${error.message}")
-                if (revision == mapLoadRevision) {
-                    maps.clear()
+                if (!closed && revision == mapLoadRevision) {
+                    GameEngine.log("Failed to load maps for ${mode.name}: ${error.message}")
+                    synchronized(maps) { maps.clear() }
+                    loadError = I18n.levelselect.loadError()
                 }
             } finally {
-                if (revision == mapLoadRevision) {
-                    isLoading.value = false
+                if (!closed && revision == mapLoadRevision) {
+                    isLoading = false
                 }
             }
         }
     }
 
-    fun dispatch(action: LevelSelectAction) = onAction.onAction(action)
+    fun snapshot(): LevelSelectUiState = LevelSelectUiState(
+        revision = mapLoadRevision,
+        currentMode = currentMode,
+        maps = synchronized(maps) { maps.toList() },
+        isLoading = isLoading,
+        loadError = loadError,
+    )
 
-    fun createScene(): Scene = UiScene(LEVEL_SELECT_SCENE_NAME) {
-        addPanelSurface(PanelStyle.Menu, "level-select-panel", model) { theme ->
-            LevelSelectList(
-                model = LevelSelectListModel(
-                    title = modeTitle.use(),
-                    maps = maps.use(),
-                    currentMode = currentMode.use(),
-                    availableModes = LevelSelectMode.entries,
-                    isLoading = isLoading.use(),
-                ),
-                theme = theme,
-                actions = LevelSelectListActions(
-                    onMapSelected = { dispatch(LevelSelectAction.SelectMap(it)) },
-                    onModeSelected = { dispatch(LevelSelectAction.SelectMode(it)) },
-                    onBack = { dispatch(LevelSelectAction.Back) },
-                ),
-            )
-        }
+    fun dispatch(action: LevelSelectAction) { if (!closed) onAction.onAction(action) }
+
+    /** Retires this frontend owner; neither queued loads nor later actions can reopen it. */
+    fun close() {
+        if (closed) return
+        closed = true
+        mapLoadRevision++
+        mapLoadJob?.cancel()
+        mapLoadJob = null
+        loadScope.cancel()
+        synchronized(maps) { maps.clear() }
+        isLoading = false
+        loadError = null
     }
 
     companion object {

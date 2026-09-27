@@ -14,8 +14,8 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -178,7 +178,7 @@ public class Helicopter extends AirUnit {
         projectileA.lifeTimer = 30.0f;
         projectileA.speed = 8.0f;
         projectileA.hasExploded = false;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
         projectileA.isInstantHit = true;
         projectileA.playsHitSound = false;
         GameEngine gameEngine = GameEngine.getInstance();
@@ -251,7 +251,7 @@ public class Helicopter extends AirUnit {
             return false;
         }
         if (!this.isDead) {
-            KoolPaint paintAN = getRenderPaint();
+            Paint paintAN = getRenderPaint();
             GameEngine gameEngine = GameEngine.getInstance();
             this.s.a(0, 0, c.m(), c.l());
             float f3 = this.rotorPhase;

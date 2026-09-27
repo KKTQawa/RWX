@@ -7,6 +7,7 @@ import io.github.rwx.audio.AndroidMediaMusicFactory
 import io.github.rwx.di.androidModule
 import io.github.rwx.di.coreModule
 import io.github.rwx.mod.api.LogLevel
+import io.github.rwx.render.canvas.GameFontMetrics
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform.getKoin
@@ -17,6 +18,7 @@ class RwxApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        GameFontMetrics.install(AndroidGameFontMetrics)
 
         FileCrashReporter.get(
             crashFile = File(filesDir, CRASH_FILE_NAME),

@@ -1,7 +1,7 @@
 package com.corrodinggames.rts.gameFramework;
 
 import com.corrodinggames.rts.gameFramework.graphics.GamePaint;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.m */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/m.class */
@@ -11,7 +11,7 @@ class PaintSizeTracker {
     float textSize;
 
     /* JADX INFO: renamed from: b */
-    KoolPaint paint;
+    Paint paint;
 
     final /* synthetic */ GameEngine c;
 

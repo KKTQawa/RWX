@@ -1,6 +1,6 @@
 package io.github.rwx.ui.model
 
-import de.fabmax.kool.util.Color
+import io.github.rwx.ui.UiColor
 
 
 /** A single player slot row in the battle-room table. */
@@ -24,6 +24,10 @@ data class BattleRoomPlayer(
     val isReady: Boolean = true,
     val isAI: Boolean = false,
     val isLocal: Boolean = false,
+    /** Per-player starting-units override; null = use room default. */
+    val startingUnitsOverride: Int? = null,
+    /** Per-player AI-difficulty override; null = use room default. */
+    val aiDifficultyOverride: Int? = null,
 )
 
 /** The room map/info shown in the left panel. */
@@ -34,6 +38,7 @@ data class BattleRoomInfo(
     val mapPreviewAssetPath: String? = null,
     val rwxModeLabel: String? = null,
     val rwxCompatibilityLabel: String? = null,
+    val mapAssetPath: String? = null,
 )
 
 /**
@@ -51,7 +56,26 @@ data class BattleRoomModel(
     val players: List<BattleRoomPlayer>,
     val chatLines: List<BattleRoomChatLine>,
     val isHost: Boolean,
-)
+    val revision: Long = 0,
+    val mapRevision: Long = 0,
+    val isAvailable: Boolean = true,
+) {
+    fun canConfigurePlayer(playerId: String): Boolean = isAvailable && playerId.isNotBlank() &&
+        players.any { it.id == playerId && (isHost || it.isLocal) }
+
+    /** Background player/chat updates keep a room's identity; explicit room transitions invalidate actions. */
+    internal fun resolveAction(requestRevision: Long, action: BattleRoomAction): BattleRoomAction? {
+        if (requestRevision != revision) return null
+        if (action == BattleRoomAction.Back) return action
+        if (!isAvailable) return null
+        return when (action) {
+            BattleRoomAction.SelectMap, BattleRoomAction.OpenOptions, BattleRoomAction.Start, BattleRoomAction.AddAI -> action.takeIf { isHost }
+            is BattleRoomAction.SelectPlayer -> action.takeIf { canConfigurePlayer(it.playerId) }
+            is BattleRoomAction.SendChat -> action.message.trim().takeIf { it.isNotEmpty() }?.let { BattleRoomAction.SendChat(it) }
+            BattleRoomAction.Back -> action
+        }
+    }
+}
 
 data class BattleRoomActions(
     val onBack: () -> Unit,
@@ -114,16 +138,16 @@ object BattleRoomNavigation {
  * fallback so spectators and default-colored players keep the theme's text color.
  */
 object BattleRoomTeamColors {
-    private val palette: List<Color> = listOf(
-        Color("4caf50ff"), Color("e64545ff"), Color("5c8aedff"), Color("e2c541ff"),
-        Color("46c5c5ff"), Color("eef1f4ff"), Color("8a8f96ff"), Color("e667b0ff"),
-        Color("e8923cff"), Color("9b6bd0ff"),
+    private val palette: List<UiColor> = listOf(
+        UiColor("4caf50ff"), UiColor("e64545ff"), UiColor("5c8aedff"), UiColor("e2c541ff"),
+        UiColor("46c5c5ff"), UiColor("eef1f4ff"), UiColor("8a8f96ff"), UiColor("e667b0ff"),
+        UiColor("e8923cff"), UiColor("9b6bd0ff"),
     )
 
-    fun colorFor(index: Int, fallback: Color): Color = palette.getOrNull(index) ?: fallback
+    fun colorFor(index: Int, fallback: UiColor): UiColor = palette.getOrNull(index) ?: fallback
 }
 
-internal fun battleRoomChatColorIndexFor(line: BattleRoomChatLine, players: List<BattleRoomPlayer>): Int? {
+fun battleRoomChatColorIndexFor(line: BattleRoomChatLine, players: List<BattleRoomPlayer>): Int? {
     // Prefer the team color the engine attached to the message; fall back to matching the author
     // name against the current players (covers locally-echoed lines that carry no index).
     line.teamColorIndex.takeIf { it >= 0 }?.let { return it }

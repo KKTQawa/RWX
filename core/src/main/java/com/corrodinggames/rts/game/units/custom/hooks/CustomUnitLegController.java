@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.custom.b.h */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/custom/b/h.class */
@@ -20,7 +20,7 @@ public class CustomUnitLegController extends CustomUnitRenderHook {
     public static final CustomUnitRenderHook a = new CustomUnitLegController();
     static final Rect b = new Rect();
     static final RectF c = new RectF();
-    static final KoolPaint d = new KoolPaint();
+    static final Paint d = new Paint();
 
     public static void a(CustomUnit customUnit, float f, boolean z, boolean z2) {
         LegInstance[] legInstanceArr = customUnit.legInstances;
@@ -40,7 +40,7 @@ public class CustomUnitLegController extends CustomUnitRenderHook {
             customUnit.dv();
         }
         float maxHealth = customUnit.getRenderScale();
-        KoolPaint renderPaint = null;
+        Paint renderPaint = null;
         boolean z3 = gameEngine.shouldDrawUnitLegDetails || customUnit.isUnitParalyzed;
         for (int i2 = 0; i2 < legInstanceArr.length; i2++) {
             LegConfig legConfig = customUnitConfig.legConfig[i2];
@@ -51,7 +51,7 @@ public class CustomUnitLegController extends CustomUnitRenderHook {
                     if (renderPaint == null) {
                         renderPaint = customUnit.getRenderPaint();
                     }
-                    KoolPaint paint = renderPaint;
+                    Paint paint = renderPaint;
                     float fL = 1.0f;
                     if (f3 < -0.3f) {
                         fL = customUnit.getSubmergedRenderAlpha(f3) * 0.003921569f;

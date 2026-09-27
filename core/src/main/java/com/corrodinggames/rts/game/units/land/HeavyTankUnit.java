@@ -15,7 +15,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.f */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/f.class */
@@ -168,7 +168,7 @@ public class HeavyTankUnit extends LandUnit {
             PointF pointFK = getShadowOffsetForLevel(i);
             projectileA.trackOffsetX = pointFK.x;
             projectileA.trackOffsetY = pointFK.y;
-            projectileA.color = KoolArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 150, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 40);
+            projectileA.color = ArgbColor.a(SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_TERRESTRIAL_ANALOG, 150, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 40);
             projectileA.damage = q(i);
             projectileA.targetUnit = baseUnit;
             projectileA.lifeTimer = 60.0f;
@@ -185,7 +185,7 @@ public class HeavyTankUnit extends LandUnit {
         PointF pointFE2 = E(i);
         pointFE2.a(this.posX, this.posY);
         Projectile projectileA2 = Projectile.a(this, this.posX, this.posY);
-        projectileA2.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+        projectileA2.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
         projectileA2.damage = q(i);
         projectileA2.targetUnit = baseUnit;
         projectileA2.lifeTimer = 190.0f;

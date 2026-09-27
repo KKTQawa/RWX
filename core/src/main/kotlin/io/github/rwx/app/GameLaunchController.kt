@@ -2,7 +2,7 @@ package io.github.rwx.app
 
 import io.github.rwx.i18n.I18n
 import io.github.rwx.logger
-import io.github.rwx.render.canvas.KoolCanvasViewport
+import io.github.rwx.render.frame.GameViewport
 import io.github.rwx.session.BattleRoomLaunchConfig
 import io.github.rwx.session.GameSession
 import io.github.rwx.ui.AppScreen
@@ -17,7 +17,7 @@ internal class GameLaunchController(
     private val warmupController: WarmupController,
     private val pendingStartController: PendingStartController,
     private val dialogSceneHost: DialogSceneHost,
-    private val viewport: () -> KoolCanvasViewport,
+    private val viewport: () -> GameViewport,
     private val currentScreen: () -> AppScreen,
     private val navigateTo: (AppScreen) -> Unit,
 ) {
@@ -31,7 +31,7 @@ internal class GameLaunchController(
         val shouldDiscardExistingGame = shouldDiscardExistingGameForStart(
             startNew = startNew,
             hasLaunchConfig = launchConfig != null,
-            rendersIntoKoolCanvas = gameSession.rendersIntoKoolCanvas,
+            usesFrameCommandRendering = gameSession.usesFrameCommandRendering,
             canResume = gameSession.canResume(),
             canStartNewSessionInPlace = gameSession.canStartNewSessionInPlace,
         )
@@ -42,7 +42,7 @@ internal class GameLaunchController(
             pendingStartController.clear()
         } else {
             pendingStartController.set(mapPath, mapStartFailureReturnScreen(currentScreen()))
-            if (!gameSession.rendersIntoKoolCanvas) {
+            if (!gameSession.usesFrameCommandRendering) {
                 if (launchConfig != null) {
                     check(gameSession.prepareLocalBattleRoom(launchConfig)) {
                         "Game session rejected local battle room launch"
@@ -56,7 +56,7 @@ internal class GameLaunchController(
             } else {
                 gameSession.prepareMapAsync(mapPath, viewport())
             }
-            if (gameSession.rendersIntoKoolCanvas) {
+            if (gameSession.usesFrameCommandRendering) {
                 logger.info { "Entering RW game screen while map prepares: $mapPath (startNew=$startNew)" }
             }
         }
@@ -76,11 +76,11 @@ internal class GameLaunchController(
     fun showStartNewGameDialog(startNewAction: () -> Unit = { enterRwGame(startNew = true) }) {
         dialogSceneHost.show(
             Dialog(
-                title = "Game in progress",
-                message = "A game is already running. Start a new game or continue the current game?",
+                title = I18n.gamestart.title(),
+                message = I18n.gamestart.message(),
                 buttons = listOf(
-                    DialogButton("Start New") { startNewAction() },
-                    DialogButton("Continue") { resumeRwGame() },
+                    DialogButton(I18n.gamestart.startNew()) { startNewAction() },
+                    DialogButton(I18n.mainmenu.`continue`()) { resumeRwGame() },
                     DialogButton(I18n.common.cancel()),
                 ),
             ),

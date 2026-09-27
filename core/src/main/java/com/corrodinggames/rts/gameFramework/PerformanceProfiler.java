@@ -2,7 +2,7 @@ package com.corrodinggames.rts.gameFramework;
 
 import com.corrodinggames.rts.game.units.custom.logicBooleans.VariableScope;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.br */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/br.class */
@@ -16,7 +16,7 @@ public final class PerformanceProfiler {
     public int b = 0;
     public int d = 0;
     ProfilerData e = new ProfilerData(this);
-    KoolPaint f = new KoolPaint();
+    Paint f = new Paint();
     Rect g = new Rect();
     int h = -1;
 

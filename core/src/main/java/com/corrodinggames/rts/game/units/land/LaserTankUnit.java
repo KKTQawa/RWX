@@ -13,8 +13,8 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.k */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/k.class */
@@ -122,7 +122,7 @@ public class LaserTankUnit extends LandUnit {
         projectileA.persistsAfterExplosion = true;
         projectileA.isInstantHit = true;
         projectileA.isSmallExplosion = true;
-        projectileA.color = KoolArgbColor.a(80, 255, 0, 0);
+        projectileA.color = ArgbColor.a(80, 255, 0, 0);
         GameEngine gameEngine = GameEngine.getInstance();
         gameEngine.effectManager.createLightEffect(pointFE.x, pointFE.y, this.posZ, -1127220);
         gameEngine.effectManager.createFlameEffect(pointFE.x, pointFE.y, this.posZ, this.movementLevels[i].targetX);
@@ -199,7 +199,7 @@ public class LaserTankUnit extends LandUnit {
                 gameEngine.renderGraphicsEngine.i();
                 gameEngine.renderGraphicsEngine.b(pointFE.x - gameEngine.viewpointXSnapped, pointFE.y - gameEngine.viewpointYSnapped);
                 gameEngine.renderGraphicsEngine.a(fE, fE);
-                gameEngine.renderGraphicsEngine.a(d, 0.0f, 0.0f, (KoolPaint) null);
+                gameEngine.renderGraphicsEngine.a(d, 0.0f, 0.0f, (Paint) null);
                 gameEngine.renderGraphicsEngine.j();
                 return true;
             }

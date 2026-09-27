@@ -13,14 +13,14 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.d.i */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/d/i.class */
 public abstract class FactoryWithQueue extends BaseBuilding implements FactoryQueueInterface {
-    public static final KoolPaint y = new KoolPaint();
+    public static final Paint y = new Paint();
     /* JADX INFO: renamed from: z */
     FactoryQueueManager queueManager;
     Rect A;

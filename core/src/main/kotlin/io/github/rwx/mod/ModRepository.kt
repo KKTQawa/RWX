@@ -19,6 +19,8 @@ class ModRepository(
     private val preferenceStorage: PreferenceStorage,
 ) {
 
+    fun hasEnabledMods(): Boolean = liveModManager()?.mods?.any { !it.disabled } == true
+
     fun listMods(): List<ModEntry> {
         val manager = liveModManager() ?: return emptyList()
         if (manager.mods.isEmpty()) {

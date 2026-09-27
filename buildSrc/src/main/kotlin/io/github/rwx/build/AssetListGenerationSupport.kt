@@ -11,10 +11,7 @@ data class AssetListGeneration(
 )
 
 object AssetListGenerationSupport {
-    val runtimeAssetExcludes = listOf(
-        "font/NotoSansCJKsc-Regular.otf",
-        "font/ZenDots-Regular.ttf",
-    )
+    val runtimeAssetExcludes = emptyList<String>()
     private val assetListGenerationExcludes = listOf("assets.txt") + runtimeAssetExcludes
 
     fun register(project: Project): AssetListGeneration {

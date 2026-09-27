@@ -87,7 +87,7 @@ class AndroidPlatformStorage(context: Context) : PlatformStorage {
 
     private fun safPath(normalized: String): String? = runCatching {
         FileHelper.convertAbstractPath(normalized)
-    }.getOrNull()?.takeIf { it.contains(SAF_LINK_SUFFIX) }
+    }.getOrNull()?.takeIf { it.contains(SafPlatformBridge.SAF_LINK_SUFFIX) }
 
     private fun safExists(normalized: String): Boolean =
         safPath(normalized)?.let(SafPlatformBridge::exists) == true
@@ -97,8 +97,4 @@ class AndroidPlatformStorage(context: Context) : PlatformStorage {
 
     private fun safOpen(normalized: String): InputStream? =
         safPath(normalized)?.let(SafPlatformBridge::openInput)
-
-    private companion object {
-        const val SAF_LINK_SUFFIX = ".[saflink]"
-    }
 }

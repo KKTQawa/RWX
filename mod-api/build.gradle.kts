@@ -1,11 +1,12 @@
 plugins {
     id("java-library")
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.compose)
     `maven-publish`
 }
 
 dependencies {
-    api(libs.kool.core)
+    compileOnly(libs.compose.runtime)
 }
 
 val iniSpecSources = fileTree("src/main/kotlin/io/github/rwx/mod/api/specs") {

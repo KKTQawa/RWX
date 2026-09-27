@@ -16,7 +16,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.e */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/e.class */
@@ -111,7 +111,7 @@ public class HeavyHoverTank extends HoverLandUnit {
         PointF pointFK = getShadowOffsetForLevel(i);
         projectileA.trackOffsetX = pointFK.x;
         projectileA.trackOffsetY = pointFK.y;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 0, 50);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 0, 50);
         projectileA.damage = q(i);
         projectileA.targetUnit = baseUnit;
         projectileA.lifeTimer = 95.0f;

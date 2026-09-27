@@ -1,13 +1,10 @@
 package io.github.rwx.app
 
-import com.corrodinggames.rts.gameFramework.GameEngine
-import com.corrodinggames.rts.gameFramework.network.MasterServerClient
 import com.corrodinggames.rts.gameFramework.network.ServerInfo
+import io.github.rwx.i18n.I18n
 import io.github.rwx.logger
 import io.github.rwx.map.MapMetadata
-import io.github.rwx.p2p.P2PLobbyService
 import io.github.rwx.p2p.P2PRoomAdvertisement
-import io.github.rwx.ui.*
 import io.github.rwx.ui.host.MultiplayerSceneHost
 import io.github.rwx.ui.model.ModeLabel
 import io.github.rwx.ui.model.MultiplayerLobbyKind
@@ -15,142 +12,95 @@ import io.github.rwx.ui.model.MultiplayerRoomItem
 
 internal class MultiplayerLobbyController(
     private val sceneHost: MultiplayerSceneHost,
+    private val backend: MultiplayerLobbyBackend = EngineMultiplayerLobbyBackend,
 ) {
     var activeLobbyKind: MultiplayerLobbyKind = MultiplayerLobbyKind.Original
         private set
 
-    private var latestRooms: List<MultiplayerRoomItem> = emptyList()
-
-    fun roomById(roomId: String): MultiplayerRoomItem? =
-        latestRooms.firstOrNull { it.roomId == roomId }
+    fun roomById(roomId: String): MultiplayerRoomItem? {
+        val state = sceneHost.snapshot()
+        if (roomId.isBlank() || state.lobbyKind != activeLobbyKind || state.errorText != null) return null
+        return state.rooms.firstOrNull { it.roomId == roomId }
+    }
 
     fun requestRefresh() {
-        if (activeLobbyKind == MultiplayerLobbyKind.Original) {
-            requestOriginalRefresh()
-        } else {
-            requestP2PRefresh()
+        val kind = activeLobbyKind
+        sceneHost.beginRefresh(kind)
+        try {
+            val unavailable = backend.unavailableReason(kind)
+            if (unavailable != null) {
+                fail(kind, unavailable)
+                return
+            }
+            backend.requestRefresh(kind)
+            updateRooms(kind, isRefreshing = true)
+        } catch (error: Exception) {
+            reportFailure(kind, "refresh", error)
+        } catch (error: LinkageError) {
+            // An unavailable native transport must not cancel the frontend's coroutine scope.
+            reportFailure(kind, "refresh", error)
         }
     }
 
     fun switchLobby(lobbyKind: MultiplayerLobbyKind) {
-        if (activeLobbyKind == lobbyKind) {
-            updateActiveRooms()
-            return
-        }
+        // Selecting the active tab is not a new discovery attempt and must not hide an error.
+        if (activeLobbyKind == lobbyKind) return
         activeLobbyKind = lobbyKind
         requestRefresh()
     }
 
-    fun handleOriginalRoomListRefresh() {
-        if (activeLobbyKind == MultiplayerLobbyKind.Original) {
-            updateOriginalRooms()
-        }
-    }
+    fun handleOriginalRoomListRefresh() = updateRooms(MultiplayerLobbyKind.Original)
 
-    fun handleP2PRoomListRefresh() {
-        if (activeLobbyKind == MultiplayerLobbyKind.P2P) {
-            updateP2PRooms()
-        }
-    }
+    fun handleP2PRoomListRefresh() = updateRooms(MultiplayerLobbyKind.P2P)
 
-    private fun requestOriginalRefresh() {
-        val gameEngine = GameEngine.getInstance()
-        if (gameEngine?.networkEngine == null) {
-            updateOriginalRooms()
-            return
-        }
-        runCatching {
-            MasterServerClient.loadServerListAsync {
-                CoreUiEventQueue.requestOriginalRoomListRefresh()
+    private fun updateRooms(kind: MultiplayerLobbyKind, isRefreshing: Boolean = false) {
+        if (kind != activeLobbyKind) return
+        try {
+            val unavailable = backend.unavailableReason(kind)
+            if (unavailable != null) {
+                fail(kind, unavailable)
+                return
             }
-        }.onFailure { error ->
-            logger.warn(error) { "Original room refresh failed" }
+            val rooms = backend.readRooms(kind)
             sceneHost.updateRooms(
-                emptyList(),
-                "Original lobby unavailable: ${error.message ?: error.javaClass.simpleName}",
-                MultiplayerLobbyKind.Original,
+                rooms = rooms,
+                statusText = when {
+                    isRefreshing -> I18n.multiplayer.searching()
+                    rooms.isEmpty() -> I18n.multiplayer.noRooms()
+                    else -> ""
+                },
+                lobbyKind = kind,
+                isRefreshing = isRefreshing,
             )
-            return
-        }
-        updateOriginalRooms("Searching for rooms...")
-    }
-
-    private fun requestP2PRefresh() {
-        val lobby = P2PLobbyService.getInstance()
-        runCatching {
-            lobby.inLobby = true
-            lobby.startIfNeeded()
-            lobby.requestRefresh()
-        }.onFailure { error ->
-            logger.warn { "P2P room refresh failed: ${error.message}" }
-            sceneHost.updateRooms(
-                emptyList(),
-                "P2P unavailable: ${error.message ?: error.javaClass.simpleName}",
-                MultiplayerLobbyKind.P2P,
-            )
-            return
-        }
-        updateP2PRooms("Searching for rooms...")
-    }
-
-    private fun updateActiveRooms(statusText: String = "") {
-        when (activeLobbyKind) {
-            MultiplayerLobbyKind.Original -> updateOriginalRooms(statusText)
-            MultiplayerLobbyKind.P2P -> updateP2PRooms(statusText)
+        } catch (error: Exception) {
+            reportFailure(kind, "list read", error)
+        } catch (error: LinkageError) {
+            reportFailure(kind, "list read", error)
         }
     }
 
-    private fun updateP2PRooms(statusText: String = "") {
-        val rooms = P2PLobbyService.getInstance().getRooms().map(::p2pRoomToMultiplayerItem)
-        latestRooms = rooms
-        sceneHost.updateRooms(
-            rooms = rooms,
-            statusText = statusText.ifBlank { if (rooms.isEmpty()) "No rooms found" else "" },
-            lobbyKind = MultiplayerLobbyKind.P2P,
-        )
+    private fun reportFailure(kind: MultiplayerLobbyKind, operation: String, error: Throwable) {
+        logger.warn(error) { "${kind.label} room $operation failed" }
+        fail(kind, unavailableMessage(kind, error.message ?: error.javaClass.simpleName))
     }
 
-    private fun updateOriginalRooms(statusText: String = "") {
-        val gameEngine = GameEngine.getInstance()
-        if (gameEngine?.networkEngine == null) {
-            latestRooms = emptyList()
-            sceneHost.updateRooms(
-                rooms = emptyList(),
-                statusText = "Original lobby requires the RW engine to be loaded",
-                lobbyKind = MultiplayerLobbyKind.Original,
-            )
-            return
-        }
-        val rooms = runCatching {
-            ServerListUiBridge.getServerList()
-                .filterIsInstance<ServerInfo>()
-                .map(::serverInfoToMultiplayerItem)
-        }.getOrElse { error ->
-            logger.warn(error) { "Original room list read failed" }
-            latestRooms = emptyList()
-            sceneHost.updateRooms(
-                rooms = emptyList(),
-                statusText = "Original lobby unavailable: ${error.message ?: error.javaClass.simpleName}",
-                lobbyKind = MultiplayerLobbyKind.Original,
-            )
-            return
-        }
-        latestRooms = rooms
-        sceneHost.updateRooms(
-            rooms = rooms,
-            statusText = statusText.ifBlank { if (rooms.isEmpty()) "No rooms found" else "" },
-            lobbyKind = MultiplayerLobbyKind.Original,
-        )
+    private fun fail(kind: MultiplayerLobbyKind, message: String) {
+        if (kind != activeLobbyKind) return
+        // The visible list is also the authoritative join lookup: failures must not leave old rooms joinable.
+        sceneHost.updateRooms(emptyList(), message, kind, errorText = message)
     }
+
+    private fun unavailableMessage(kind: MultiplayerLobbyKind, detail: String): String =
+        if (kind == MultiplayerLobbyKind.Original) "Original lobby unavailable: $detail" else "P2P unavailable: $detail"
 }
 
 internal fun p2pRoomToMultiplayerItem(room: P2PRoomAdvertisement): MultiplayerRoomItem =
     MultiplayerRoomItem(
         roomId = room.roomId.orEmpty(),
-        hostName = room.createdBy ?: "Unknown",
+        hostName = room.createdBy ?: I18n.multiplayer.unknown(),
         mapName = room.getMapDisplayName().withRwxModeSuffix(room.requiredRwxFeatures),
         playersLabel = "${room.currentPlayers.coerceAtLeast(0)}/${room.maxPlayers.coerceAtLeast(0)}",
-        versionLabel = room.gameVersionString?.let { "v$it" } ?: "Unknown",
+        versionLabel = room.gameVersionString?.let { "v$it" } ?: I18n.multiplayer.unknown(),
         requiresPassword = room.requiresPassword,
         hasMods = room.hasMods,
         transportLabel = when {
@@ -158,7 +108,7 @@ internal fun p2pRoomToMultiplayerItem(room: P2PRoomAdvertisement): MultiplayerRo
             room.transport.isNotBlank() -> room.transport
             else -> "P2P"
         },
-        stateLabel = room.gameState ?: "unknown",
+        stateLabel = room.gameState ?: "Unknown",
         infoText = room.getInfoText(),
     )
 
@@ -168,19 +118,19 @@ private fun String.withRwxModeSuffix(requiredRwxFeatures: List<String>): String 
 internal fun serverInfoToMultiplayerItem(server: ServerInfo): MultiplayerRoomItem =
     MultiplayerRoomItem(
         roomId = server.getConnectDescriptor(),
-        hostName = server.createdBy ?: server.publicHost ?: server.lanHost ?: "Unknown",
+        hostName = server.createdBy ?: server.publicHost ?: server.lanHost ?: I18n.multiplayer.unknown(),
         mapName = server.mapPath?.let(MapMetadata::getMapName) ?: server.serverMessage ?: "<No Map>",
         playersLabel = "${server.currentPlayers.coerceAtLeast(0)}/${server.maxPlayers.coerceAtLeast(0)}",
-        versionLabel = server.gameVersionString?.let { if (it == "ANY") it else "v$it" } ?: "Unknown",
+        versionLabel = server.gameVersionString?.let { if (it == "ANY") it else "v$it" } ?: I18n.multiplayer.unknown(),
         requiresPassword = server.requiresPassword,
         hasMods = server.hasMods,
         transportLabel = when {
             server.isLanServer -> "LAN"
             server.isDedicatedServer -> "Dedicated"
             server.isPortOpen -> "Internet"
-            else -> "Relay"
+            else -> "Unknown"
         },
-        stateLabel = server.gameState ?: "unknown",
+        stateLabel = server.gameState ?: "Unknown",
         joinAddress = server.getConnectDescriptor(),
         originalServerId = server.serverId?.takeIf { it.isNotBlank() },
         infoText = runCatching { server.getInfoText() }.getOrDefault(""),

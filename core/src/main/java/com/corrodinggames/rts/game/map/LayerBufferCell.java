@@ -6,7 +6,7 @@ import com.corrodinggames.rts.gameFramework.graphics.RenderTargetMode;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.b.d */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/b/d.class */
@@ -43,7 +43,7 @@ public class LayerBufferCell {
     final /* synthetic */ LayerBufferManager manager;
 
     /* JADX INFO: renamed from: h */
-    public KoolPaint fadeBlendPaint = new GamePaint();
+    public Paint fadeBlendPaint = new GamePaint();
 
     /* JADX INFO: renamed from: k */
     public boolean needsRedraw = true;

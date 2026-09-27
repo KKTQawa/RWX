@@ -11,7 +11,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.h.c */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/h/c.class */
@@ -132,7 +132,7 @@ public class GunBoat extends WaterUnit {
         projectileA.lifeTimer = 30.0f;
         projectileA.speed = 8.0f;
         projectileA.hasExploded = false;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_STB_INPUT, 0);
         GameEngine gameEngine = GameEngine.getInstance();
         gameEngine.soundEngine.playSound(SoundEngine.gunFireSound, 0.2f, pointFE.x, pointFE.y);
         gameEngine.effectManager.createFlameEffect(pointFE.x, pointFE.y, this.posZ, this.movementLevels[i].targetX);

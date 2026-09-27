@@ -9,7 +9,7 @@ import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.path.PathEngine;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -246,7 +246,7 @@ public class Path {
     public void g() {
         GameEngine gameEngine = GameEngine.getInstance();
         TileMap tileMap = gameEngine.tileMap;
-        KoolPaint paint = new KoolPaint();
+        Paint paint = new Paint();
         paint.a(2.0f);
         paint.a(100, 0, 100, 0);
         gameEngine.renderGraphicsEngine.a(((this.endTileX * tileMap.tileWorldSizeX) + tileMap.halfTileWorldSizeX) - GameEngine.getInstance().viewpointXInt, ((this.endTileY * tileMap.tileWorldSizeY) + tileMap.halfTileWorldSizeY) - GameEngine.getInstance().viewpointYInt, this.n * tileMap.tileWorldSizeX, paint);
@@ -262,7 +262,7 @@ public class Path {
                 for (int i = 1; i < this.pathPoints.size(); i++) {
                     PathPoint pathPoint = (PathPoint) this.pathPoints.get(i);
                     PathPoint pathPoint2 = (PathPoint) this.pathPoints.get(i - 1);
-                    KoolPaint paint = new KoolPaint();
+                    Paint paint = new Paint();
                     paint.a(255, 0, 255, 0);
                     paint.a(2.0f);
                     gameEngine.renderGraphicsEngine.a(((pathPoint.tileX * tileMap.tileWorldSizeX) + tileMap.halfTileWorldSizeX) - GameEngine.getInstance().viewpointXInt, ((pathPoint.tileY * tileMap.tileWorldSizeY) + tileMap.halfTileWorldSizeY) - GameEngine.getInstance().viewpointYInt, ((pathPoint2.tileX * tileMap.tileWorldSizeX) + tileMap.halfTileWorldSizeX) - GameEngine.getInstance().viewpointXInt, ((pathPoint2.tileY * tileMap.tileWorldSizeY) + tileMap.halfTileWorldSizeY) - GameEngine.getInstance().viewpointYInt, paint);

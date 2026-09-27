@@ -14,7 +14,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.l */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/l.class */
@@ -125,7 +125,7 @@ public class MammothTank extends LandUnit {
     public void a(BaseUnit baseUnit, int i) {
         PointF pointFE = E(i);
         Projectile projectileA = Projectile.a(this, pointFE.x, pointFE.y);
-        projectileA.color = KoolArgbColor.a(255, 247, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_EISU, 129);
+        projectileA.color = ArgbColor.a(255, 247, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_EISU, 129);
         projectileA.damage = 260.0f;
         projectileA.targetUnit = baseUnit;
         projectileA.lifeTimer = 20.0f;

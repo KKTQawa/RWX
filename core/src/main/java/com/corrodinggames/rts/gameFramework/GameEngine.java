@@ -33,7 +33,7 @@ import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
 import io.github.rwx.map.MapMetadata;
 import io.github.rwx.platform.CoreGameView;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 import io.github.rwx.ui.CoreUiEventQueue;
 
 import java.io.*;
@@ -323,13 +323,13 @@ public abstract class GameEngine {
     public GameInputStream remoteMapStream;
 
     /* JADX INFO: renamed from: dn */
-    public KoolPaint teamInfoPaint;
+    public Paint teamInfoPaint;
 
     /* JADX INFO: renamed from: do */
-    public KoolPaint centeredPaint;
+    public Paint centeredPaint;
 
     /* JADX INFO: renamed from: dp */
-    public KoolPaint loadingPaint;
+    public Paint loadingPaint;
 
     /* JADX INFO: renamed from: dw */
     public int selectedWaypointDrawCount;
@@ -1187,12 +1187,12 @@ public abstract class GameEngine {
     }
 
     /* JADX INFO: renamed from: a */
-    public void updatePaint(KoolPaint paint) {
+    public void updatePaint(Paint paint) {
         updatePaintTextSize(paint, 16.0f);
     }
 
     /* JADX INFO: renamed from: a */
-    public void updatePaintTextSize(KoolPaint paint, float f) {
+    public void updatePaintTextSize(Paint paint, float f) {
         PaintSizeTracker paintSizeTracker = new PaintSizeTracker(this);
         paintSizeTracker.textSize = f;
         paintSizeTracker.paint = paint;
@@ -1206,7 +1206,7 @@ public abstract class GameEngine {
     }
 
     /* JADX INFO: renamed from: b */
-    public void setScaledTextSize(KoolPaint paint, float f) {
+    public void setScaledTextSize(Paint paint, float f) {
         float screenPixels = toScreenPixels(f);
         if (paint.k() != screenPixels) {
             paint.b(screenPixels);

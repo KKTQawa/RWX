@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.android.kmp.library) apply false
+    alias(libs.plugins.compose) apply false
+    alias(libs.plugins.kotlin.compose) apply false
 }
 
 group = property("group") as String
@@ -16,10 +20,14 @@ allprojects {
     version = rootProject.version
 }
 
-I18nGenerationSupport.register(rootProject)
+val generateI18nSources = I18nGenerationSupport.register(rootProject)
 
 configure<I18nGenerationExtension> {
     inputFormat = "properties"
+}
+
+project(":core").tasks.matching { it.name.startsWith("compile") }.configureEach {
+    dependsOn(generateI18nSources)
 }
 
 subprojects {
@@ -32,5 +40,7 @@ subprojects {
 
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        systemProperty("user.language", "en")
+        systemProperty("user.country", "US")
     }
 }

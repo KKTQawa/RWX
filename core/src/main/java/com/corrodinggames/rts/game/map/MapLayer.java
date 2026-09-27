@@ -10,9 +10,9 @@ import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -119,17 +119,17 @@ public class MapLayer {
         base64DecodeTable[47] = 63;
         paintFillBlack = new GamePaint();
         paintFillBlack.b(-16777216);
-        paintFillBlack.a(KoolPaint.Style.FILL);
+        paintFillBlack.a(Paint.Style.FILL);
         alphaFillPaints = new GamePaint[11];
         for (int i5 = 0; i5 <= 10; i5++) {
             alphaFillPaints[i5] = new GamePaint();
             alphaFillPaints[i5].b(-16777216);
-            alphaFillPaints[i5].a(KoolPaint.Style.FILL);
+            alphaFillPaints[i5].a(Paint.Style.FILL);
             alphaFillPaints[i5].c(i5 * 25);
         }
         dynamicAlphaFillPaint = new GamePaint();
         dynamicAlphaFillPaint.b(-16777216);
-        dynamicAlphaFillPaint.a(KoolPaint.Style.FILL);
+        dynamicAlphaFillPaint.a(Paint.Style.FILL);
         groundTexturePaint = new GamePaint();
         groundTexturePaint.a(false);
         groundTexturePaint.d(false);
@@ -145,7 +145,7 @@ public class MapLayer {
         lightingPaints = new GamePaint[11];
         for (int i6 = 0; i6 <= 10; i6++) {
             GamePaint gamePaint = new GamePaint();
-            gamePaint.a(new KoolMultiplyAddColorFilter(KoolArgbColor.a(255 - (i6 * 25), 255 - (i6 * 25), 255 - (i6 * 25)), 0));
+            gamePaint.a(new MultiplyAddColorFilter(ArgbColor.a(255 - (i6 * 25), 255 - (i6 * 25), 255 - (i6 * 25)), 0));
             lightingPaints[i6] = gamePaint;
         }
     }

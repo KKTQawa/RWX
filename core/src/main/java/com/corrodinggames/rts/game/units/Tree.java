@@ -12,7 +12,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.network.GameInputStream;
 import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -229,11 +229,11 @@ public class Tree extends NaturalUnit {
         }
         if (this.hasSubType) {
             dv.a(this.es, 0);
-            gameEngine.renderGraphicsEngine.a(textureD, dv, du, (KoolPaint) null);
+            gameEngine.renderGraphicsEngine.a(textureD, dv, du, (Paint) null);
             dv.a(-this.es, 0);
         }
         graphicsEngine.a(getRenderRotation(false), fD, fE);
-        graphicsEngine.a(textureD, dv, du, (KoolPaint) null);
+        graphicsEngine.a(textureD, dv, du, (Paint) null);
         graphicsEngine.l();
         return true;
     }

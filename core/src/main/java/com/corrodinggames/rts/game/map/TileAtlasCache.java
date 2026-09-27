@@ -5,9 +5,9 @@ import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine;
 import com.corrodinggames.rts.gameFramework.graphics.RenderTargetMode;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolCanvasBlendMode;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.frame.GameCanvasBlendMode;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.b.h */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/b/h.class */
@@ -55,7 +55,7 @@ public class TileAtlasCache {
     int allocatedSlotCount = 0;
 
     /* JADX INFO: renamed from: d */
-    KoolPaint paddingBlitPaint = new KoolPaint();
+    Paint paddingBlitPaint = new Paint();
 
     /* JADX INFO: renamed from: o */
     Rect cachedSlotRect = new Rect();
@@ -131,7 +131,7 @@ public class TileAtlasCache {
     public void clearAtlas() {
         this.allocatedSlotCount = 0;
         if (this.isAlphaAtlas) {
-            this.atlasGraphics.a(0, KoolCanvasBlendMode.Clear);
+            this.atlasGraphics.a(0, GameCanvasBlendMode.Clear);
         } else {
             this.atlasGraphics.b(-16777216);
         }
@@ -201,7 +201,7 @@ public class TileAtlasCache {
         texture.x();
         for (int i = iL; i < iL2; i++) {
             for (int i2 = iM; i2 < iM2; i2++) {
-                if (KoolArgbColor.a(texture.a(i2, i)) != 255) {
+                if (ArgbColor.a(texture.a(i2, i)) != 255) {
                     return true;
                 }
             }
@@ -233,7 +233,7 @@ public class TileAtlasCache {
     }
 
     /* JADX INFO: renamed from: a */
-    public static void blitPaddingEdges(GraphicsEngine graphicsEngine, Texture texture, Rect rect, Rect rect2, KoolPaint paint) {
+    public static void blitPaddingEdges(GraphicsEngine graphicsEngine, Texture texture, Rect rect, Rect rect2, Paint paint) {
         for (int i = 0; i <= 3; i++) {
             getPixelCopyRectForCorner(rect, tmpRectB, i, 0);
             getPixelCopyRectForCorner(rect2, tmpRectC, i, 1);

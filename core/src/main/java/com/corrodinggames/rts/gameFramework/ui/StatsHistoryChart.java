@@ -12,9 +12,9 @@ import com.corrodinggames.rts.gameFramework.statistics.StatHistoryBuilder;
 import com.corrodinggames.rts.gameFramework.statistics.ValueDisplayMode;
 import com.corrodinggames.rts.gameFramework.stats.TeamStats;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
-import io.github.rwx.render.canvas.KoolTypeface;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
+import io.github.rwx.render.canvas.Typeface;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,9 +39,9 @@ public class StatsHistoryChart {
     /* JADX INFO: renamed from: r */
     private Rect tabRect;
     /* JADX INFO: renamed from: c */
-    KoolPaint leftTextPaint;
+    Paint leftTextPaint;
     /* JADX INFO: renamed from: d */
-    KoolPaint rightTextPaint;
+    Paint rightTextPaint;
     private StatsTab f = StatsTab.overallStats;
     private ValueDisplayMode g = ValueDisplayMode.absolute;
     private ArrayList h = new ArrayList();
@@ -92,14 +92,14 @@ public class StatsHistoryChart {
     public void b() {
         this.f = StatsTab.overallStats;
         GameEngine gameEngine = GameEngine.getInstance();
-        this.leftTextPaint = new KoolPaint();
+        this.leftTextPaint = new Paint();
         this.leftTextPaint.a(true);
-        this.leftTextPaint.a(KoolPaint.Align.LEFT);
+        this.leftTextPaint.a(Paint.Align.LEFT);
         this.leftTextPaint.a(255, 0, 255, 0);
         gameEngine.setScaledTextSize(this.leftTextPaint, 16.0f);
-        this.rightTextPaint = new KoolPaint();
+        this.rightTextPaint = new Paint();
         this.rightTextPaint.a(true);
-        this.rightTextPaint.a(KoolPaint.Align.RIGHT);
+        this.rightTextPaint.a(Paint.Align.RIGHT);
         this.rightTextPaint.a(255, 0, 255, 0);
         gameEngine.setScaledTextSize(this.rightTextPaint, 16.0f);
         c();
@@ -130,8 +130,8 @@ public class StatsHistoryChart {
             int i2 = (rect2.d - screenPixels) - screenPixels2;
             int i3 = gameUI.c ? length + 2 : length - 1;
             int i4 = (int) ((gameEngine.currentScreenWidthPixels / 2.0f) - (((i * i3) + (screenPixels2 * (i3 - 1))) / 2));
-            KoolPaint paint = new KoolPaint();
-            KoolPaint paint2 = new KoolPaint();
+            Paint paint = new Paint();
+            Paint paint2 = new Paint();
             paint2.a(100, 255, 255, 255);
             for (int i5 = 0; i5 < length; i5++) {
                 StatsTab statsTab = StatsTab.values()[i5];
@@ -150,7 +150,7 @@ public class StatsHistoryChart {
                     }
                     this.b.a(i4, i2, i4 + i, i2 + screenPixels);
                     gameEngine.renderGraphicsEngine.a(gameEngine.gameUI.uiTexture1, this.tabRect, this.b, paint);
-                    KoolPaint paint3 = paint2;
+                    Paint paint3 = paint2;
                     if (!gameUI.c || this.f == statsTab) {
                         paint3 = paint;
                     }
@@ -166,12 +166,12 @@ public class StatsHistoryChart {
                     this.lastTabSwitchTime = System.currentTimeMillis();
                 }
                 this.b.a(i6, i2, i6 + i, i2 + screenPixels);
-                KoolPaint paint4 = paint;
+                Paint paint4 = paint;
                 if (this.f == StatsTab.overallStats) {
                     paint4 = paint2;
                 }
                 gameEngine.renderGraphicsEngine.a(gameEngine.gameUI.uiTexture1, this.tabRect, this.b, paint4);
-                KoolPaint paint5 = paint;
+                Paint paint5 = paint;
                 if (!z4 || this.f == StatsTab.overallStats) {
                     paint5 = paint2;
                 }
@@ -189,12 +189,12 @@ public class StatsHistoryChart {
                     this.lastTabSwitchTime = System.currentTimeMillis();
                 }
                 this.b.a(i7, i2, i7 + i, i2 + screenPixels);
-                KoolPaint paint6 = paint;
+                Paint paint6 = paint;
                 if (this.f == StatsTab.overallStats) {
                     paint6 = paint2;
                 }
                 gameEngine.renderGraphicsEngine.a(gameEngine.gameUI.uiTexture1, this.tabRect, this.b, paint6);
-                KoolPaint paint7 = paint;
+                Paint paint7 = paint;
                 if (!z5 || this.f == StatsTab.overallStats) {
                     paint7 = paint2;
                 }
@@ -265,24 +265,24 @@ public class StatsHistoryChart {
         GameUI var6 = var5.gameUI;
         StatHistoryBuilder var7 = this.statBuilders[bj.ordinal()];
         float var8 = (float) (System.currentTimeMillis() - this.lastTabSwitchTime) / 250.0F;
-        KoolPaint var9 = new KoolPaint();
+        Paint var9 = new Paint();
         var9.a(255, 0, 255, 0);
         var9.a(true);
         var9.c(true);
-        var9.a(KoolTypeface.a(KoolTypeface.c, 0));
+        var9.a(Typeface.a(Typeface.c, 0));
         var5.setScaledTextSize(var9, 14.0F);
-        KoolPaint var10 = new KoolPaint(var9);
-        var10.a(KoolPaint.Align.CENTER);
+        Paint var10 = new Paint(var9);
+        var10.a(Paint.Align.CENTER);
         var5.setScaledTextSize(var10, 14.0F);
-        KoolPaint var11 = new KoolPaint();
+        Paint var11 = new Paint();
         var11.a(2.0F);
         if (GameEngine.isIOSVersion) {
             var11.a(3.0F);
         }
 
-        var11.a(KoolPaint.Cap.ROUND);
+        var11.a(Paint.Cap.ROUND);
         Rect var12 = new Rect();
-        KoolPaint var14 = var6.buildingPreviewInvalidPaint;
+        Paint var14 = var6.buildingPreviewInvalidPaint;
         String var15 = Locale.get("gui.leaderboard.type." + bj.name());
         var14.a(var15, 0, var15.length(), this.b);
         y.a(var15, (float) rect.d(), (float) (rect.b + this.b.c()), var14);
@@ -458,7 +458,7 @@ public class StatsHistoryChart {
                     int var78 = var62.teamColor;
                     if (this.currentTeamChart != null && this.currentTeamChart != var62) {
                         byte var81 = 60;
-                        var78 = KoolArgbColor.a(var81, KoolArgbColor.b(var78), KoolArgbColor.c(var78), KoolArgbColor.d(var78));
+                        var78 = ArgbColor.a(var81, ArgbColor.b(var78), ArgbColor.c(var78), ArgbColor.d(var78));
                     }
 
                     this.t.add(var78);

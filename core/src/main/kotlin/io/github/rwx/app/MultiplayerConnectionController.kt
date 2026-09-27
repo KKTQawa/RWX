@@ -61,64 +61,31 @@ internal class MultiplayerConnectionController(
             showOriginalRoomInputDialog(room)
             return
         }
-        dialogSceneHost.show(
-            Dialog(
-                title = I18n.multiplayer.joinServerQuestion(),
-                message = joinRoomDialogMessage(room),
-                buttons = listOf(
-                    DialogButton(I18n.common.join()) {
-                        if (lobbyController.activeLobbyKind == MultiplayerLobbyKind.P2P) {
-                            joinP2PRoom(room.roomId, room.joinDisplayLabel())
-                        } else {
-                            joinOriginalServer(
-                                room.joinAddress,
-                                room.joinDisplayLabel(),
-                                room.originalServerId,
-                            )
-                        }
-                    },
-                    DialogButton(I18n.common.cancel()),
-                ),
-                scrollableMessage = true,
-            )
-        )
+        dialogSceneHost.show(multiplayerJoinRoomDialog(lobbyController.activeLobbyKind, room, ::joinLobbyRequest))
     }
 
     fun showJoinDirectDialog() {
-        val activeLobbyKind = lobbyController.activeLobbyKind
-        val title = when (activeLobbyKind) {
-            MultiplayerLobbyKind.Original -> I18n.multiplayer.joinServer()
-            MultiplayerLobbyKind.P2P -> I18n.multiplayer.joinP2pRoom()
-        }
-        val hint = when (activeLobbyKind) {
-            MultiplayerLobbyKind.Original -> I18n.multiplayer.joinServerHint()
-            MultiplayerLobbyKind.P2P -> I18n.multiplayer.p2pRoomIdHint()
-        }
-        val message = when (activeLobbyKind) {
-            MultiplayerLobbyKind.Original -> I18n.multiplayer.joinServerInput()
-            MultiplayerLobbyKind.P2P -> I18n.multiplayer.joinP2pRoomInput()
-        }
-        dialogSceneHost.show(
-            Dialog(
-                title = title,
-                message = message,
-                textInput = DialogTextInput(hint = hint),
-                buttons = listOf(
-                    DialogButton(
-                        I18n.common.join(),
-                        onInputPress = { value ->
-                            val input = value.trim()
-                            if (lobbyController.activeLobbyKind == MultiplayerLobbyKind.P2P) {
-                                joinP2PRoom(input)
-                            } else {
-                                joinOriginalServer(input)
-                            }
-                        },
-                    ),
-                    DialogButton(I18n.common.cancel()),
-                ),
+        dialogSceneHost.show(multiplayerJoinDirectDialog(lobbyController.activeLobbyKind, ::joinLobbyRequest))
+    }
+
+
+    fun joinDirectWithAddress(address: String) {
+        val trimmed = address.trim()
+        if (trimmed.isBlank()) return
+        val lobbyKind = lobbyController.activeLobbyKind
+        joinLobbyRequest(
+            MultiplayerJoinRequest(
+                lobbyKind, trimmed,
+                roomLabel = if (lobbyKind == MultiplayerLobbyKind.P2P) "P2P room" else "server",
             ),
         )
+    }
+
+    private fun joinLobbyRequest(request: MultiplayerJoinRequest) {
+        when (request.lobbyKind) {
+            MultiplayerLobbyKind.P2P -> joinP2PRoom(request.address, request.roomLabel)
+            MultiplayerLobbyKind.Original -> joinOriginalServer(request.address, request.roomLabel, request.originalServerId)
+        }
     }
 
     fun showPlayerNameDialog() {
@@ -189,7 +156,7 @@ internal class MultiplayerConnectionController(
             navigateToBattleRoom()
         }.onFailure { error ->
             logger.warn(error) { "Host game failed" }
-            showUnavailableDialog("Unable to host game: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.multiplayer.hostFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 

@@ -4,23 +4,12 @@ import io.github.rwx.session.BattleRoomLaunchConfig
 import io.github.rwx.session.MapSnapshot
 import java.util.concurrent.atomic.AtomicReference
 
-/**
- * What the Slick renderer should be showing.
- *
- * This is the single encoding of "what was asked for" on the desktop backend: [SlickGameSession]
- * publishes one of these, [SlickGame] holds exactly one as its pending work, and the render thread
- * consumes it. Because the variants are a closed set, the mutually-exclusive states can no longer
- * disagree with each other the way parallel nullable fields could.
- */
+
 sealed interface SlickSessionRequest {
-    /** Path reported in loading/error status, or null when the request loads no level of its own. */
     val loadingPath: String?
 
-    /** True when honouring this request loads a level, so the render thread must drive the game loop. */
     val loadsLevel: Boolean
         get() = true
-
-    /** Boot the engine and renderer only; no level is loaded. */
     data object EnginePreparation : SlickSessionRequest {
         override val loadingPath: String? = null
         override val loadsLevel: Boolean = false

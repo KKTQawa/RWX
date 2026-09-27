@@ -4,8 +4,8 @@ import com.corrodinggames.rts.gameFramework.AssetType
 import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.graphics.*
 import io.github.rwx.geometry.Rect
-import io.github.rwx.render.canvas.KoolDisplacementEffect
-import io.github.rwx.render.canvas.KoolPaint
+import io.github.rwx.render.canvas.DisplacementEffect
+import io.github.rwx.render.canvas.Paint
 
 class FrameBufferHelper() {
     private var graphicsBackend: GraphicsEngine? = null
@@ -20,13 +20,13 @@ class FrameBufferHelper() {
     val c: GamePaint = GamePaint()
 
     @JvmField
-    var d: KoolDisplacementEffect? = null
+    var d: DisplacementEffect? = null
 
     @JvmField
     var shaderProgram: ShaderProgram? = null
 
     @JvmField
-    val e: KoolPaint = KoolPaint()
+    val e: Paint = Paint()
 
     @JvmField
     val f: Rect = Rect(-101, 0, -1, 100)
@@ -101,7 +101,7 @@ class FrameBufferHelper() {
         @JvmStatic
         fun postDisplacement(): FrameBufferHelper =
             FrameBufferHelper("assets/shaders/post_displacement.frag").apply {
-                d = KoolDisplacementEffect()
+                d = DisplacementEffect()
                 c.a(d)
             }
     }

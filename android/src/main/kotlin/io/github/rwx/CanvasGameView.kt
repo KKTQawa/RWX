@@ -9,13 +9,8 @@ import android.view.SurfaceView
 import com.corrodinggames.rts.gameFramework.android.graphics.DeferredGraphicsRenderer
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
+import androidx.core.view.isVisible
 
-/**
- * Android Canvas presenter backed by its own Surface. Kool's translucent SurfaceView is placed
- * above this one while menus are visible, allowing the native game frame to remain visible below
- * the UI. A regular View cannot be used here because the upper SurfaceView punches a hole in the
- * host window and hides regular sibling views beneath it.
- */
 class CanvasGameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback {
     class Frame internal constructor(
         internal val buffer: FrameBuffer,
@@ -57,7 +52,7 @@ class CanvasGameView(context: Context) : SurfaceView(context), SurfaceHolder.Cal
 
     fun isReady(): Boolean =
         !paused && surfaceReady && holder.surface.isValid && isAttachedToWindow &&
-                visibility == VISIBLE && width > 0 && height > 0
+                isVisible && width > 0 && height > 0
 
     fun acquireFrame(): Frame? {
         val buffer = acquireUpdateBuffer() ?: return null

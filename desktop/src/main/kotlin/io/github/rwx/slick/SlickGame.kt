@@ -19,8 +19,8 @@ import io.github.rwx.input.MultiTouchPointerState
 import io.github.rwx.logger
 import io.github.rwx.net.CoreUiNetworkCallbacks
 import io.github.rwx.platform.CoreGameView
-import io.github.rwx.render.canvas.KoolCanvasViewport
-import io.github.rwx.render.canvas.KoolGraphicsEngine
+import io.github.rwx.render.frame.GameViewport
+import com.corrodinggames.rts.gameFramework.graphics.GraphicsEngine
 import io.github.rwx.session.*
 import io.github.rwx.ui.InGameMenuController
 import kotlinx.coroutines.CompletableDeferred
@@ -165,7 +165,7 @@ private data class CompletedModReload(
 
 private data class PreparedModReload(
     val request: CompletableDeferred<Unit>,
-    val graphicsEngine: KoolGraphicsEngine,
+    val graphicsEngine: GraphicsEngine,
 )
 
 internal fun legacySlickDeltaSpeed(deltaMillis: Int): Float = deltaMillis * 0.060000002f
@@ -262,7 +262,7 @@ class SlickGame(
         GameEngine.graphicsEngine = graphicsEngine
         GameEngine.externalGameLoopDriver = true
         val activeEngine = gameSession.ensureRendererEngine(
-            viewport = KoolCanvasViewport(container.width, container.height),
+            viewport = GameViewport(container.width, container.height),
             graphicsEngine = graphicsEngine,
             view = view,
             platformCallbacks = SlickLoadingCallbacks(onLoadingStatus),
@@ -864,7 +864,7 @@ class SlickGame(
     private fun prepareModReload(activeEngine: GameEngine): Boolean {
         if (preparedModReload != null || completedModReload != null) return false
         val request = modReloadQueue.takePending() ?: return false
-        val reloadGraphicsEngine = KoolGraphicsEngine()
+        val reloadGraphicsEngine = contextBoundSlickGraphics(graphicsEngine, SlickGlContext(checkNotNull(SlickCanvasHost.gameCanvas() as? SlickAwtGLCanvas)))
         val error = runCatching {
             graphicsEngine.resetBackendState()
             activeEngine.minimap?.bindGraphicsBackend(reloadGraphicsEngine)
@@ -950,7 +950,7 @@ class SlickGame(
 
     private fun captureFrameSnapshotAfterWorldRender(container: GameContainer) {
         val request = pendingFrameSnapshotRequest.get()
-        if (request == null && !runningMenuBackground) {
+        if (request == null) {
             return
         }
         if (runningMapPath == null || (!runningMenuBackground && !gameVisible)) {

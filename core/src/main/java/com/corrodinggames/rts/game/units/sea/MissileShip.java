@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.h.d */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/h/d.class */
@@ -124,7 +124,7 @@ public class MissileShip extends WaterUnit {
             PointF pointFK = getShadowOffsetForLevel(i);
             projectileA.trackOffsetX = pointFK.x;
             projectileA.trackOffsetY = pointFK.y;
-            projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+            projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
             projectileA.damage = 62.0f;
             projectileA.targetUnit = baseUnit;
             projectileA.lifeTimer = 190.0f;
@@ -138,7 +138,7 @@ public class MissileShip extends WaterUnit {
             return;
         }
         Projectile projectileA2 = Projectile.a(this, pointFE.x, pointFE.y, this.posZ - 1.0f, i);
-        projectileA2.color = KoolArgbColor.a(255, 0, 0, 150);
+        projectileA2.color = ArgbColor.a(255, 0, 0, 150);
         projectileA2.renderScale = 1.0f;
         projectileA2.damage = 42.0f;
         projectileA2.targetUnit = baseUnit;

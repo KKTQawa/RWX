@@ -11,6 +11,7 @@ import io.github.rwx.ui.model.Dialog
 import io.github.rwx.ui.model.DialogButton
 
 internal class BattleRoomAdminController(
+    private val currentRoomRevision: () -> Long,
     private val gameSession: GameSession,
     private val dialogSceneHost: DialogSceneHost,
     private val updateBattleRoomFromNetwork: () -> Unit,
@@ -18,7 +19,7 @@ internal class BattleRoomAdminController(
 ) {
     fun addAiToBattleRoom() {
         if (gameSession.currentBattleRoom() == null) {
-            showUnavailableDialog("Add AI requires a hosted RW room")
+            showUnavailableDialog(I18n.battleroom.admin.addAiRequires())
             return
         }
         runCatching {
@@ -26,31 +27,34 @@ internal class BattleRoomAdminController(
             updateBattleRoomFromNetwork()
         }.onFailure { error ->
             logger.warn(error) { "Add AI failed" }
-            showUnavailableDialog("Unable to add AI: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.battleroom.admin.addAiFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 
     fun showBattleRoomOptionsDialog() {
-        val initialOptions = gameSession.currentBattleRoom()?.room?.options
-        if (initialOptions == null) {
-            showUnavailableDialog("Game options require a hosted RW room")
+        val snapshot = gameSession.currentBattleRoom()
+        val initialOptions = snapshot?.room?.options
+        if (initialOptions == null || !snapshot.isHost) {
+            showUnavailableDialog(I18n.battleroom.admin.optionsRequires())
             return
         }
+        val revision = currentRoomRevision()
         dialogSceneHost.show(
             Dialog(
-                title = "Game Options",
-                message = "Configure this battle room before starting.",
+                title = I18n.battleroom.options(),
+                message = I18n.battleroom.admin.optionsHint(),
                 form = battleRoomOptionsForm(
                     initialOptions,
                     maxPlayers = gameSession.currentBattleRoom()?.maxPlayers ?: DEFAULT_MAX_PLAYERS,
                 ),
                 buttons = listOf(
-                    DialogButton("Apply", onFormPress = ::applyBattleRoomOptionsForm),
+                    DialogButton(I18n.mods.apply(), onFormPress = ::applyBattleRoomOptionsForm),
                     DialogButton(I18n.common.cancel()),
                 ),
                 scrollableForm = true,
                 compactOnAndroid = true,
             ),
+            isValid = { currentRoomRevision() == revision && gameSession.currentBattleRoom(refreshNetworkStatus = false)?.isHost == true },
         )
     }
 
@@ -58,20 +62,20 @@ internal class BattleRoomAdminController(
         val snapshot = gameSession.currentBattleRoom()
         val player = snapshot?.players
             ?.let { players -> resolveBattleRoomPlayerSnapshot(playerId, players) }
-        if (player == null) {
-            showUnavailableDialog("Player config requires a hosted RW room")
+        if (player == null || (!snapshot.isHost && !player.isLocal)) {
+            showUnavailableDialog(I18n.battleroom.admin.playerRequires())
             return
         }
+        val revision = currentRoomRevision()
         val canKick = snapshot.isHost && !player.isLocal
         val buttons = buildList {
             add(
                 DialogButton(
-                    "Apply",
+                    I18n.mods.apply(),
                     onFormPress = { values ->
                         runCatching {
                             val spawn = values["spawn"]?.toIntOrNull()
                             val team = values["team"]?.toIntOrNull()
-                            // Host-only override fields are absent from a non-host form.
                             val startingUnits = values["startingUnits"]?.toIntOrNull()
                             val aiDifficulty = values["aiDifficulty"]?.toIntOrNull()
                             check(
@@ -85,25 +89,31 @@ internal class BattleRoomAdminController(
                         }.onFailure { error ->
                             logger.warn(error) { "Apply player config failed" }
                             showUnavailableDialog(
-                                "Unable to apply player config: ${error.message ?: error.javaClass.simpleName}",
+                                I18n.battleroom.admin.applyPlayerFailed(error.message ?: error.javaClass.simpleName),
                             )
                         }
                     },
                 ),
             )
             if (canKick) {
-                add(DialogButton(if (player.isAI) "Remove AI" else "Kick") { kickBattleRoomPlayer(player.id) })
+                add(DialogButton(if (player.isAI) I18n.battleroom.admin.removeAi() else I18n.battleroom.admin.kick()) { kickBattleRoomPlayer(player.id) })
             }
             add(DialogButton(I18n.common.cancel()))
         }
         dialogSceneHost.show(
             Dialog(
-                title = "Player Config",
-                message = "Set spawn point and ally team.",
-                form = playerConfigForm(player, isHost = snapshot.isHost),
+                title = I18n.battleroom.admin.playerTitle(),
+                message = I18n.battleroom.admin.playerHint(),
+                form = playerConfigForm(player, snapshot.room.options, isHost = snapshot.isHost),
                 buttons = buttons,
                 compactOnAndroid = true,
             ),
+            isValid = {
+                val current = gameSession.currentBattleRoom(refreshNetworkStatus = false)
+                val member = current?.players?.let { resolveBattleRoomPlayerSnapshot(player.id, it) }
+                currentRoomRevision() == revision && current?.isHost == snapshot.isHost && member != null &&
+                    member.isLocal == player.isLocal && (current.isHost || member.isLocal)
+            },
         )
     }
 
@@ -113,7 +123,7 @@ internal class BattleRoomAdminController(
             updateBattleRoomFromNetwork()
         }.onFailure { error ->
             logger.warn(error) { "Kick player failed" }
-            showUnavailableDialog("Unable to kick player: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.battleroom.admin.kickFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 
@@ -121,20 +131,20 @@ internal class BattleRoomAdminController(
         val text = message.trim()
         if (text.isBlank()) return
         if (gameSession.currentBattleRoom() == null) {
-            showUnavailableDialog("Chat requires a hosted RW room")
+            showUnavailableDialog(I18n.battleroom.admin.chatRequires())
             return
         }
         runCatching {
             check(gameSession.sendBattleRoomMessage(text)) { "Game session rejected chat request" }
         }.onFailure { error ->
             logger.warn(error) { "Send battle room chat failed" }
-            showUnavailableDialog("Unable to send chat: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.battleroom.admin.chatFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 
     private fun applyTeamLayout(layout: BattleRoomTeamLayout) {
         if (gameSession.currentBattleRoom() == null) {
-            showUnavailableDialog("Set Teams requires a hosted RW room")
+            showUnavailableDialog(I18n.battleroom.admin.setTeamsRequires())
             return
         }
         runCatching {
@@ -144,7 +154,7 @@ internal class BattleRoomAdminController(
             updateBattleRoomFromNetwork()
         }.onFailure { error ->
             logger.warn(error) { "Set team layout failed" }
-            showUnavailableDialog("Unable to set teams: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.battleroom.admin.setTeamsFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 
@@ -153,7 +163,7 @@ internal class BattleRoomAdminController(
         val options = values.toGameRoomSettings(base)
         val layout = values["teamLayout"]?.toBattleRoomTeamLayoutOrNull()
         if (gameSession.currentBattleRoom() == null) {
-            showUnavailableDialog("Game options require a hosted RW room")
+            showUnavailableDialog(I18n.battleroom.admin.optionsRequires())
             return
         }
         runCatching {
@@ -171,7 +181,7 @@ internal class BattleRoomAdminController(
             updateBattleRoomFromNetwork()
         }.onFailure { error ->
             logger.warn(error) { "Apply battle room options failed" }
-            showUnavailableDialog("Unable to apply options: ${error.message ?: error.javaClass.simpleName}")
+            showUnavailableDialog(I18n.battleroom.admin.applyOptionsFailed(error.message ?: error.javaClass.simpleName))
         }
     }
 }

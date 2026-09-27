@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.e.m */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/e/m.class */
@@ -98,7 +98,7 @@ public class MegaTankUnit extends LandUnit {
         if (!baseUnit.i()) {
             PointF pointFE = E(i);
             Projectile projectileA = Projectile.a(this, pointFE.x, pointFE.y);
-            projectileA.color = KoolArgbColor.a(255, 150, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 40);
+            projectileA.color = ArgbColor.a(255, 150, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 40);
             projectileA.damage = 50.0f;
             projectileA.targetUnit = baseUnit;
             projectileA.lifeTimer = 60.0f;
@@ -112,7 +112,7 @@ public class MegaTankUnit extends LandUnit {
             return;
         }
         Projectile projectileA2 = Projectile.a(this, this.posX, this.posY);
-        projectileA2.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+        projectileA2.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
         projectileA2.damage = 40.0f;
         projectileA2.targetUnit = baseUnit;
         projectileA2.lifeTimer = 190.0f;

@@ -8,6 +8,7 @@ import io.github.rwx.PlatformStorage
 import io.github.rwx.geometry.Rect
 import io.github.rwx.geometry.RectF
 import io.github.rwx.render.canvas.*
+import io.github.rwx.render.frame.*
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL13
@@ -130,7 +131,7 @@ class SlickGraphicsEngine private constructor(
         return SlickTexture(image)
     }
 
-    override fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, f: Float, f2: Float, f3: Float, paint: Paint?) {
         val resolved = texture ?: return
         val image = resolved.asSlickTexture()?.image() ?: return
         drawImageRegion(
@@ -151,7 +152,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, f: Float, f2: Float, f3: Float, paint: Paint?) {
         if (rect == null) return
         val image = texture.asSlickTexture()?.image() ?: return
         drawImageRegion(
@@ -172,7 +173,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, rect2: Rect?, paint: Paint?) {
         val image = texture.asSlickTexture()?.image() ?: return
         val src = rect ?: return
         val dst = rect2 ?: return
@@ -191,7 +192,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, rectF: RectF?, paint: Paint?) {
         val image = texture.asSlickTexture()?.image() ?: return
         val dst = rectF ?: return
         val src = rect ?: run {
@@ -225,7 +226,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun a(texture: Texture?, f: Float, f2: Float, paint: Paint?) {
         val resolved = texture ?: return
         val image = resolved.asSlickTexture()?.image() ?: return
         drawImageRegion(
@@ -243,7 +244,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun a(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?, f3: Float, f4: Float) {
+    override fun a(texture: Texture?, f: Float, f2: Float, paint: Paint?, f3: Float, f4: Float) {
         val image = texture.asSlickTexture()?.image() ?: return
         drawImageRegion(
             image = image,
@@ -263,7 +264,7 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun b(texture: Texture?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun b(texture: Texture?, f: Float, f2: Float, paint: Paint?) {
         val image = texture.asSlickTexture()?.image() ?: return
         drawImageRegion(
             image = image,
@@ -280,26 +281,26 @@ class SlickGraphicsEngine private constructor(
         )
     }
 
-    override fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: KoolPaint?) {
+    override fun b(texture: Texture?, rect: Rect?, rect2: Rect?, paint: Paint?) {
         a(texture, rect, rect2, paint)
     }
 
-    override fun a(rect: Rect?, paint: KoolPaint?) {
+    override fun a(rect: Rect?, paint: Paint?) {
         if (rect == null) return
         drawRect(rect.a.toFloat(), rect.b.toFloat(), rect.width().toFloat(), rect.height().toFloat(), paint)
     }
 
-    override fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?) {
+    override fun a(texture: Texture?, rect: Rect?, paint: Paint?) {
         if (texture == null || rect == null) return
         tileTexture(texture, rect, paint, 0, 0, 0, 0)
     }
 
-    override fun a(texture: Texture?, rect: Rect?, paint: KoolPaint?, i: Int, i2: Int, i3: Int, i4: Int) {
+    override fun a(texture: Texture?, rect: Rect?, paint: Paint?, i: Int, i2: Int, i3: Int, i4: Int) {
         if (texture == null || rect == null) return
         tileTexture(texture, rect, paint, i, i2, i3, i4)
     }
 
-    override fun a(texture: Texture?, rectF: RectF?, paint: KoolPaint?, f: Float, f2: Float, i: Int, i2: Int) {
+    override fun a(texture: Texture?, rectF: RectF?, paint: Paint?, f: Float, f2: Float, i: Int, i2: Int) {
         if (texture == null || rectF == null) return
         tileTexture(texture, rectF, paint, f, f2, i, i2)
     }
@@ -311,14 +312,14 @@ class SlickGraphicsEngine private constructor(
         g.clear()
     }
 
-    override fun a(i: Int, mode: KoolCanvasBlendMode?) {
+    override fun a(i: Int, mode: GameCanvasBlendMode?) {
         when (mode) {
-            KoolCanvasBlendMode.Clear -> {
+            GameCanvasBlendMode.Clear -> {
                 b(i)
                 runCatching { activeGraphics()?.clearAlphaMap() }
             }
 
-            KoolCanvasBlendMode.ClearAlpha -> {
+            GameCanvasBlendMode.ClearAlpha -> {
                 runCatching { activeGraphics()?.clearAlphaMap() }
             }
 
@@ -326,13 +327,13 @@ class SlickGraphicsEngine private constructor(
         }
     }
 
-    override fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?, paint2: KoolPaint?, f3: Float) {
+    override fun a(str: String?, f: Float, f2: Float, paint: Paint?, paint2: Paint?, f3: Float) {
         val text = str ?: return
         val textWidth = b(text, paint).toFloat()
         val textHeight = a(text, paint).toFloat()
         val left = when (paint?.j()) {
-            KoolPaint.Align.CENTER -> f - (textWidth * 0.5f) - f3
-            KoolPaint.Align.RIGHT -> f - textWidth - f3
+            Paint.Align.CENTER -> f - (textWidth * 0.5f) - f3
+            Paint.Align.RIGHT -> f - textWidth - f3
             else -> f - f3
         }
         val backgroundRect = RectF(left, f2 - f3, left + textWidth + (f3 * 2f), f2 + textHeight + f3)
@@ -340,7 +341,7 @@ class SlickGraphicsEngine private constructor(
         a(text, f, f2 + textHeight, paint)
     }
 
-    override fun a(str: String?, f: Float, f2: Float, paint: KoolPaint?) {
+    override fun a(str: String?, f: Float, f2: Float, paint: Paint?) {
         val g = activeGraphics() ?: return
         val text = str ?: return
         val font = fontForText(paint, text)
@@ -352,7 +353,7 @@ class SlickGraphicsEngine private constructor(
         g.font = oldFont
     }
 
-    override fun b(rect: Rect?, paint: KoolPaint?) {
+    override fun b(rect: Rect?, paint: Paint?) {
         a(rect, paint)
     }
 
@@ -360,12 +361,12 @@ class SlickGraphicsEngine private constructor(
 
     override fun f() = Unit
 
-    override fun a(rectF: RectF?, paint: KoolPaint?) {
+    override fun a(rectF: RectF?, paint: Paint?) {
         if (rectF == null) return
         drawRect(rectF.a, rectF.b, rectF.width(), rectF.height(), paint)
     }
 
-    override fun c(rect: Rect?, paint: KoolPaint?) {
+    override fun c(rect: Rect?, paint: Paint?) {
         if (rect == null) return
         drawRect(rect.a.toFloat(), rect.b.toFloat(), rect.c.toFloat(), rect.d.toFloat(), paint)
     }
@@ -380,7 +381,7 @@ class SlickGraphicsEngine private constructor(
         applyClip()
     }
 
-    override fun a(f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun a(f: Float, f2: Float, f3: Float, paint: Paint?) {
         val g = activeGraphics() ?: return
         withPaint(paint) {
             g.drawOval(
@@ -392,11 +393,11 @@ class SlickGraphicsEngine private constructor(
         }
     }
 
-    override fun b(f: Float, f2: Float, f3: Float, paint: KoolPaint?) {
+    override fun b(f: Float, f2: Float, f3: Float, paint: Paint?) {
         a(f, f2, f3, paint)
     }
 
-    override fun a(fArr: FloatArray?, i: Int, i2: Int, paint: KoolPaint?) {
+    override fun a(fArr: FloatArray?, i: Int, i2: Int, paint: Paint?) {
         val points = fArr ?: return
         val g = activeGraphics() ?: return
         if (i2 <= 0) return
@@ -453,7 +454,7 @@ class SlickGraphicsEngine private constructor(
         transform.translate(f, f2)
     }
 
-    override fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: KoolPaint?) {
+    override fun a(f: Float, f2: Float, f3: Float, f4: Float, paint: Paint?) {
         withPaint(paint) {
             activeGraphics()?.drawLine(transform.x(f), transform.y(f2), transform.x(f3), transform.y(f4))
         }
@@ -497,10 +498,10 @@ class SlickGraphicsEngine private constructor(
         shaderState.currentShader = null
     }
 
-    override fun a(str: String?, paint: KoolPaint?): Int =
+    override fun a(str: String?, paint: Paint?): Int =
         fontForText(paint, str ?: "").getLineHeight()
 
-    override fun b(str: String?, paint: KoolPaint?): Int =
+    override fun b(str: String?, paint: Paint?): Int =
         fontForText(paint, str ?: "").getWidth(str ?: "")
 
     override fun r(): Texture = fallbackTexture
@@ -518,14 +519,14 @@ class SlickGraphicsEngine private constructor(
             fallbackTexture
         }
 
-    private fun drawRect(x: Float, y: Float, width: Float, height: Float, paint: KoolPaint?) {
+    private fun drawRect(x: Float, y: Float, width: Float, height: Float, paint: Paint?) {
         val g = activeGraphics() ?: return
         val left = transform.x(x)
         val top = transform.y(y)
         val right = transform.x(x + width)
         val bottom = transform.y(y + height)
         withPaint(paint) {
-            if (paint?.d() == KoolPaint.Style.STROKE) {
+            if (paint?.d() == Paint.Style.STROKE) {
                 g.drawRect(left, top, right - left, bottom - top)
             } else {
                 g.fillRect(left, top, right - left, bottom - top)
@@ -543,7 +544,7 @@ class SlickGraphicsEngine private constructor(
         dstTop: Float,
         dstRight: Float,
         dstBottom: Float,
-        paint: KoolPaint?,
+        paint: Paint?,
         extraRotationDegrees: Float = 0f,
         pivotX: Float = transform.rotationPivotX,
         pivotY: Float = transform.rotationPivotY,
@@ -671,7 +672,7 @@ class SlickGraphicsEngine private constructor(
     private fun tileTexture(
         texture: Texture,
         rect: Rect,
-        paint: KoolPaint?,
+        paint: Paint?,
         offsetX: Int,
         offsetY: Int,
         trimRight: Int,
@@ -742,7 +743,7 @@ class SlickGraphicsEngine private constructor(
     private fun tileTexture(
         texture: Texture,
         rect: RectF,
-        paint: KoolPaint?,
+        paint: Paint?,
         offsetX: Float,
         offsetY: Float,
         trimRight: Int,
@@ -810,7 +811,7 @@ class SlickGraphicsEngine private constructor(
         }
     }
 
-    private inline fun withPaint(paint: KoolPaint?, block: () -> Unit) {
+    private inline fun withPaint(paint: Paint?, block: () -> Unit) {
         val g = activeGraphics() ?: return
         clearSlickShader(g)
         g.setColorRaw(colorForPaint(paint))
@@ -824,7 +825,7 @@ class SlickGraphicsEngine private constructor(
     private inline fun withSlickShader(
         graphics: Graphics,
         shaderProgram: ShaderProgram?,
-        paint: KoolPaint?,
+        paint: Paint?,
         texture: Texture?,
         block: () -> Unit,
     ) {
@@ -857,7 +858,7 @@ class SlickGraphicsEngine private constructor(
         block()
     }
 
-    private fun slickShaderFor(texture: Texture?, paint: KoolPaint?): ShaderProgram? {
+    private fun slickShaderFor(texture: Texture?, paint: Paint?): ShaderProgram? {
         val paintShader = (paint as? GamePaint)?.shaderProgram()
         if (paintShader != null) {
             return paintShader
@@ -1037,19 +1038,19 @@ class SlickGraphicsEngine private constructor(
             else -> "shader"
         }
 
-    private fun colorForPaint(paint: KoolPaint?): Color {
-        return writeResolvedColor(paint.resolvedKoolPaintColor(), paintColorScratch)
+    private fun colorForPaint(paint: Paint?): Color {
+        return writeResolvedColor(paint.resolvedPaintColor(), paintColorScratch)
     }
 
-    private fun colorForImage(paint: KoolPaint?): Color {
-        return writeResolvedColor(paint.resolvedKoolPaintColor(), imageColorScratch)
+    private fun colorForImage(paint: Paint?): Color {
+        return writeResolvedColor(paint.resolvedPaintColor(), imageColorScratch)
     }
 
     private fun writeResolvedColor(argb: Int, target: Color): Color {
-        target.r = KoolArgbColor.b(argb) / 255f
-        target.g = KoolArgbColor.c(argb) / 255f
-        target.b = KoolArgbColor.d(argb) / 255f
-        target.a = KoolArgbColor.a(argb) / 255f
+        target.r = ArgbColor.b(argb) / 255f
+        target.g = ArgbColor.c(argb) / 255f
+        target.b = ArgbColor.d(argb) / 255f
+        target.a = ArgbColor.a(argb) / 255f
         return target
     }
 
@@ -1106,7 +1107,7 @@ class SlickGraphicsEngine private constructor(
             RectF(x(rect.a), y(rect.b), x(rect.c), y(rect.d)).also { it.g() }
     }
 
-    private inline fun withSlickBlendModeForPaint(graphics: Graphics, paint: KoolPaint?, block: () -> Unit) {
+    private inline fun withSlickBlendModeForPaint(graphics: Graphics, paint: Paint?, block: () -> Unit) {
         val blendMode = slickBlendModeForPaint(paint)
         if (blendMode == null) {
             block()
@@ -1122,16 +1123,16 @@ class SlickGraphicsEngine private constructor(
         }
     }
 
-    private fun slickBlendModeForPaint(paint: KoolPaint?): SlickBlendMode? {
+    private fun slickBlendModeForPaint(paint: Paint?): SlickBlendMode? {
         when (paint?.getBlendMode()) {
-            KoolCanvasBlendMode.Source -> return SlickBlendMode.Source
-            KoolCanvasBlendMode.Add -> return SlickBlendMode.Add
-            KoolCanvasBlendMode.Multiply -> return SlickBlendMode.Multiply
-            KoolCanvasBlendMode.Screen -> return SlickBlendMode.Screen
+            GameCanvasBlendMode.Source -> return SlickBlendMode.Source
+            GameCanvasBlendMode.Add -> return SlickBlendMode.Add
+            GameCanvasBlendMode.Multiply -> return SlickBlendMode.Multiply
+            GameCanvasBlendMode.Screen -> return SlickBlendMode.Screen
             else -> Unit
         }
         return when (val filter = paint?.h()) {
-            is KoolMultiplyAddColorFilter ->
+            is MultiplyAddColorFilter ->
                 if (filter.usesLegacyAdditiveBlend()) SlickBlendMode.LightingAdd else null
 
             is TeamColorFilter ->
@@ -1198,7 +1199,7 @@ class SlickGraphicsEngine private constructor(
         val family: SlickFontFamily,
     )
 
-    private fun fontForText(paint: KoolPaint?, text: String): Font {
+    private fun fontForText(paint: Paint?, text: String): Font {
         val size = (paint?.k() ?: 16f).roundToInt().coerceAtLeast(1)
         val family = if (needsUnicodeFont(text)) {
             SlickFontFamily.DroidSansFallback
@@ -1255,10 +1256,10 @@ class SlickGraphicsEngine private constructor(
         return false
     }
 
-    private fun alignedX(text: String, x: Float, paint: KoolPaint?): Float =
+    private fun alignedX(text: String, x: Float, paint: Paint?): Float =
         when (paint?.j()) {
-            KoolPaint.Align.CENTER -> x - (b(text, paint) / 2f)
-            KoolPaint.Align.RIGHT -> x - b(text, paint)
+            Paint.Align.CENTER -> x - (b(text, paint) / 2f)
+            Paint.Align.RIGHT -> x - b(text, paint)
             else -> x
         }
 

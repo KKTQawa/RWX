@@ -21,7 +21,7 @@ import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -152,7 +152,7 @@ public class CommandCenter extends FactoryWithQueue {
         float f = this.posX;
         float f2 = this.posY;
         gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
-        Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(f, f2, this.posZ, KoolArgbColor.a(255, 255, 255, 255));
+        Effect effectCreateLightEffect = gameEngine.effectManager.createLightEffect(f, f2, this.posZ, ArgbColor.a(255, 255, 255, 255));
         if (effectCreateLightEffect != null) {
             effectCreateLightEffect.G = 8.0f;
             effectCreateLightEffect.F = 5.0f;
@@ -239,7 +239,7 @@ public class CommandCenter extends FactoryWithQueue {
         PointF pointFK = getShadowOffsetForLevel(i);
         projectileA.trackOffsetX = pointFK.x;
         projectileA.trackOffsetY = pointFK.y;
-        projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+        projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
         projectileA.damage = q(i);
         projectileA.targetUnit = baseUnit;
         projectileA.lifeTimer = 180.0f;

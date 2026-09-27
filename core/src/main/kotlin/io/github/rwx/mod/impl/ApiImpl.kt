@@ -12,8 +12,7 @@ import com.corrodinggames.rts.gameFramework.graphics.ShaderProgram
 import com.corrodinggames.rts.gameFramework.graphics.ShaderUniformValueType
 import com.corrodinggames.rts.gameFramework.graphics.Texture
 import com.corrodinggames.rts.gameFramework.mod.ModInfo
-import de.fabmax.kool.modules.ui2.Dp
-import de.fabmax.kool.modules.ui2.UiScope
+import androidx.compose.runtime.Composable
 import io.github.rwx.PlatformBridge
 import io.github.rwx.logger
 import io.github.rwx.mod.*
@@ -1070,7 +1069,7 @@ private class RecordingUi(private val api: ApiImpl) : Ui {
 
     override fun selectedUnits(): List<UnitRuntimeState> = api.selectedUnits()
 
-    override fun registerHud(id: HudId, order: Int, content: UiScope.() -> Unit) {
+    override fun registerHud(id: HudId, order: Int, content: @Composable () -> Unit) {
         UiRegistry.registerHud(api, id, order, content)
     }
 
@@ -1085,7 +1084,7 @@ private class RecordingUi(private val api: ApiImpl) : Ui {
     override fun registerWindow(
         id: ModWindowId,
         title: LocalizedText,
-        content: UiScope.(ModWindowContext, Dp) -> Unit,
+        content: @Composable (ModWindowContext) -> Unit,
     ) {
         UiRegistry.registerWindow(api, id, title, content)
     }

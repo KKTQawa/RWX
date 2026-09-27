@@ -6,7 +6,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.graphics.GamePaint;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.d.b */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/d/b.class */
@@ -19,7 +19,7 @@ public class CloudRenderer {
     Texture noiseTexture = null;
 
     /* JADX INFO: renamed from: c */
-    KoolPaint paint = new GamePaint();
+    Paint paint = new GamePaint();
 
     /* JADX INFO: renamed from: d */
     RectF drawRect = new RectF();

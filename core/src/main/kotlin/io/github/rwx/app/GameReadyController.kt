@@ -24,7 +24,7 @@ internal class GameReadyController(
             if (!gameFrameReadyMarkerPrinted && renderedGameFrameCount >= 2) {
                 gameFrameReadyMarkerPrinted = true
                 onFirstGameFrameReady()
-                println(RWX_KOOL_GAME_FRAME_READY_MARKER)
+                println(RWX_GAME_FRAME_READY_MARKER)
                 System.out.flush()
                 if (pendingAutoReturnMainMenuAfterGameReady) {
                     pendingAutoReturnMainMenuAfterGameReady = false

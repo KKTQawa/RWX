@@ -17,7 +17,7 @@ import com.corrodinggames.rts.gameFramework.network.GameOutputStream;
 import com.corrodinggames.rts.gameFramework.utility.GameViewUtils;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -353,7 +353,7 @@ public class AttackSubmarine extends WaterUnit {
             PointF pointFK = getShadowOffsetForLevel(i2);
             projectileA.trackOffsetX = pointFK.x;
             projectileA.trackOffsetY = pointFK.y;
-            projectileA.color = KoolArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
+            projectileA.color = ArgbColor.a(255, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_DATA_SERVICE, 50);
             projectileA.damage = 42.0f;
             projectileA.targetUnit = baseUnit;
             projectileA.lifeTimer = 190.0f;
@@ -371,7 +371,7 @@ public class AttackSubmarine extends WaterUnit {
         PointF pointFK2 = getShadowOffsetForLevel(i2);
         projectileA2.trackOffsetX = pointFK2.x;
         projectileA2.trackOffsetY = pointFK2.y;
-        projectileA2.color = KoolArgbColor.a(255, 30, 30, 150);
+        projectileA2.color = ArgbColor.a(255, 30, 30, 150);
         projectileA2.renderScale = 1.0f;
         projectileA2.damage = 42.0f;
         projectileA2.targetUnit = baseUnit;

@@ -53,11 +53,12 @@
 构建需要 Java 25。常用发行任务如下：
 
 ```bash
-# 当前平台 fat JAR 与 jpackage 应用镜像
-./gradlew :desktop:platformFatJar :desktop:packageDesktopDistribution
+# 当前平台桌面发行包（Compose Multiplatform 内置打包：
+# 应用镜像 + 系统安装包，产物在 desktop/build/compose/binaries）
+./gradlew :desktop:packageDistributionForCurrentOS
 
-# 包含所有桌面平台原生库的通用 JAR
-./gradlew :desktop:multiPlatformFatJar
+# 当前平台单 JAR（Compose uber jar，仅含当前 OS 原生库）
+./gradlew :desktop:packageUberJarForCurrentOS
 
 # Android APK
 ./gradlew :android:assembleRelease
@@ -65,6 +66,10 @@
 
 更多信息请参考 [CI/CD 配置](.github/workflows/ci.yml) 以及
 [文档站快速开始](https://rwx-docs.netlify.app/zh/tutorial/getting-started)。
+
+## 感谢
+
+UI设计参考了[RWPP](https://github.com/RWPP-Team/RWPP)
 
 ## 免责声明
 

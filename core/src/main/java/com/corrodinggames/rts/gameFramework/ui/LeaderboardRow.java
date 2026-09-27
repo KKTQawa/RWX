@@ -1,14 +1,14 @@
 package com.corrodinggames.rts.gameFramework.ui;
 
 import com.corrodinggames.rts.gameFramework.GameEngine;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.l */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/l.class */
 public class LeaderboardRow {
 
     /* JADX INFO: renamed from: a */
-    KoolPaint labelPaint;
+    Paint labelPaint;
 
     /* JADX INFO: renamed from: b */
     String label;
@@ -17,7 +17,7 @@ public class LeaderboardRow {
     float labelWidth;
 
     /* JADX INFO: renamed from: e */
-    KoolPaint valuePaint;
+    Paint valuePaint;
 
     /* JADX INFO: renamed from: f */
     String value;
@@ -31,7 +31,7 @@ public class LeaderboardRow {
     /* JADX INFO: renamed from: g */
     int color = -1;
 
-    public LeaderboardRow(String str, KoolPaint paint, String str2, KoolPaint paint2) {
+    public LeaderboardRow(String str, Paint paint, String str2, Paint paint2) {
         GameEngine gameEngine = GameEngine.getInstance();
         this.labelPaint = paint;
         this.label = str;

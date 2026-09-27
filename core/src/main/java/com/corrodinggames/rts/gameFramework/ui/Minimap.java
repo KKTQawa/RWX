@@ -15,8 +15,8 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Point;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -109,13 +109,13 @@ public class Minimap {
     public float height = 120.0f;
 
     /* JADX INFO: renamed from: n */
-    final KoolPaint minimapTexturePaint = new KoolPaint();
+    final Paint minimapTexturePaint = new Paint();
 
     /* JADX INFO: renamed from: o */
-    final KoolPaint borderPaint = new KoolPaint();
+    final Paint borderPaint = new Paint();
 
     /* JADX INFO: renamed from: p */
-    final KoolPaint dynamicTeamColorPaint = new KoolPaint();
+    final Paint dynamicTeamColorPaint = new Paint();
 
     /* JADX INFO: renamed from: q */
     float borderPulsePhase = 0.0f;
@@ -124,40 +124,40 @@ public class Minimap {
     float effectPulsePhase = 0.0f;
 
     /* JADX INFO: renamed from: s */
-    final KoolPaint cameraViewportPaint = new GamePaint();
+    final Paint cameraViewportPaint = new GamePaint();
 
     /* JADX INFO: renamed from: t */
-    final KoolPaint alertEffectPaint = new KoolPaint();
+    final Paint alertEffectPaint = new Paint();
 
     /* JADX INFO: renamed from: u */
-    final KoolPaint unitEffectPaint = new KoolPaint();
+    final Paint unitEffectPaint = new Paint();
 
     /* JADX INFO: renamed from: v */
-    final KoolPaint messageEffectPaint = new KoolPaint();
+    final Paint messageEffectPaint = new Paint();
 
     /* JADX INFO: renamed from: w */
     public final Rect minimapBoundsRect = new Rect();
 
     /* JADX INFO: renamed from: x */
-    final KoolPaint ownUnitPaint = new GamePaint();
+    final Paint ownUnitPaint = new GamePaint();
 
     /* JADX INFO: renamed from: y */
-    final KoolPaint allyUnitPaint = new GamePaint();
+    final Paint allyUnitPaint = new GamePaint();
 
     /* JADX INFO: renamed from: z */
-    final KoolPaint enemyUnitPaint = new GamePaint();
+    final Paint enemyUnitPaint = new GamePaint();
 
     /* JADX INFO: renamed from: A */
-    final KoolPaint ownBuildPreviewPaint = new GamePaint();
+    final Paint ownBuildPreviewPaint = new GamePaint();
 
     /* JADX INFO: renamed from: B */
-    final KoolPaint allyBuildPreviewPaint = new GamePaint();
+    final Paint allyBuildPreviewPaint = new GamePaint();
 
     /* JADX INFO: renamed from: C */
-    final KoolPaint enemyBuildPreviewPaint = new GamePaint();
+    final Paint enemyBuildPreviewPaint = new GamePaint();
 
     /* JADX INFO: renamed from: D */
-    final KoolPaint strategicPointPaint = new GamePaint();
+    final Paint strategicPointPaint = new GamePaint();
 
     /* JADX INFO: renamed from: E */
     final Rect cameraViewportRect = new Rect();
@@ -213,29 +213,29 @@ public class Minimap {
 
     /* JADX INFO: renamed from: a */
     public void init() {
-        this.borderPaint.a(KoolPaint.Style.STROKE);
+        this.borderPaint.a(Paint.Style.STROKE);
         this.borderPaint.a(1.0f);
         this.cameraViewportPaint.a(255, 255, 255, 255);
-        this.cameraViewportPaint.a(KoolPaint.Style.STROKE);
+        this.cameraViewportPaint.a(Paint.Style.STROKE);
         this.cameraViewportPaint.a(1.0f);
         this.fogAlphaPaints = new GamePaint[11];
         for (int i = 0; i <= 10; i++) {
             this.fogAlphaPaints[i] = new GamePaint();
             this.fogAlphaPaints[i].b(-16777216);
-            this.fogAlphaPaints[i].a(KoolPaint.Style.FILL);
+            this.fogAlphaPaints[i].a(Paint.Style.FILL);
             this.fogAlphaPaints[i].c(i * 25);
         }
         this.shroudFogPaint = new GamePaint();
         this.shroudFogPaint.b(-16777216);
-        this.shroudFogPaint.a(KoolPaint.Style.FILL);
+        this.shroudFogPaint.a(Paint.Style.FILL);
         this.alertEffectPaint.a(255, 255, 0, 0);
-        this.alertEffectPaint.a(KoolPaint.Style.STROKE);
+        this.alertEffectPaint.a(Paint.Style.STROKE);
         this.alertEffectPaint.a(2.0f);
         this.unitEffectPaint.a(155, 255, 0, 0);
-        this.unitEffectPaint.a(KoolPaint.Style.STROKE);
+        this.unitEffectPaint.a(Paint.Style.STROKE);
         this.unitEffectPaint.a(2.0f);
         this.messageEffectPaint.a(200, 12, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_11, 219);
-        this.messageEffectPaint.a(KoolPaint.Style.STROKE);
+        this.messageEffectPaint.a(Paint.Style.STROKE);
         this.messageEffectPaint.a(2.0f);
         this.ownUnitPaint.b(-16711936);
         this.allyUnitPaint.b(-256);
@@ -248,7 +248,7 @@ public class Minimap {
 
     /* JADX INFO: renamed from: a */
     public static int darkenColor(int i) {
-        return KoolArgbColor.a(KoolArgbColor.a(i), (int) (KoolArgbColor.b(i) * 0.5f), (int) (KoolArgbColor.c(i) * 0.5f), (int) (KoolArgbColor.d(i) * 0.5f));
+        return ArgbColor.a(ArgbColor.a(i), (int) (ArgbColor.b(i) * 0.5f), (int) (ArgbColor.c(i) * 0.5f), (int) (ArgbColor.d(i) * 0.5f));
     }
 
     /* JADX INFO: renamed from: a */
@@ -402,7 +402,7 @@ public class Minimap {
                 this.fogGraphics.p();
                 Rect rect2 = new Rect(0, 0, (int) this.width, (int) this.height);
                 Rect rect3 = new Rect(i3 * i, i4 * i2, i3 * (i + 1), i4 * (i2 + 1));
-                KoolPaint paint2 = new KoolPaint();
+                Paint paint2 = new Paint();
                 paint2.a(true);
                 paint2.d(true);
                 paint2.b(true);
@@ -412,7 +412,7 @@ public class Minimap {
         this.unitsGraphics.p();
         Rect rect4 = new Rect(0, 0, (int) this.width, (int) this.height);
         this.backgroundGraphics.b(-16777216);
-        KoolPaint paint3 = new KoolPaint();
+        Paint paint3 = new Paint();
         paint3.a(true);
         paint3.d(true);
         paint3.b(true);
@@ -432,7 +432,7 @@ public class Minimap {
         GamePaint gamePaint;
         GameEngine gameEngine = GameEngine.getInstance();
         this.fogUpdateRect.a(0, (int) (f * this.height), (int) this.width, (int) (f2 * this.height));
-        this.fogGraphics.a(this.backgroundTexture, this.fogUpdateRect, this.fogUpdateRect, (KoolPaint) null);
+        this.fogGraphics.a(this.backgroundTexture, this.fogUpdateRect, this.fogUpdateRect, (Paint) null);
         TileMap tileMap = gameEngine.tileMap;
         if (tileMap.fogEnabled) {
             boolean z = tileMap.fogRenderActive;
@@ -493,14 +493,14 @@ public class Minimap {
             }
         }
         this.fogGraphics.p();
-        this.unitsGraphics.a(this.fogTexture, this.fogUpdateRect, this.fogUpdateRect, (KoolPaint) null);
+        this.unitsGraphics.a(this.fogTexture, this.fogUpdateRect, this.fogUpdateRect, (Paint) null);
         this.unitsGraphics.p();
         if (GameEngine.isGDXVersion) {
         }
     }
 
     /* JADX INFO: renamed from: a */
-    static LineDrawer getLineDrawer(int i, KoolPaint paint) {
+    static LineDrawer getLineDrawer(int i, Paint paint) {
         synchronized (lineDrawerPool) {
             LineDrawer lineDrawer = null;
             for (LineDrawer lineDrawer2 : lineDrawerPool) {
@@ -575,7 +575,7 @@ public class Minimap {
         for (int i12 = -1; i12 < PlayerTeam.TEAM_NEUTRAL; i12++) {
             PlayerTeam playerTeamK = PlayerTeam.k(i12);
             if (playerTeamK != null) {
-                KoolPaint paint = playerTeamK.teamColorPaint;
+                Paint paint = playerTeamK.teamColorPaint;
                 if (gameEngine.settingsEngine.useMinimapAllyColors) {
                     if (z) {
                         this.dynamicTeamColorPaint.b(PlayerTeam.i(playerTeamK.teamColorId));
@@ -615,11 +615,11 @@ public class Minimap {
                         gameEngine.renderGraphicsEngine.a(lineDrawer);
                     }
                 }
-                KoolPaint paint2 = playerTeamK.teamTextPaint;
+                Paint paint2 = playerTeamK.teamTextPaint;
                 if (gameEngine.settingsEngine.useMinimapAllyColors) {
                     if (z) {
                         this.dynamicTeamColorPaint.b(PlayerTeam.i(playerTeamK.teamColorId));
-                        KoolPaint paint3 = this.dynamicTeamColorPaint;
+                        Paint paint3 = this.dynamicTeamColorPaint;
                     } else if (gameEngine.playerTeam == playerTeamK) {
                         paint2 = this.ownBuildPreviewPaint;
                     } else if (gameEngine.playerTeam.d(playerTeamK)) {
@@ -796,7 +796,7 @@ public class Minimap {
 
     /* JADX INFO: renamed from: e */
     public void draw(float f) {
-        KoolPaint paint;
+        Paint paint;
         GameEngine gameEngine = GameEngine.getInstance();
         GraphicsEngine graphicsEngine = gameEngine.renderGraphicsEngine;
         updateMinimapPosition();

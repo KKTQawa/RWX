@@ -52,11 +52,12 @@ English, [简体中文](README_zh.md)
 Java 25 is required. Common release tasks:
 
 ```bash
-# Current-platform fat JAR and jpackage app image
-./gradlew :desktop:platformFatJar :desktop:packageDesktopDistribution
+# Current-platform desktop distribution via Compose Multiplatform built-in packaging
+# (app image plus OS installers under desktop/build/compose/binaries)
+./gradlew :desktop:packageDistributionForCurrentOS
 
-# One large JAR containing every supported desktop native library
-./gradlew :desktop:multiPlatformFatJar
+# Current-platform single JAR (Compose uber jar, current OS natives only)
+./gradlew :desktop:packageUberJarForCurrentOS
 
 # Android APK
 ./gradlew :android:assembleRelease
@@ -65,10 +66,15 @@ Java 25 is required. Common release tasks:
 See the [workflow](.github/workflows/ci.yml) and the
 [getting started guide](https://rwx-docs.netlify.app/tutorial/getting-started) for more details.
 
+## Thanks
+
+The UI design references [RWPP](https://github.com/RWPP-Team/RWPP)
+
 ## Disclaimer
 
 This is an unofficial extension project for Rusted Warfare, aiming to extend game functionality and gameplay through a
 modern technology stack. All related assets used in this project belong to their original authors.
 For educational and research purposes only, commercial use is prohibited.
+
 
 ---

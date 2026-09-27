@@ -833,6 +833,22 @@ public class SlickToAndroidKeycodes {
     /* JADX INFO: renamed from: a */
     public static void initializeKeyCodeMaps() {
         slickToAndroid = buildKeyCodeConversionMap("slickToAndroidCodes", slickNameMap, androidNameMap);
+        // Physical keyboard semantics differ from Android's device BACK/HOME keys, and
+        // several Slick spellings have no Android name match. Keep gameplay and UI capture aligned.
+        slickToAndroid.put(SlickCodes.KEY_BACK, AndroidCodes.KEYCODE_DEL);
+        slickToAndroid.put(SlickCodes.KEY_DELETE, AndroidCodes.KEYCODE_FORWARD_DEL);
+        slickToAndroid.put(SlickCodes.KEY_HOME, AndroidCodes.KEYCODE_MOVE_HOME);
+        slickToAndroid.put(SlickCodes.KEY_END, AndroidCodes.KEYCODE_MOVE_END);
+        slickToAndroid.put(SlickCodes.KEY_LBRACKET, AndroidCodes.KEYCODE_LEFT_BRACKET);
+        slickToAndroid.put(SlickCodes.KEY_RBRACKET, AndroidCodes.KEYCODE_RIGHT_BRACKET);
+        slickToAndroid.put(SlickCodes.KEY_LCONTROL, AndroidCodes.KEYCODE_CTRL_LEFT);
+        slickToAndroid.put(SlickCodes.KEY_RCONTROL, AndroidCodes.KEYCODE_CTRL_RIGHT);
+        slickToAndroid.put(SlickCodes.KEY_LSHIFT, AndroidCodes.KEYCODE_SHIFT_LEFT);
+        slickToAndroid.put(SlickCodes.KEY_RSHIFT, AndroidCodes.KEYCODE_SHIFT_RIGHT);
+        slickToAndroid.put(SlickCodes.KEY_LALT, AndroidCodes.KEYCODE_ALT_LEFT);
+        slickToAndroid.put(SlickCodes.KEY_RALT, AndroidCodes.KEYCODE_ALT_RIGHT);
+        slickToAndroid.put(SlickCodes.KEY_PAUSE, AndroidCodes.KEYCODE_BREAK);
+        slickToAndroid.put(SlickCodes.KEY_DECIMAL, AndroidCodes.KEYCODE_NUMPAD_DOT);
         androidKeyCodeToNameMap = new HashMap();
         ArrayList arrayList = new ArrayList();
         for (String str : slickNameMap.keySet()) {
@@ -847,6 +863,12 @@ public class SlickToAndroidKeycodes {
             if (num != null) {
                 androidKeyCodeToNameMap.put(num, lowerCase);
             }
+        }
+        // Some Android keys have no identically named Slick alias (DEL, LEFT_BRACKET,
+        // NUMPADDOT, ...). They must still serialize to a name getAndroidKeyCode can read.
+        for (Object entryObject : androidNameMap.entrySet()) {
+            java.util.Map.Entry entry = (java.util.Map.Entry) entryObject;
+            androidKeyCodeToNameMap.putIfAbsent(entry.getValue(), ((String) entry.getKey()).toLowerCase(Locale.ENGLISH));
         }
     }
 

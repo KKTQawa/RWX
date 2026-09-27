@@ -1,6 +1,6 @@
 package com.corrodinggames.rts.gameFramework.graphics;
 
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class TeamColorShader extends ShaderProgram {
     }
 
     @Override
-    public boolean a(KoolPaint paint, Texture texture) {
+    public boolean a(Paint paint, Texture texture) {
         boolean z = false;
         if (texture instanceof TeamColorTexture) {
             TeamColorTexture teamColorTexture = (TeamColorTexture) texture;

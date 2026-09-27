@@ -7,7 +7,7 @@ import com.corrodinggames.rts.gameFramework.Utility;
 import com.corrodinggames.rts.gameFramework.path.PathEngine;
 import com.corrodinggames.rts.gameFramework.utility.Debug;
 import com.corrodinggames.rts.gameFramework.utility.Log;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,7 +44,7 @@ public final class PathSolver implements Runnable {
     public volatile boolean s = true;
     Object x = new Object();
     Object A = new Object();
-    KoolPaint B = new KoolPaint();
+    Paint B = new Paint();
 
     public void a(Path path) {
         if (!this.s) {

@@ -13,7 +13,7 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.PointF;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
+import io.github.rwx.render.canvas.ArgbColor;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.game.units.b.a */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/game/units/b/a.class */
@@ -117,7 +117,7 @@ public class AirShip extends AirUnit {
         projectileA.speed = 6.0f;
         projectileA.renderScale = 2.0f;
         projectileA.glowScale = 4.0f;
-        projectileA.color = KoolArgbColor.a(250, 74, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 255);
+        projectileA.color = ArgbColor.a(250, 74, SlickToAndroidKeycodes.AndroidCodes.KEYCODE_TV_RADIO_SERVICE, 255);
         GameEngine gameEngine = GameEngine.getInstance();
         Effect effectCreateFlameEffect = gameEngine.effectManager.createFlameEffect(pointFE.x, pointFE.y, this.posZ, this.movementLevels[i].targetX);
         if (effectCreateFlameEffect != null) {

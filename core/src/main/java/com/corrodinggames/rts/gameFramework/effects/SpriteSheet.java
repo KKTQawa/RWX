@@ -4,8 +4,8 @@ import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.d.g */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/d/g.class */
@@ -30,7 +30,7 @@ public final class SpriteSheet {
         this.j.j();
         for (int i = 0; i < this.j.m(); i++) {
             for (int i2 = 0; i2 < this.j.l(); i2++) {
-                this.j.a(i, i2, KoolArgbColor.a(KoolArgbColor.a(this.j.a(i, i2)), 0, 0, 0));
+                this.j.a(i, i2, ArgbColor.a(ArgbColor.a(this.j.a(i, i2)), 0, 0, 0));
             }
         }
         this.j.p();
@@ -38,7 +38,7 @@ public final class SpriteSheet {
     }
 
     /* JADX INFO: renamed from: a */
-    public void drawSprite(int i, float f, float f2, KoolPaint paint) {
+    public void drawSprite(int i, float f, float f2, Paint paint) {
         Rect rect = l;
         RectF rectF = m;
         GameEngine gameEngine = GameEngine.getInstance();

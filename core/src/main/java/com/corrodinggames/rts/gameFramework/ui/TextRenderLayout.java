@@ -4,7 +4,7 @@ import com.corrodinggames.rts.gameFramework.GameEngine;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.utility.FastArrayList;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.f.aj */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/f/aj.class */
@@ -17,10 +17,10 @@ public class TextRenderLayout {
     Rect rect;
 
     /* JADX INFO: renamed from: c */
-    KoolPaint defaultPaint;
+    Paint defaultPaint;
 
     /* JADX INFO: renamed from: d */
-    KoolPaint highlightPaint;
+    Paint highlightPaint;
 
     public void a(final float float1, final float float2) {
         final GameEngine instance = GameEngine.getInstance();

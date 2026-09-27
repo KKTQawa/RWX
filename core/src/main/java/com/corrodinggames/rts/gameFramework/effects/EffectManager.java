@@ -10,10 +10,10 @@ import com.corrodinggames.rts.gameFramework.graphics.ShaderProgram;
 import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolDisplacementEffect;
-import io.github.rwx.render.canvas.KoolMultiplyAddColorFilter;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.DisplacementEffect;
+import io.github.rwx.render.canvas.MultiplyAddColorFilter;
+import io.github.rwx.render.canvas.Paint;
 
 /* JADX INFO: renamed from: com.corrodinggames.rts.gameFramework.d.c */
 /* JADX INFO: loaded from: game-lib.jar:com/corrodinggames/rts/gameFramework/d/c.class */
@@ -28,7 +28,7 @@ public final class EffectManager {
     /* JADX INFO: renamed from: j */
     public int maxParticlesLow;
 
-    public static KoolDisplacementEffect displacementEffect;
+    public static DisplacementEffect displacementEffect;
 
     /* JADX INFO: renamed from: k */
     public static ShaderProgram shader;
@@ -57,9 +57,9 @@ public final class EffectManager {
     public static final Rect p = new Rect();
 
     /* JADX INFO: renamed from: q */
-    public static final KoolPaint paint = new KoolPaint();
+    public static final Paint paint = new Paint();
 
-    public static final KoolPaint r = new KoolPaint();
+    public static final Paint r = new Paint();
 
     /* JADX INFO: renamed from: a */
     public int activeEffectsCount = 0;
@@ -89,7 +89,7 @@ public final class EffectManager {
     boolean forceHighQuality = false;
 
     /* JADX INFO: renamed from: w */
-    public final KoolPaint linePaint = new KoolPaint();
+    public final Paint linePaint = new Paint();
 
     /* JADX INFO: renamed from: x */
     float lastUpdate = 0.0f;
@@ -279,7 +279,7 @@ public final class EffectManager {
             effectCreateEffectInternal.W = effectCreateEffectInternal.V;
             effectCreateEffectInternal.fadeIn = false;
             if (i != 0) {
-                effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(i, 0);
+                effectCreateEffectInternal.B = new MultiplyAddColorFilter(i, 0);
             }
         }
         return effectCreateEffectInternal;
@@ -303,7 +303,7 @@ public final class EffectManager {
             effectCreateEffectInternal.G = 0.8f;
             effectCreateEffectInternal.F = 2.3f;
             if (i != 0) {
-                effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(i, 0);
+                effectCreateEffectInternal.B = new MultiplyAddColorFilter(i, 0);
             }
         }
         return effectCreateEffectInternal;
@@ -365,7 +365,7 @@ public final class EffectManager {
             effectCreateEffectInternal.d = true;
             if (i != 0) {
                 effectCreateEffectInternal.startColor = i;
-                effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(i, 0);
+                effectCreateEffectInternal.B = new MultiplyAddColorFilter(i, 0);
             }
         }
         return effectCreateEffectInternal;
@@ -409,10 +409,10 @@ public final class EffectManager {
             effectCreateEffectInternal.P = f4;
             effectCreateEffectInternal.Q = f5;
             if (i != 0) {
-                i = KoolArgbColor.a(255, 0, 0, 200);
+                i = ArgbColor.a(255, 0, 0, 200);
             }
             if (i != 0) {
-                effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(i, 0);
+                effectCreateEffectInternal.B = new MultiplyAddColorFilter(i, 0);
             }
         }
         return effectCreateEffectInternal;
@@ -454,7 +454,7 @@ public final class EffectManager {
             effectCreateEffectInternal.F = 1.3f;
             effectCreateEffectInternal.ar = (short) 1;
             if (i != 0) {
-                effectCreateEffectInternal.B = new KoolMultiplyAddColorFilter(i, 0);
+                effectCreateEffectInternal.B = new MultiplyAddColorFilter(i, 0);
             }
         }
         return effectCreateEffectInternal;
@@ -658,7 +658,7 @@ public final class EffectManager {
         this.linePaint.a(130, 200, 0, 0);
         this.linePaint.a(true);
         this.linePaint.a(2.0f);
-        this.linePaint.a(KoolPaint.Cap.ROUND);
+        this.linePaint.a(Paint.Cap.ROUND);
         if (GameEngine.isPCOrIOSVersion) {
             this.linePaint.a(3.0f);
         }

@@ -14,7 +14,7 @@ import com.corrodinggames.rts.gameFramework.utility.Log;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.geometry.RectF;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.Properties;
 
@@ -305,7 +305,7 @@ public final class MapTile {
     }
 
     /* JADX INFO: renamed from: a */
-    public void renderTile(GraphicsEngine graphicsEngine, RectF rectF, float f, KoolPaint paint) {
+    public void renderTile(GraphicsEngine graphicsEngine, RectF rectF, float f, Paint paint) {
         Tileset tileset = this.tileset;
         graphicsEngine.a(tileset.tilesetBitmap, tileset.getTileRectCached(this.tilesetLocalIndex), rectF, paint);
     }

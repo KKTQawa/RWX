@@ -5,7 +5,6 @@ import io.github.rwx.PreferenceStorage
 import io.github.rwx.mod.ModRepository
 import io.github.rwx.net.ResourceBrowserRepository
 import io.github.rwx.net.UpdateRepository
-import io.github.rwx.render.canvas.*
 import io.github.rwx.settings.GameSettingsRepository
 import io.github.rwx.ui.host.*
 import io.github.rwx.ui.model.*
@@ -25,15 +24,6 @@ val coreModule = module {
     }
     single { ResourceBrowserRepository(storage = get<PlatformStorage>()) }
     single { UpdateRepository() }
-    single<KoolCanvasTextureStore> { KoolCanvasTextureRegistry }
-    single<KoolCanvasTextureResolver> { get<KoolCanvasTextureStore>() }
-    single<KoolCanvasContextResourceInvalidator> { KoolCanvasTextureRegistry }
-    factory { parameters ->
-        KoolCanvasSceneHost(
-            frameRenderer = KoolCanvasFrameRenderer(textureStore = get()),
-            sceneName = parameters.getOrNull<String>() ?: KoolCanvasSceneHost.DEFAULT_SCENE_NAME,
-        )
-    }
     single<LevelSelectViewModelFactory> {
         val storage = get<PlatformStorage>()
         val viewModels = mutableMapOf<LevelSelectMode, LevelSelectViewModel>()
@@ -86,7 +76,7 @@ val coreModule = module {
             onAction = parameters.getOrNull<(SettingsAction) -> Unit>() ?: {},
         )
     }
-    single { parameters ->
+    factory { parameters ->
         DialogSceneHost(
             model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
             onVisibilityChanged = parameters.getOrNull<(Boolean) -> Unit>() ?: {},
@@ -98,41 +88,24 @@ val coreModule = module {
             onVisibilityChanged = parameters.getOrNull<(Boolean) -> Unit>() ?: {},
         )
     }
-    single { parameters ->
-        SnackbarSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
-            onVisibilityChanged = parameters.getOrNull<(Boolean) -> Unit>() ?: {},
-        )
-    }
     factory { parameters ->
         MultiplayerSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
             onAction = parameters.getOrNull<(MultiplayerAction) -> Unit>() ?: {},
         )
     }
     factory { parameters ->
         ModsSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
             onAction = parameters.getOrNull<(ModsAction) -> Unit>() ?: {},
         )
     }
     factory { parameters ->
         ResourceBrowserSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
             onAction = parameters.getOrNull<(ResourceBrowserAction) -> Unit>() ?: {},
         )
     }
     factory { parameters ->
         BattleRoomSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
             onAction = parameters.getOrNull<(BattleRoomAction) -> Unit>() ?: {},
         )
     }
-    factory { parameters ->
-        ModWindowSceneHost(
-            model = parameters.getOrNull<SettingsModel>() ?: SettingsModel(),
-            onBack = parameters.getOrNull<() -> Unit>() ?: {},
-        )
-    }
-    factory { ModHudSceneHost() }
 }

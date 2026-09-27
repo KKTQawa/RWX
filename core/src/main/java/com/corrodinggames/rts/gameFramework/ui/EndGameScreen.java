@@ -9,8 +9,8 @@ import com.corrodinggames.rts.gameFramework.ui.widgets.UIStyle;
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes;
 import io.github.rwx.geometry.Rect;
 import io.github.rwx.platform.CoreGameView;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 import io.github.rwx.ui.InGameMenuController;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class EndGameScreen {
 
     /* JADX INFO: renamed from: a */
-    KoolPaint textPaint;
+    Paint textPaint;
 
     /* JADX INFO: renamed from: n */
     boolean savedSelectionBoxActive;
@@ -81,9 +81,9 @@ public class EndGameScreen {
     public EndGameScreen() {
         GameEngine gameEngine = GameEngine.getInstance();
         setupButtonActions();
-        this.textPaint = new KoolPaint();
+        this.textPaint = new Paint();
         this.textPaint.a(true);
-        this.textPaint.a(KoolPaint.Align.CENTER);
+        this.textPaint.a(Paint.Align.CENTER);
         this.textPaint.a(255, 0, 255, 0);
         gameEngine.updatePaintTextSize(this.textPaint, 34.0f);
     }
@@ -218,8 +218,8 @@ public class EndGameScreen {
             int screenPixels5 = this.screenBounds.b + gameEngine.toScreenPixels(40);
             int i2 = (int) (gameEngine.currentScreenWidthPixels / 2.0f);
             int screenPixels6 = this.screenBounds.d - gameEngine.toScreenPixels(45);
-            int iA = KoolArgbColor.a(140, 100, 100, 100);
-            KoolPaint paint = this.textPaint;
+            int iA = ArgbColor.a(140, 100, 100, 100);
+            Paint paint = this.textPaint;
             String str = "Victory!";
             if (gameEngine.hasLostGame) {
                 str = "Defeat";
@@ -237,7 +237,7 @@ public class EndGameScreen {
                     this.fireworkTimer = 0.0f;
                     gameEngine.effectManager.setOverrideEffectQuality(EffectQuality.critical);
                     gameEngine.effectManager.setForceHighQuality();
-                    Effect effectCreateLightEffectInternal = gameEngine.effectManager.createLightEffectInternal(0.0f, 0.0f, 0.0f, KoolArgbColor.a(255, Utility.getRandomIntInRange(0, 255), Utility.getRandomIntInRange(0, 255), Utility.getRandomIntInRange(0, 255)));
+                    Effect effectCreateLightEffectInternal = gameEngine.effectManager.createLightEffectInternal(0.0f, 0.0f, 0.0f, ArgbColor.a(255, Utility.getRandomIntInRange(0, 255), Utility.getRandomIntInRange(0, 255), Utility.getRandomIntInRange(0, 255)));
                     if (effectCreateLightEffectInternal != null) {
                         effectCreateLightEffectInternal.ar = (short) 4;
                         effectCreateLightEffectInternal.I = i2 + Utility.randomFloatInRange(-70.0f, 70.0f);
@@ -306,7 +306,7 @@ public class EndGameScreen {
         this.rateGamePopupRect.a(i, i2, screenPixels, screenPixels2);
         gameEngine.renderGraphicsEngine.b(this.rateGamePopupRect, gameUI.minimapViewportBorderPaint);
         int i3 = i + (screenPixels / 2);
-        KoolPaint paint = this.textPaint;
+        Paint paint = this.textPaint;
         String str = rateGameText;
         paint.a(str, 0, str.length(), this.textBounds);
         gameEngine.renderGraphicsEngine.a(str, i3, i2 - ((paint.l() + paint.m()) / 2.0f), paint);
@@ -314,7 +314,7 @@ public class EndGameScreen {
         int screenPixels3 = gameEngine.toScreenPixels(70);
         int screenPixels4 = gameEngine.toScreenPixels(30);
         int screenPixels5 = ((i + (screenPixels / 2)) - gameEngine.toScreenPixels(10)) - screenPixels3;
-        int iA = KoolArgbColor.a(140, 100, 100, 100);
+        int iA = ArgbColor.a(140, 100, 100, 100);
         if (gameUI.a(screenPixels5, iC, screenPixels3, screenPixels4, rateGameYesText, IconGroup.none, false, iA, gameUI.buildingPreviewInvalidPaint, (UIStyle) null)) {
             this.showRateGamePopup = false;
             CoreGameView gameView = gameEngine.activeGameView;

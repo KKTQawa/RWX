@@ -2,7 +2,7 @@ package com.corrodinggames.rts.gameFramework.graphics.opengl
 
 import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.graphics.*
-import io.github.rwx.render.canvas.KoolPaint
+import io.github.rwx.render.canvas.Paint
 
 class TextureAtlas {
     @JvmField
@@ -12,7 +12,7 @@ class TextureAtlas {
     var b: GraphicsEngine? = null
 
     @JvmField
-    var c: KoolPaint? = null
+    var c: Paint? = null
 
     @JvmField
     var d: Int = 0

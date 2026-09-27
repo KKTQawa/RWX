@@ -3,7 +3,6 @@ package io.github.rwx.ui.model
 import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.GameSaver
 import com.corrodinggames.rts.gameFramework.file.FileHelper
-import io.github.rwx.LegacyAssetBridge
 import io.github.rwx.PlatformStorage
 import io.github.rwx.i18n.I18n
 import io.github.rwx.i18n.I18nText
@@ -36,14 +35,16 @@ data class MapEntry(
     val playerCount: Int? = null,
     val requiredRwxFeatures: List<String> = emptyList(),
     val type: LevelSelectMode = LevelSelectMode.Skirmish,
+    val previewOverride: String? = null,
+    val hasSiblingIndex: Boolean = false,
 ) {
     val previewAssetPath: String? =
         if (type == LevelSelectMode.SavedGames) {
             null
+        } else if (hasSiblingIndex) {
+            previewOverride
         } else {
-            MAP_PREVIEW_SUFFIX.map {
-                mapAssetPath.removeSuffix(".tmx") + "_map" + it
-            }.firstOrNull { LegacyAssetBridge.assetExists(it) }
+            previewOverride ?: cachedPreview(mapAssetPath)
         }
     val fileName: String
         get() = mapAssetPath.trimEnd('/', '\\').substringAfterLast('/')
@@ -52,24 +53,16 @@ data class MapEntry(
     val isSavedGame: Boolean get() = type == LevelSelectMode.SavedGames
 
     companion object {
-        private fun generateCaseCombinations(strings: Collection<String>): Set<String> = strings.flatMap { str ->
-            val chars = str.toList()
-            val n = chars.size
-            (0 until (1 shl n)).map { mask ->
-                chars.mapIndexed { index, ch ->
-                    if (ch.isLetter()) {
-                        if (mask shr index and 1 == 1) ch.uppercaseChar()
-                        else
-                            ch.lowercaseChar()
-                    } else ch
-                }.joinToString("")
+        private val previewCacheLock = Any()
+        private val previewCache = HashMap<String, String?>()
 
-            }
-        }.toSet()
+        internal fun cachedPreview(mapPath: String): String? = synchronized(previewCacheLock) {
+            if (previewCache.containsKey(mapPath)) previewCache[mapPath] else null
+        }
 
-        private val MAP_PREVIEW_SUFFIX = generateCaseCombinations(
-            listOf(".png", ".jpg", ".jpeg")
-        )
+        internal fun cachePreview(mapPath: String, preview: String?) = synchronized(previewCacheLock) {
+            previewCache[mapPath] = preview
+        }
 
         private val leadingPlayerTagRegex = Regex("""^\[(?:z;)?[po]\d+]\s*""", RegexOption.IGNORE_CASE)
         private val sortPrefixRegex = Regex("""^[a-z]\d+;""", RegexOption.IGNORE_CASE)
@@ -96,25 +89,28 @@ data class LevelSelectFilterOption(
     override fun toString(): String = label
 
     companion object {
-        val All: LevelSelectFilterOption = LevelSelectFilterOption("All maps")
+        val All: LevelSelectFilterOption
+            get() = LevelSelectFilterOption(I18n.levelselect.filter.all())
     }
 }
 
-enum class LevelSelectSortOption(private val label: String) {
-    Default("Default"),
-    Name("Name"),
-    Players("Players"),
+enum class LevelSelectSortOption(private val text: I18nText) {
+    Default(I18n.levelselect.sort.default),
+    Name(I18n.levelselect.sort.name),
+    Players(I18n.levelselect.sort.players),
     ;
 
-    override fun toString(): String = label
+    override fun toString(): String = text()
 }
 
 object LevelSelectMapBrowser {
     fun filterOptions(maps: List<MapEntry>): List<LevelSelectFilterOption> {
         val playerCounts = maps.mapNotNull { it.playerCount }.distinct().sorted()
-        return listOf(LevelSelectFilterOption.All) +
-                playerCounts.map { count -> LevelSelectFilterOption("${count}p maps", count) } +
-                listOf(LevelSelectFilterOption("RWX modes", rwxOnly = true))
+        return buildList {
+            addAll(listOf(LevelSelectFilterOption.All))
+            playerCounts.mapTo(this) { count -> LevelSelectFilterOption("$count ${I18n.levelselect.players()}", count) }
+            addAll(listOf(LevelSelectFilterOption(I18n.levelselect.filter.rwxModes(), rwxOnly = true)))
+        }
     }
 
     fun visibleMaps(
@@ -178,11 +174,6 @@ class LevelSelectViewModel(
         }
     }
 
-    /**
-     * Drops the cached built-in map list so the next [items] call re-scans the assets. Called after a
-     * mod reload so newly enabled mods that add built-in maps become visible (RWPP forces this via
-     * `getAllMaps(true)`). Custom maps are never cached, so they need no invalidation.
-     */
     fun invalidateCache() {
         synchronized(this) {
             builtInItems = null
@@ -191,33 +182,71 @@ class LevelSelectViewModel(
 
     private fun builtInMapItems(): List<MapEntry> {
         val prefix = "maps/${requireNotNull(mode.assetSubdir)}"
-        return storage.listAssets(prefix)
-            .asSequence()
+        val all = storage.listAssets(prefix)
             .map { it.replace('\\', '/').trim('/') }
+        val lowerIndex = HashMap<String, String>(all.size)
+        for (path in all) {
+            lowerIndex.getOrPut(path.lowercase()) { path }
+        }
+        return all.asSequence()
             .filter { it.endsWith(".tmx") }
             .sortedBy { it.substringAfterLast('/') }
-            .map { mapEntry(it) }
+            .map { mapPath ->
+                val preview = findBuiltInPreview(mapPath, lowerIndex)
+                MapEntry.cachePreview(mapPath, preview)
+                val fileName = mapPath.substringAfterLast('/')
+                MapEntry(
+                    mapAssetPath = mapPath,
+                    playerCount = playerCount(fileName),
+                    requiredRwxFeatures = MapFeatureDetector.requiredFeaturesForMap(mapPath),
+                    previewOverride = preview,
+                    hasSiblingIndex = true,
+                )
+            }
             .toList()
     }
 
+    private fun findBuiltInPreview(tmxPath: String, lowerIndex: Map<String, String>): String? {
+        val base = tmxPath.removeSuffix(".tmx")
+        for (suffix in SIBLING_PREVIEW_SUFFIXES) {
+            lowerIndex[(base + "_map" + suffix).lowercase()]?.let { return it }
+        }
+        return null
+    }
+
     private fun customMapItems(): List<MapEntry> {
-        val fileMaps = (customMapPathsProvider?.invoke()
-            ?: engineCustomMapPaths(ENGINE_CUSTOM_MAP_ROOT, depth = 0))
-            .distinct()
-            .sortedBy { it.lowercase() }
-            .map(::engineCustomMapEntry)
+        val providerPaths = customMapPathsProvider?.invoke()
+        if (providerPaths != null) {
+            val distinctSorted = providerPaths.distinct().sortedBy { it.lowercase() }
+            val dirSiblings = HashMap<String, Set<String>>()
+            for (path in distinctSorted) {
+                val dir = path.substringBeforeLast('/', "")
+                dirSiblings.getOrPut(dir) {
+                    if (dir.isEmpty()) emptySet()
+                    else runCatching { FileHelper.listFiles(dir)?.toSet() }.getOrNull() ?: emptySet()
+                }
+            }
+            val fileMaps = distinctSorted
+                .map { path -> engineCustomMapEntry(path, dirSiblings[path.substringBeforeLast('/', "")]) }
+            return fileMaps + modMapItems()
+        }
+        val fileMaps = engineCustomMapPaths(ENGINE_CUSTOM_MAP_ROOT, depth = 0)
+            .distinctBy { it.first }
+            .sortedBy { it.first.lowercase() }
+            .map { (mapPath, siblings) -> engineCustomMapEntry(mapPath, siblings) }
         return fileMaps + modMapItems()
     }
 
-    private fun engineCustomMapPaths(folder: String, depth: Int): List<String> {
+    private fun engineCustomMapPaths(folder: String, depth: Int): List<Pair<String, Set<String>>> {
         if (depth > MAX_CUSTOM_MAP_SCAN_DEPTH) return emptyList()
         val entries = runCatching { FileHelper.listFiles(folder) }.getOrNull() ?: return emptyList()
-        val result = mutableListOf<String>()
+        val siblingSet: Set<String> = entries.toSet()
+        val result = mutableListOf<Pair<String, Set<String>>>()
         for (entry in entries) {
             if (entry.startsWith('.')) continue
             val childPath = folder.trimEnd('/') + "/" + entry
             if (entry.endsWith(".tmx", ignoreCase = true)) {
-                result += childPath
+                result += childPath to siblingSet
             } else if (runCatching { FileHelper.isDirectory(childPath) }.getOrDefault(false)) {
                 result += engineCustomMapPaths(childPath, depth + 1)
             }
@@ -225,13 +254,37 @@ class LevelSelectViewModel(
         return result
     }
 
-    private fun engineCustomMapEntry(mapPath: String): MapEntry {
+    private fun engineCustomMapEntry(mapPath: String, siblingNames: Set<String>? = null): MapEntry {
         val fileName = mapPath.substringAfterLast('/')
+        val siblingPreview = if (siblingNames != null) {
+            resolveSiblingPreview(mapPath, siblingNames)
+        } else {
+            null
+        }
+        if (siblingNames != null) {
+            MapEntry.cachePreview(mapPath, siblingPreview)
+        }
         return MapEntry(
             mapAssetPath = mapPath,
             playerCount = playerCount(fileName),
             requiredRwxFeatures = MapFeatureDetector.requiredFeaturesForMap(mapPath),
+            previewOverride = siblingPreview,
+            hasSiblingIndex = siblingNames != null,
         )
+    }
+
+    private fun resolveSiblingPreview(mapPath: String, siblingNames: Set<String>): String? {
+        val fileName = mapPath.substringAfterLast('/')
+        if (fileName.length < 4) return null
+        val fileBase = fileName.substring(0, fileName.length - 4)
+        val dirPrefix = mapPath.substringBeforeLast('/', "")
+        val prefix = if (dirPrefix.isEmpty()) "" else dirPrefix + "/"
+        for (suffix in SIBLING_PREVIEW_SUFFIXES) {
+            val candidate = fileBase + "_map" + suffix
+            val realName = siblingNames.firstOrNull { it.equals(candidate, ignoreCase = true) }
+            if (realName != null) return prefix + realName
+        }
+        return null
     }
 
     private fun savedGameItems(): List<MapEntry> {
@@ -254,23 +307,22 @@ class LevelSelectViewModel(
             ?: emptyList()
     }
 
-    /**
-     * Maps shipped inside mod packages, listed the way the original engine does it.
-     *
-     * While scanning a mod, `CustomUnitConfigParser.loadOrGetSound` records every `.tmx` it meets
-     * through `ModManager.addInvalidMod`; the level select screen then folds those records into the
-     * custom map list via `ModManager.addExtraMapsForPath` (`LevelSelectActivity.setup`). Entries
-     * come back as `MOD|<uuid>/<path inside the mod>` and are resolved on open by
-     * `FileLoader.applyModPath`, so `.rwmod` archives work without unpacking them here.
-     */
     private fun modMapItems(): List<MapEntry> {
         val manager = GameEngine.getInstance()?.modManager ?: return emptyList()
         val entries = manager.addExtraMapsForPath(null, CUSTOM_LEVELS_DIR) ?: return emptyList()
-        // On Android the engine also folds the legacy "maps2" folder into this list; our own file
-        // scan above already covers it, so only the mod entries are new here.
         return entries
             .filter { it.startsWith(MOD_PATH_PREFIX) }
-            .map { engineCustomMapEntry("$CUSTOM_LEVELS_DIR/$it") }
+            .map {
+                val mapPath = "$CUSTOM_LEVELS_DIR/$it"
+                val fileName = mapPath.substringAfterLast('/')
+                MapEntry(
+                    mapAssetPath = mapPath,
+                    playerCount = playerCount(fileName),
+                    requiredRwxFeatures = MapFeatureDetector.requiredFeaturesForMap(mapPath),
+                    previewOverride = MapEntry.cachedPreview(mapPath),
+                    hasSiblingIndex = true,
+                )
+            }
     }
 
     fun mapEntry(mapAssetPath: String): MapEntry {
@@ -279,6 +331,8 @@ class LevelSelectViewModel(
             mapAssetPath = mapAssetPath,
             playerCount = playerCount(fileName),
             requiredRwxFeatures = MapFeatureDetector.requiredFeaturesForMap(mapAssetPath),
+            previewOverride = MapEntry.cachedPreview(mapAssetPath),
+            hasSiblingIndex = true,
         )
     }
 
@@ -290,6 +344,8 @@ class LevelSelectViewModel(
         private const val CUSTOM_LEVELS_DIR: String = "/SD/rusted_warfare_maps"
         private const val MOD_PATH_PREFIX: String = "MOD|"
 
+        private val SIBLING_PREVIEW_SUFFIXES: List<String> = listOf(".png", ".jpg", ".jpeg")
+
         private val playerCountRegex = Regex("""p(\d+)|(\d+)p""", RegexOption.IGNORE_CASE)
 
         fun playerCount(fileName: String): Int? {
@@ -300,15 +356,23 @@ class LevelSelectViewModel(
     }
 }
 
+fun MapEntry.playerLabel(): String =
+    if (isSavedGame) {
+        I18n.singleplayer.loadSave()
+    } else {
+        CompatibilityLabel() ?: playerCount?.let { "${it}p" } ?: I18n.levelselect.scenario()
+    }
+
+
 fun MapEntry.ModeLabel(): String? = requiredRwxFeatures.ModeLabel()
 
 fun MapEntry.CompatibilityLabel(): String? =
-    ModeLabel()?.let { "Single-player / RWX P2P" }
+    ModeLabel()?.let { "${I18n.levelselect.compatibility.singlePlayer()} / ${I18n.levelselect.compatibility.p2p()}" }
 
 fun List<String>.ModeLabel(): String? =
     when {
-        contains(FeatureIds.AREA_CONTROL) -> "Area Control"
-        contains(FeatureIds.MAP_LINKS) -> "Map Links"
+        contains(FeatureIds.AREA_CONTROL) -> I18n.levelselect.mode.areaControl()
+        contains(FeatureIds.MAP_LINKS) -> I18n.levelselect.mode.mapLinks()
         else -> firstOrNull { it.startsWith("mode:") }
             ?.substringAfter("mode:")
             ?.takeIf { it.isNotBlank() }

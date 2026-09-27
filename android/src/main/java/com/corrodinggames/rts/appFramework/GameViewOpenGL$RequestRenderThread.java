@@ -16,7 +16,12 @@ final class GameViewOpenGL$RequestRenderThread extends Thread {
                 }
                 GameViewOpenGL.requestRenderQueued = false;
             }
-            GameViewOpenGL.lastHeldSurfaceView.requestRender();
+            synchronized (GameViewOpenGL.makeActiveLock) {
+                GameViewOpenGL view = GameViewOpenGL.lastHeldSurfaceView;
+                if (view != null) {
+                    view.requestRender();
+                }
+            }
         }
     }
 }

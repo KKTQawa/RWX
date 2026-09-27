@@ -15,8 +15,8 @@ import com.corrodinggames.rts.gameFramework.graphics.Texture;
 import com.corrodinggames.rts.gameFramework.ui.GameInterfaceRenderer;
 import com.corrodinggames.rts.gameFramework.ui.TextRenderQueue;
 import io.github.rwx.geometry.Rect;
-import io.github.rwx.render.canvas.KoolArgbColor;
-import io.github.rwx.render.canvas.KoolPaint;
+import io.github.rwx.render.canvas.ArgbColor;
+import io.github.rwx.render.canvas.Paint;
 
 import java.util.ArrayList;
 
@@ -371,9 +371,9 @@ public abstract class AbstractUnitAction implements Comparable<AbstractUnitActio
     }
 
     /* JADX INFO: renamed from: a */
-    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, KoolPaint paint, KoolPaint paint2) {
+    public void renderDisplayText(BaseUnit baseUnit, TextRenderQueue textRenderQueue, Paint paint, Paint paint2) {
         String displayTextForUnitWithQueueCount;
-        KoolPaint paint3 = textRenderQueue.currentPaint;
+        Paint paint3 = textRenderQueue.currentPaint;
         if (paint != null) {
             textRenderQueue.a(paint);
         }
@@ -440,7 +440,7 @@ public abstract class AbstractUnitAction implements Comparable<AbstractUnitActio
 
     /* JADX INFO: renamed from: J */
     public int getExtraIconColor() {
-        return KoolArgbColor.a(100, 255, 255, 255);
+        return ArgbColor.a(100, 255, 255, 255);
     }
 
     /* JADX INFO: renamed from: v */
