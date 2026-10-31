@@ -19,7 +19,11 @@ data class AppOptions(
     val noSteam: Boolean = false,
     val backendId: String? = null,
     val autoReplay: String? = null,
+    val headlessMapPath: String? = null,
+    val headlessTickLimit: Int? = null,
 ) {
+    val headless: Boolean get() = backendId == "headless"
+
     companion object {
         private const val SCREEN_PREFIX = "--screen="
         private const val COLOR_SCHEME_PREFIX = "--color-scheme="
@@ -34,6 +38,9 @@ data class AppOptions(
         private const val JOIN_SERVER_PREFIX = "--join-server="
         private const val BACKEND_PREFIX = "--render-backend="
         private const val AUTO_REPLAY_PREFIX = "--auto-replay="
+        private const val HEADLESS_ARG = "--headless"
+        private const val MAP_PREFIX = "--map="
+        private const val TICKS_PREFIX = "--ticks="
 
         private val screensByArgument = mapOf(
             "main-menu" to AppScreen.MainMenu,
@@ -83,6 +90,9 @@ data class AppOptions(
             var noSteam = false
             var rendererId: String? = null
             var autoReplay: String? = null
+            var headless = false
+            var headlessMapPath: String? = null
+            var headlessTickLimit: Int? = null
 
             args.forEach { arg ->
                 when {
@@ -97,6 +107,17 @@ data class AppOptions(
 
                     arg == DEMO_DIALOG_ARG -> showDemoDialog = true
                     arg == NO_STEAM_ARG -> noSteam = true
+                    arg == HEADLESS_ARG -> headless = true
+                    arg.startsWith(MAP_PREFIX) -> {
+                        headlessMapPath = arg.removePrefix(MAP_PREFIX).trim().also {
+                            require(it.isNotEmpty()) { "Map path must not be empty" }
+                        }
+                    }
+                    arg.startsWith(TICKS_PREFIX) -> {
+                        headlessTickLimit = arg.removePrefix(TICKS_PREFIX).toIntOrNull().also {
+                            require(it != null && it > 0) { "Tick limit must be a positive integer" }
+                        }
+                    }
                     arg == AUTO_START_SINGLE_PLAYER_UI_ARG -> autoStartSinglePlayerFromUi = true
                     arg == AUTO_START_BATTLE_ROOM_ARG -> autoStartBattleRoom = true
                     arg == AUTO_START_BATTLE_ROOM_TWICE_ARG -> {
@@ -129,6 +150,19 @@ data class AppOptions(
                 }
             }
 
+            if (headless) {
+                require(rendererId == null || rendererId == "headless") {
+                    "--headless conflicts with the selected render backend"
+                }
+                rendererId = "headless"
+            }
+            if (rendererId == "headless" || headlessMapPath != null || headlessTickLimit != null) {
+                require(isDesktop && rendererId == "headless") { "Headless arguments require desktop headless mode" }
+                require(listOfNotNull(headlessMapPath, autoReplay, joinServer).size <= 1) {
+                    "Select only one headless map, replay or server"
+                }
+            }
+
             return AppOptions(
                 initialScreen = initialScreen,
                 colorSchemeId = colorSchemeId,
@@ -144,27 +178,29 @@ data class AppOptions(
                 noSteam = noSteam,
                 backendId = rendererId,
                 autoReplay = autoReplay,
+                headlessMapPath = headlessMapPath,
+                headlessTickLimit = headlessTickLimit,
             )
         }
 
         private fun parseScreen(value: String): AppScreen = requireNotNull(screensByArgument[value]) {
-            "Unsupported Kool app screen: $value"
+            "Unsupported app screen: $value"
         }
 
         private fun parseColorScheme(value: String): ColorSchemeId {
             val id = ColorSchemeId(value)
             require(ColorSchemeRegistry.schemes.any { it.id == id }) {
-                "Unsupported Kool app color scheme: $value"
+                "Unsupported app color scheme: $value"
             }
             return id
         }
 
         private fun parseLevelMode(value: String): LevelSelectMode = requireNotNull(levelModesByArgument[value]) {
-            "Unsupported Kool app level mode: $value"
+            "Unsupported app level mode: $value"
         }
 
         private fun parseSettingsPage(value: String): SettingsPage = requireNotNull(settingsPagesByArgument[value]) {
-            "Unsupported Kool app settings page: $value"
+            "Unsupported app settings page: $value"
         }
 
         private fun parseRendererId(value: String): String {

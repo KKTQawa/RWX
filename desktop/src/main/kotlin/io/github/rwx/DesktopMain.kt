@@ -9,6 +9,7 @@ import io.github.rwx.app.installApp
 import io.github.rwx.di.coreModule
 import io.github.rwx.di.desktopModule
 import io.github.rwx.i18n.LocaleSettings
+import io.github.rwx.headless.HeadlessDesktopRunner
 import io.github.rwx.render.canvas.GameFontMetrics
 import io.github.rwx.settings.GameSettingsRepository
 import io.github.rwx.skia.SkiaGameSession
@@ -31,6 +32,16 @@ object DesktopMain : KoinComponent {
     fun main(args: Array<String>) {
         configureDesktopLogging()
         val options = AppOptions.parseArgs(args, isDesktop = true)
+        if (options.headless) {
+            val exitCode = try {
+                HeadlessDesktopRunner.run(options)
+                0
+            } catch (error: Throwable) {
+                error.printStackTrace()
+                1
+            }
+            kotlin.system.exitProcess(exitCode)
+        }
         configureLwjglMemoryStack()
         System.setProperty("org.lwjgl.opengl.contextAPI", "native")
         GameEngine.isMenuBackgroundDisabled = true
@@ -77,6 +88,7 @@ object DesktopMain : KoinComponent {
                 DesktopRenderBackend.Slick -> SwingAppHost.create(
                     fullscreen = SettingsEngine.getInstance().slick2dFullScreen
                 )
+                DesktopRenderBackend.Headless -> error("Headless mode does not create a desktop host")
             }
             bridge.filePickerHost = host
             host.closeCompletion.whenComplete { _, error ->
@@ -98,6 +110,7 @@ object DesktopMain : KoinComponent {
                 val presenter: GameFramePresenter = when (renderBackend) {
                     DesktopRenderBackend.Skia -> GameFramePresenter { }
                     DesktopRenderBackend.Slick -> SlickFramePresenter { host.presentSnapshot(get<SlickGameSession>().currentSnapshot()) }
+                    DesktopRenderBackend.Headless -> error("Headless mode does not create a frame presenter")
                 }
                 val session = installApp(
                     viewportProvider = { host.viewport },

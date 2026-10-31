@@ -9,11 +9,12 @@ import io.github.rwx.p2p.WebRtcTunnelProxy
 import io.github.rwx.session.GameSession
 import io.github.rwx.slick.SlickGameSession
 import io.github.rwx.skia.SkiaGameSession
+import io.github.rwx.headless.HeadlessGameSession
 import org.koin.dsl.module
 
 val desktopModule = module {
     WebRtcTunnelProxy.registerFactory { config -> DesktopWebRtcTunnelProxy(config) }
-    single<PlatformBridge> { DesktopPlatformBridge() }
+    single<PlatformBridge> { DesktopPlatformBridge(headless = runCatching { get<AppOptions>().headless }.getOrDefault(false)) }
     single<PlatformStorage> { get<PlatformBridge>().storage }
     single<PreferenceStorage> { get<PlatformBridge>().preferenceStorage }
     single<MapWorkerLauncher> { DesktopMapWorkerLauncher(get()) }
@@ -22,6 +23,7 @@ val desktopModule = module {
     single<CrashReporter> { get<PlatformBridge>().crashReporter }
     single { SlickGameSession(storage = get()) }
     single { SkiaGameSession(storage = get()) }
+    single { HeadlessGameSession(storage = get()) }
     single<GameSession> {
         val rendererId = runCatching { get<AppOptions>().backendId }.getOrNull()
         val stored = runCatching {
@@ -30,6 +32,7 @@ val desktopModule = module {
         when (DesktopRenderBackend.selectedId(rendererId, stored)) {
             DesktopRenderBackend.Skia -> get<SkiaGameSession>()
             DesktopRenderBackend.Slick -> get<SlickGameSession>()
+            DesktopRenderBackend.Headless -> get<HeadlessGameSession>()
         }
     }
 }

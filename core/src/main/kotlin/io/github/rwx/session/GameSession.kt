@@ -868,8 +868,12 @@ abstract class GameSession {
         get() = activeBattleRoomJoinConnector != null
 
     open fun cancelBattleRoomJoin() {
-        activeBattleRoomJoinConnector?.a()
+        val connector = activeBattleRoomJoinConnector
         activeBattleRoomJoinConnector = null
+        connector?.a()
+        // A completed connect may still be waiting to hand its socket to the engine owner.
+        runCatching { connector?.connectedSocket?.close() }
+            .onFailure { error -> logger.warn(error) { "Failed to close a pending battle room connection" } }
     }
 
     open fun leaveBattleRoom() {
@@ -1657,7 +1661,7 @@ abstract class GameSession {
             ?: engine.networkEngine?.selectedMapPath?.takeIf { it.isNotBlank() }
             ?: engine.currentMapPath?.takeIf { it.isNotBlank() }
 
-    protected fun activeEngineLocked(): GameEngine? {
+    protected open fun activeEngineLocked(): GameEngine? {
         val sessionEngine = gameEngine
         val singletonEngine = GameEngine.getInstance()
         return when {
