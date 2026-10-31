@@ -53,6 +53,98 @@ public abstract class BaseUnit extends SizedObject {
     /* JADX INFO: renamed from: bt */
     public BaseUnit unitTarget1;
 
+    /**
+     * Derived from versioned linked-world snapshot metadata; never borrowed gameplay flags.
+     */
+    public String pendingPortalTransfer;
+
+    public final boolean isTransferUnavailable() {
+        return this.pendingPortalTransfer != null || this.isDestroyed;
+    }
+
+    public final void freezeForTransfer(String transaction) {
+        if (transaction.equals(this.pendingPortalTransfer)) return;
+        if (this.pendingPortalTransfer != null || this.isDestroyed)
+            throw new IllegalStateException("Unit already pending transfer");
+        this.pendingPortalTransfer = transaction;
+        if (this.isHidden && this.team != null) {
+            this.team.teamStatistics.b(this);
+            this.isHidden = false;
+        }
+        bE.remove(this);
+        a.b(this);
+        GameEngine engine = GameEngine.getInstance();
+        engine.unitSpatialIndex.a(this);
+        if (engine.gameUI != null) engine.gameUI.deselectUnit(this);
+    }
+
+    public final void restoreAfterTransferRejection(String transaction) {
+        if (!transaction.equals(this.pendingPortalTransfer)) return;
+        this.pendingPortalTransfer = null;
+        if (!bE.contains(this)) bE.add(this);
+        a.a(this);
+        if (!this.isHidden && this.team != null) {
+            this.team.teamStatistics.a(this);
+            this.isHidden = true;
+        }
+        GameEngine.getInstance().unitSpatialIndex.a(this);
+    }
+
+    public final void registerTransferredUnit() {
+        registerTransferObject();
+        this.isHighlighted = true;
+        bE.add(this);
+        a.a(this);
+        PlayerTeam.c(this);
+        GameEngine.getInstance().unitSpatialIndex.a(this);
+    }
+
+    /**
+     * Transfer disposal is deliberately non-polymorphic: no death, unload, refund or removal event.
+     */
+    public final void discardForTransfer() {
+        if (this.isDestroyed) return;
+        if (this.isHidden && this.team != null) {
+            this.team.teamStatistics.b(this);
+            this.isHidden = false;
+        }
+        this.pendingPortalTransfer = "disposed";
+        bE.remove(this);
+        a.b(this);
+        GameEngine engine = GameEngine.getInstance();
+        engine.unitSpatialIndex.a(this);
+        if (engine.gameUI != null) engine.gameUI.deselectUnit(this);
+        unregisterTransferObject();
+    }
+
+    protected static int rebaseTransferStamp(int stamp, int delta) {
+        return stamp == -9999 || stamp == -1 ? stamp : Math.addExact(stamp, delta);
+    }
+
+    public void rebaseTransferState(float dx, float dy, int timeDelta) {
+        this.posX += dx;
+        this.posY += dy;
+        rebaseTransferClock(timeDelta);
+    }
+
+    /**
+     * The caller shares an identity set across all members of a transferred graph.
+     */
+    public final void rebaseTransferPositionValues(float dx, float dy, Set<BaseUnit> translated) {
+        VariableScope.rebaseTransferPlaceholder(this.unitTarget2, dx, dy, translated);
+        VariableScope.rebaseTransferPlaceholder(this.unitTarget3, dx, dy, translated);
+        if (this.unitVariables != null) this.unitVariables.rebaseTransferPositions(dx, dy, translated);
+    }
+
+    public void rebaseTransferClock(int timeDelta) {
+        this.unitCreationTime = Math.addExact(this.unitCreationTime, timeDelta);
+        this.timeAliveStamp = rebaseTransferStamp(this.timeAliveStamp, timeDelta);
+        this.customTimerStamp = rebaseTransferStamp(this.customTimerStamp, timeDelta);
+        this.lastConvertedStamp = rebaseTransferStamp(this.lastConvertedStamp, timeDelta);
+        this.attachmentStartTimeMillis = rebaseTransferStamp(this.attachmentStartTimeMillis, timeDelta);
+        this.bs = rebaseTransferStamp(this.bs, timeDelta);
+    }
+
     /* JADX INFO: renamed from: bu */
     public BaseUnit unitTarget2;
 
@@ -789,7 +881,7 @@ public abstract class BaseUnit extends SizedObject {
         if (b >= 2) {
             this.direction = gameInputStream.readFloat();
             this.targetRotation = gameInputStream.readFloat();
-            int i = gameInputStream.readInt();
+            int i = gameInputStream.collectionSize(gameInputStream.readInt());
             setUnitLevel(i);
             for (int i2 = 0; i2 < i; i2++) {
                 UnitMovementData unitMovementData = this.movementLevels[i2];
@@ -834,7 +926,7 @@ public abstract class BaseUnit extends SizedObject {
             this.isRotating = gameInputStream.readBoolean();
         }
         if (b >= 11 && gameInputStream.readBoolean()) {
-            this.unitEffects = new UnitEffectData[gameInputStream.readInt()];
+            this.unitEffects = new UnitEffectData[gameInputStream.collectionSize(gameInputStream.readInt())];
             for (int i3 = 0; i3 < this.unitEffects.length; i3++) {
                 this.unitEffects[i3] = new UnitEffectData();
                 UnitEffectData unitEffectData = this.unitEffects[i3];
@@ -912,6 +1004,7 @@ public abstract class BaseUnit extends SizedObject {
     @Override // com.corrodinggames.rts.gameFramework.SizedObject, com.corrodinggames.rts.gameFramework.GameObject
     /* JADX INFO: renamed from: a */
     public void remove() {
+        if (this.pendingPortalTransfer != null) return;
         PlayerTeam.a(this);
         if (this.isHighlighted) {
             bE.remove(this);
@@ -960,6 +1053,7 @@ public abstract class BaseUnit extends SizedObject {
     }
 
     public void o(float f) {
+        if (this.pendingPortalTransfer != null) return;
         this.currentHealth = f;
     }
 
@@ -1459,6 +1553,7 @@ public abstract class BaseUnit extends SizedObject {
     @Override // com.corrodinggames.rts.gameFramework.GameObject
     /* JADX INFO: renamed from: a */
     public void update(float f) {
+        if (this.pendingPortalTransfer != null) return;
         Effect effectCreateEffectInternal;
         if (this.isDead) {
             return;
@@ -1519,6 +1614,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: b */
     public float calculateTurnSpeed(BaseUnit baseUnit, float f, Projectile projectile) {
+        if (isTransferUnavailable()) return f;
         float f2 = f;
         float f3 = 1.0f;
         float f4 = 1.0f;
@@ -1559,6 +1655,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: a */
     public float applyDamage(BaseUnit baseUnit, float f, Projectile projectile) {
+        if (isTransferUnavailable()) return f;
         GameEngine gameEngine = GameEngine.getInstance();
         if (this.buildProgress < 1.0f) {
             f *= 1.75f;
@@ -1637,6 +1734,7 @@ public abstract class BaseUnit extends SizedObject {
     }
 
     public void bu() {
+        if (this.pendingPortalTransfer != null) return;
         GameEngine gameEngine = GameEngine.getInstance();
         gameEngine.gameUI.deselectUnit(this);
         PlayerTeam.a(this);
@@ -1658,6 +1756,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: ci */
     public void removeFromGame() {
+        if (this.pendingPortalTransfer != null) return;
         bu();
         remove();
         bt();
@@ -1665,10 +1764,12 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: cj */
     public void markForDeath() {
+        if (this.pendingPortalTransfer != null) return;
         this.currentHealth = -1.0f;
     }
 
     public void bv() {
+        if (this.pendingPortalTransfer != null) return;
         bu();
         if (!e()) {
             remove();
@@ -1715,6 +1816,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: e */
     public void changeTeam(PlayerTeam playerTeam) {
+        if (this.pendingPortalTransfer != null) return;
         if (this.team == playerTeam) {
             return;
         }
@@ -1734,6 +1836,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: b */
     public void setUnitTeam(PlayerTeam playerTeam) {
+        if (this.pendingPortalTransfer != null) return;
         if (playerTeam == null) {
             throw new RuntimeException("Could not set team to null");
         }
@@ -1742,6 +1845,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: Q */
     public final void setTeam(int i) throws MapLoadException {
+        if (this.pendingPortalTransfer != null) return;
         this.team = PlayerTeam.k(i);
         if (this.team == null) {
             throw new MapLoadException("Could not find team with id: " + i);
@@ -1842,6 +1946,7 @@ public abstract class BaseUnit extends SizedObject {
 
     /* JADX INFO: renamed from: c */
     public boolean isUnitArmorEffective(BaseUnit baseUnit, boolean z) {
+        if (isTransferUnavailable() || baseUnit.isTransferUnavailable()) return false;
         BaseUnit baseUnit2 = baseUnit.transportContainer;
         OrderableUnit orderableUnit = baseUnit.parentEntity;
         baseUnit.transportContainer = null;
@@ -2512,6 +2617,7 @@ public abstract class BaseUnit extends SizedObject {
     }
 
     public void f(float f, float f2) {
+        if (this.pendingPortalTransfer != null) return;
         this.posX = f;
         this.posY = f2;
         c(true);

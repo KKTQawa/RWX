@@ -8,7 +8,6 @@ import com.corrodinggames.rts.gameFramework.GameEngine
 import com.corrodinggames.rts.gameFramework.GameMode
 import com.corrodinggames.rts.gameFramework.InputController
 import com.corrodinggames.rts.gameFramework.PlatformCallbacks
-import com.corrodinggames.rts.gameFramework.network.GameInputStream
 import com.corrodinggames.rts.gameFramework.network.GameModeType
 import com.corrodinggames.rts.gameFramework.network.PasswordHandler
 import com.corrodinggames.rts.gameFramework.utility.SlickToAndroidKeycodes
@@ -239,6 +238,7 @@ class SlickGame(
     private val pendingTextInputHandlers = ConcurrentHashMap<Int, PasswordHandler>()
     private val pendingInputEvents = ConcurrentLinkedQueue<SlickInputEvent>()
     private val pendingInputEventCount = AtomicInteger(0)
+    private val resetViewInput = java.util.concurrent.atomic.AtomicBoolean()
     private val nextTextInputRequestId = AtomicInteger(1)
     private val frameDelta = SlickFrameDelta()
     private val frameProbe by lazy { BenchFrameProbe() }
@@ -556,7 +556,7 @@ class SlickGame(
                 startedBattleRoomGameSetupComplete = true
                 runningMenuBackground = false
                 beginRunningMap(
-                    networkEngine.selectedMapPath
+                    gameSession.linkedViewedMapPath ?: networkEngine.selectedMapPath
                         ?: activeEngine.currentMapPath
                         ?: request.mapPath
                 )
@@ -577,6 +577,7 @@ class SlickGame(
     }
 
     private fun abortStartedGameAfterDisconnect(activeEngine: GameEngine) {
+        if (gameSession.isMapViewInputBlocked) return
         val networkEngine = activeEngine.networkEngine ?: return
         if (!shouldAbortStartedGameAfterDisconnect(
                 setupComplete = startedBattleRoomGameSetupComplete,
@@ -642,9 +643,7 @@ class SlickGame(
         runningMenuBackground = false
         activeEngine.isStopped = false
         activeEngine.isPaused = false
-        check(activeEngine.gameSaver.readSaveFromStream(GameInputStream(snapshot.saveBytes), false, false, false)) {
-            "Unable to restore in-memory save: ${snapshot.mapPath}"
-        }
+        activeEngine.restoreMapSnapshot(snapshot)
     }
 
     private fun loadBattleRoomMap(activeEngine: GameEngine, config: BattleRoomLaunchConfig) {
@@ -679,6 +678,10 @@ class SlickGame(
 
     private fun setupBattleRoomGame(activeEngine: GameEngine) {
         val networkEngine = activeEngine.networkEngine
+        if (networkEngine.isMapViewer) {
+            io.github.rwx.ui.BattleRoomUiBridge.setupGame()
+            return
+        }
         prepareActiveGameLoad(activeEngine)
         activeEngine.remoteMapStream = null
         when (networkEngine.roomSettings.gameModeType) {
@@ -721,7 +724,8 @@ class SlickGame(
             setupBattleRoomGame(activeEngine)
             applyNoFogOverride(activeEngine)
             runningMenuBackground = false
-            runningMapPath = networkEngine.selectedMapPath ?: activeEngine.currentMapPath
+            runningMapPath =
+                gameSession.linkedViewedMapPath ?: networkEngine.selectedMapPath ?: activeEngine.currentMapPath
             readyNotifiedMapPath = null
             renderedFramesForRunningMap = 0
         }.onFailure { error ->
@@ -1022,6 +1026,12 @@ class SlickGame(
     }
 
     private fun applyPendingInputEvents(activeEngine: GameEngine) {
+        if (resetViewInput.getAndSet(false) || gameSession.isMapViewInputBlocked) {
+            keyStates.fill(false)
+            view.pointerState.processEvent(0f, 0f, false, -1)
+            activeEngine.clearInputState()
+        }
+        if (gameSession.isMapViewInputBlocked) return
         var pendingMotion: SlickInputEvent.Motion? = null
         while (true) {
             val event = pendingInputEvents.poll() ?: break
@@ -1109,7 +1119,16 @@ class SlickGame(
         enqueueInputEvent(SlickInputEvent.Key(key, false))
     }
 
+    @Synchronized
+    fun clearPendingViewInput() {
+        pendingInputEvents.clear()
+        pendingInputEventCount.set(0)
+        resetViewInput.set(true)
+    }
+
+    @Synchronized
     private fun enqueueInputEvent(event: SlickInputEvent) {
+        if (gameSession.isMapViewInputBlocked || resetViewInput.get()) return
         pendingInputEventCount.incrementAndGet()
         pendingInputEvents.add(event)
     }

@@ -1010,7 +1010,7 @@ public class GameLogic extends GameEngine {
         TransactionalArrayList<GameObject> transactionalArrayListDK = GameObject.dK();
         Iterator it = transactionalArrayListDK.iterator();
         while (it.hasNext()) {
-            ((GameObject) it.next()).remove();
+            ((GameObject) it.next()).removeForWorldReset();
         }
         BaseUnit.getGlobalUnitList();
         GameObject.dK();
@@ -1480,11 +1480,18 @@ public class GameLogic extends GameEngine {
         this.I = f + 2.0f;
         this.lastDelta = f;
         this.networkEngine.update(f);
+        int timeBeforeOutcomeFence = this.gameTimeMillis;
+        boolean hadOutcomeFence = this.missionEngine != null && this.missionEngine.linkedWorldState != null
+                && this.missionEngine.linkedWorldState.isOutcomeFenced();
         this.gameTimeMillis = (int) (this.gameTimeMillis + (f * 16.666666f));
-        CommandQueue.drain();
+        if (!hadOutcomeFence) CommandQueue.drain();
         this.commandController.executeAllCommands();
         this.replayEngine.update(f);
         this.currentTick++;
+        boolean hasOutcomeFence = this.missionEngine != null && this.missionEngine.linkedWorldState != null
+                && this.missionEngine.linkedWorldState.isOutcomeFenced();
+        if (hadOutcomeFence || hasOutcomeFence) this.gameTimeMillis = timeBeforeOutcomeFence;
+        if (hasOutcomeFence) return;
         ModScheduler.tick();
         PlayerTeam.g(f);
         if (this.tileMap != null) {
@@ -1504,7 +1511,9 @@ public class GameLogic extends GameEngine {
                 NetworkEngine.reportDesyncImportant("JIT bug detected, attempting to correct. before object:" + gameObject.objectId + " frame:" + this.currentTick + " deltaSpeed:" + f);
                 f = this.lastDelta;
             }
-            gameObject.update(f);
+            if (!(gameObject instanceof BaseUnit) || !((BaseUnit) gameObject).isTransferUnavailable()) {
+                gameObject.update(f);
+            }
         }
         if (isInNetworkOrReplay() && f < 0.1f) {
             NetworkEngine.reportDesync("updateAllGame3: deltaSpeed:" + f + " frame:" + this.currentTick);
@@ -1514,7 +1523,7 @@ public class GameLogic extends GameEngine {
             ListOperationEntry listOperationEntry = (ListOperationEntry) transactionalArrayListDK.pendingOperations.get(i2);
             if (listOperationEntry.operation == ListOperation.add) {
                 GameObject gameObject2 = (GameObject) listOperationEntry.value;
-                if (!gameObject2.isDestroyed) {
+                if (!gameObject2.isDestroyed && (!(gameObject2 instanceof BaseUnit) || !((BaseUnit) gameObject2).isTransferUnavailable())) {
                     gameObject2.update(f);
                 }
             }

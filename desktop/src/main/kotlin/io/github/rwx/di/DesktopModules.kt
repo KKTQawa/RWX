@@ -3,6 +3,8 @@ package io.github.rwx.di
 import io.github.rwx.*
 import io.github.rwx.app.AppOptions
 import io.github.rwx.p2p.DesktopWebRtcTunnelProxy
+import io.github.rwx.p2p.DesktopMapWorkerLauncher
+import io.github.rwx.map.multiplayer.MapWorkerLauncher
 import io.github.rwx.p2p.WebRtcTunnelProxy
 import io.github.rwx.session.GameSession
 import io.github.rwx.slick.SlickGameSession
@@ -14,6 +16,7 @@ val desktopModule = module {
     single<PlatformBridge> { DesktopPlatformBridge() }
     single<PlatformStorage> { get<PlatformBridge>().storage }
     single<PreferenceStorage> { get<PlatformBridge>().preferenceStorage }
+    single<MapWorkerLauncher> { DesktopMapWorkerLauncher(get()) }
     single<AppMetadata> { get<PlatformBridge>().appMetadata }
     single<AppLogger> { get<PlatformBridge>().logger }
     single<CrashReporter> { get<PlatformBridge>().crashReporter }
